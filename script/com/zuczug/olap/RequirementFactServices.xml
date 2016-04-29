@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<!-- zhoulei -->
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+        
+        <simple-method method-name="loadRequirementFact">
+        	<entity-one value-field="requirement" entity-name="Requirement">
+	       		<field-map field-name="requirementId" from-field="parameters.requirementId"/>
+	        </entity-one>
+        	<entity-one value-field="fact" entity-name="RequirementFact" auto-field-map="false">
+        		<field-map field-name="requirementId" from-field="parameters.requirementId"/>
+        	</entity-one>
+        	<if-not-empty field="requirement">
+	        	<if-empty field="fact">
+	        		<make-value value-field="fact" entity-name="RequirementFact"/>
+	       			<set field="fact.requirementId" from-field="requirement.requirementId"/>
+	       			<!-- facility -->
+	        		<entity-one value-field="facility" entity-name="Facility">
+	        			<field-map field-name="facilityId" from-field="requirement.facilityId"/>
+	        		</entity-one>
+	        		<if-not-empty field="facility">
+	        			<set field="fact.facilityId" from-field="facility.facilityId"/>
+	        			<set field="fact.facilityName" from-field="facility.facilityName"/>
+	        		</if-not-empty>
+	        		<!-- 获取requirementStartDateDimId -->
+	        		<if-not-empty field="requirement.requirementStartDate">
+	        			<clear-field field="inMap"/>
+	                	<set field="inMap.dimensionEntityName" value="DateDimension"/>
+	                	<set field="inMap.naturalKeyFields.dateValue" from-field="requirement.requirementStartDate" type="Date"/>
+	        			<call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+	        				<result-to-field result-name="dimensionId" field="fact.requirementStartDateDimId"/>
+	        			</call-service>
+	        			<if-empty field="fact.requirementStartDateDimId">
+	                    	<set field="fact.requirementStartDateDimId" value="_NF_"/>
+	                	</if-empty>
+	        		<else>
+	        			<set field="fact.requirementStartDateDimId" value="_NA_"/>
+	        		</else>
+	        		</if-not-empty>
+	        		
+	        		<!-- 获取createdDateDimId -->
+	        		<if-not-empty field="requirement.createdDate">
+	        			<clear-field field="inMap"/>
+	                	<set field="inMap.dimensionEntityName" value="DateDimension"/>
+	                	<set field="inMap.naturalKeyFields.dateValue" from-field="requirement.createdDate" type="Date"/>
+	        			<call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+	        				<result-to-field result-name="dimensionId" field="fact.createdDateDimId"/>
+	        			</call-service>
+	        			<if-empty field="fact.createdDateDimId">
+	                    	<set field="fact.createdDateDimId" value="_NF_"/>
+	                	</if-empty>
+	        		<else>
+	        			<set field="fact.createdDateDimId" value="_NA_"/>
+	        		</else>
+	        		</if-not-empty>
+	        		
+	        		<!-- 获取productDimId -->
+	        		<if-not-empty field="requirement.productId">
+	       				<clear-field field="inMap"/>
+	                	<set field="inMap.dimensionEntityName" value="ZzProductDimension"/>
+	                	<set field="inMap.naturalKeyFields.productId" from-field="requirement.productId"/>
+	                	<call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+	                    	<result-to-field result-name="dimensionId" field="fact.productDimId"/>
+	                	</call-service>
+	                	<if-empty field="fact.productDimId">
+	                    	<set field="fact.productDimId" value="_NF_"/>
+	                	</if-empty>
+	       			<else>
+	       				<set field="fact.productDimId" value="_NA_"/>
+	       			</else>
+	       			</if-not-empty>
+	        		<create-value value-field="fact"/>
+	        	</if-empty>
+	        	<!-- 数量 -->
+	        	<set field="fact.quantity" from-field="requirement.quantity"/>
+	        	<!-- 吊牌总价 -->
+	        	<entity-and list="productPrices" entity-name="ProductPrice">
+                    <field-map field-name="productId" from-field="requirement.productId"/>
+                    <field-map field-name="productPriceTypeId" value="LIST_PRICE"/>
+                </entity-and>
+                <first-from-list entry="productPrice" list="productPrices"/>
+                <if-not-empty field="productPrices">
+                    <calculate field="fact.listPriceAmount">
+                        <calcop operator="multiply" field="productPrice.price">
+                            <calcop operator="get" field="fact.quantity"></calcop>
+                        </calcop>
+                    </calculate>
+                </if-not-empty>
+	        	<!-- 成本总价 -->
+	        	<entity-one value-field="zzProductDimension" entity-name="ZzProductDimension">
+                    <field-map field-name="dimensionId" from-field="fact.productDimId"/>
+                </entity-one>
+                <calculate field="fact.costTotalPrice">
+                    <calcop operator="multiply" field="zzProductDimension.estDesignEngineerCost">
+                        <calcop operator="get" field="fact.quantity"></calcop>
+                    </calcop>
+                </calculate>
+		        <!-- for zuczug Hengpai data -->
+		        <set field="fact.quantitySize0" value="0" type="BigDecimal"/>
+		        <set field="fact.quantitySize2" value="0" type="BigDecimal"/>
+		        <set field="fact.quantitySize4" value="0" type="BigDecimal"/>
+		        <set field="fact.quantitySize6" value="0" type="BigDecimal"/>
+		        <set field="fact.quantitySize8" value="0" type="BigDecimal"/>
+		        <log message="PRODUCT ID = ${requirement.productId}" level="info"/>
+		        <entity-and list="productFeatureAndAppls" entity-name="ProductFeatureAndAppl" filter-by-date="true">
+		        	<field-map field-name="productId" from-field="requirement.productId"/>
+		        	<field-map field-name="productFeatureTypeId" value="SIZE"/>
+		        </entity-and>
+		        <if-not-empty field="productFeatureAndAppls">
+		        	<first-from-list entry="productFeatureAndAppl" list="productFeatureAndAppls"/>
+		        	<log message="FEATURE SIZE ID = ${productFeatureAndAppl.productFeatureId}" level="info"/>
+		        	<if-compare operator="equals" value="SIZE_0" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize0" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_25" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize0" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_2" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize2" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_26" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize2" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_4" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize4" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_27" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize4" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_F" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize4" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_6" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize6" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_28" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize6" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_8" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize8" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_29" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize8" from-field="fact.quantity"/>
+		        	</if-compare>
+		        </if-not-empty>
+		        <!-- end for zuczug Hengpai data -->
+	        	<store-value value-field="fact"/>
+        	</if-not-empty>
+        </simple-method>
+        
+        <simple-method method-name="importRequirementData">
+        	<remove-by-and map="" entity-name="RequirementFact"/>
+        	<entity-condition list="requirements" entity-name="Requirement">
+        		<condition-list>
+        			<condition-expr field-name="requirementId" operator="like" value="161%"/>
+        			<condition-expr field-name="requirementTypeId" operator="equals" value="INTERNAL_REQUIREMENT"/>
+        			<condition-expr field-name="statusId" operator="not-equals" value="REQ_REJECTED"/>
+        		</condition-list>
+        	</entity-condition>
+        	<if-not-empty field="requirements">
+        		<iterate entry="requirement" list="requirements">
+        			<clear-field field="inMap"/>
+                	<set field="inMap.requirementId" from-field="requirement.requirementId"/>
+        			<call-service service-name="loadRequirementFact" in-map-name="inMap"></call-service>
+        			<check-errors/>
+        		</iterate>
+        	</if-not-empty>
+        </simple-method>
+        
+</simple-methods>

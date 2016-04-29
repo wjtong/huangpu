@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<!-- zhoulei -->
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+
+    <simple-method method-name="loadRequestFact" short-description="">
+        <entity-one entity-name="CustRequest" value-field="custRequest"/>
+        <if-empty field="custRequest">
+            <add-error>
+                <fail-property resource="OrderErrorUiLabels" property="OrderOrderIdDoesNotExists"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+        <if-compare field="custRequest.custRequestTypeId" operator="equals" value="RF_QUOTE">
+            <if-compare field="custRequest.statusId" operator="equals" value="CRQ_SUBMITTED">
+                <entity-condition entity-name="CustRequestItem" list="custRequestItems">
+                    <condition-list combine="and">
+                        <condition-expr field-name="custRequestId" operator="equals" from-field="custRequest.custRequestId"/>
+                    </condition-list>
+                </entity-condition>
+                
+                <iterate list="custRequestItems" entry="custRequestItem">
+                    <clear-field field="inMap"/>
+                    <set field="inMap.custRequestId" from-field="custRequest.custRequestId"/>
+                    <set field="inMap.custRequestItemSeqId" from-field="custRequestItem.custRequestItemSeqId"/>
+                    <call-service service-name="loadRequestItemFact" in-map-name="inMap"/>
+                </iterate>
+            </if-compare>
+        </if-compare>
+    </simple-method>
+    
+    <simple-method method-name="loadRequestItemFact" short-description="">
+        <entity-one entity-name="CustRequest" value-field="custRequest"/>
+        <entity-one entity-name="CustRequestItem" value-field="custRequestItem"/>
+        
+        <entity-one entity-name="CustRequestItemFact" value-field="fact" auto-field-map="false">
+            <field-map field-name="custRequestId" from-field="custRequestItem.custRequestId"/>
+            <field-map field-name="custRequestItemSeqId" from-field="custRequestItem.custRequestItemSeqId"/>
+        </entity-one>
+        <!-- key handling -->
+        <if-empty field="fact">
+	        <make-value entity-name="CustRequestItemFact" value-field="fact"/>
+	        <set field="fact.custRequestId" from-field="custRequestItem.custRequestId"/>
+	        <set field="fact.custRequestItemSeqId" from-field="custRequestItem.custRequestItemSeqId"/>
+            <!-- conversion of the product id -->
+            <if-not-empty field="custRequestItem.productId">
+                <clear-field field="inMap"/>
+                <set field="inMap.dimensionEntityName" value="ZzProductDimension"/>
+                <set field="inMap.naturalKeyFields.productId" from-field="custRequestItem.productId"/>
+                <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+                    <result-to-field result-name="dimensionId" field="fact.productDimId"/>
+                </call-service>
+                <if-empty field="fact.productDimId">
+                    <set field="fact.productDimId" value="_NF_"/>
+                </if-empty>
+            <else>
+                <set field="fact.productDimId" value="_NA_"/>
+            </else>
+            </if-not-empty>
+            <!-- conversion of the request date -->
+            <!-- CustRequestStatus版本，因为CustRequestStatus由于订货会数据导入原因，该表没有数据 -->
+            <!-- 
+            <entity-condition entity-name="CustRequestStatus" list="custRequestStatusList">
+                <condition-list combine="and">
+                    <condition-expr field-name="custRequestId" from-field="custRequestItem.custRequestId"/>
+                    <condition-expr field-name="statusId" value="CRQ_ACCEPTED"/>
+                </condition-list>
+                <order-by field-name="-statusDatetime"/>
+            </entity-condition>
+            <first-from-list entry="custRequestStatus" list="custRequestStatusList"/>
+            <if-not-empty field="custRequestStatus.statusDatetime">
+                <clear-field field="inMap"/>
+                <set field="inMap.dimensionEntityName" value="DateDimension"/>
+                <set field="inMap.naturalKeyFields.dateValue" from-field="custRequestStatus.statusDatetime" type="Date"/>
+                <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+                    <result-to-field result-name="dimensionId" field="fact.dateDimId"/>
+                </call-service>
+                <if-empty field="fact.dateDimId">
+                    <set field="fact.dateDimId" value="_NF_"/>
+                </if-empty>
+            <else>
+                <set field="fact.dateDimId" value="_NA_"/>
+            </else>
+            </if-not-empty>
+             -->
+            <!-- 使用custRequest.custRequestDate来获取时间 -->
+            <if-not-empty field="custRequest.custRequestDate">
+                <clear-field field="inMap"/>
+                <set field="inMap.dimensionEntityName" value="DateDimension"/>
+                <set field="inMap.naturalKeyFields.dateValue" from-field="custRequest.custRequestDate" type="Date"/>
+                <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+                    <result-to-field result-name="dimensionId" field="fact.dateDimId"/>
+                </call-service>
+                <if-empty field="fact.dateDimId">
+                    <set field="fact.dateDimId" value="_NF_"/>
+                </if-empty>
+            <else>
+                <set field="fact.dateDimId" value="_NA_"/>
+            </else>
+            </if-not-empty>
+            <!-- conversion of the customer party id -->
+            <if-not-empty field="custRequest.fromPartyId">
+                <clear-field field="inMap"/>
+                <set field="inMap.dimensionEntityName" value="ZzBulkCustomerDimension"/>
+                <set field="inMap.naturalKeyFields.partyId" from-field="custRequest.fromPartyId"/>
+                <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+                    <result-to-field result-name="dimensionId" field="fact.customerDimId"/>
+                </call-service>
+                <if-empty field="fact.customerDimId">
+                    <set field="fact.customerDimId" value="_NF_"/>
+                </if-empty>
+            <else>
+                <set field="fact.customerDimId" value="_NA_"/>
+            </else>
+            </if-not-empty>
+	        
+            <create-value value-field="fact"/>
+        </if-empty>
+        <!-- =============== -->
+        <!-- facts handling  -->
+        <!-- =============== -->
+        <set field="fact.quantity" from-field="custRequestItem.quantity" type="BigDecimal"/>
+        
+		<entity-and list="listPrices" entity-name="ProductPrice" filter-by-date="true">
+			<field-map field-name="productId" from-field="custRequestItem.productId"/>
+			<field-map field-name="productPriceTypeId" value="LIST_PRICE"/>
+		</entity-and>
+		<if-not-empty field="listPrices">
+			<first-from-list entry="listPrice" list="listPrices"/>
+            <calculate field="fact.listPriceAmount">
+                <calcop field="fact.quantity" operator="multiply">
+                    <calcop field="listPrice.price" operator="get"/>
+                </calcop>
+            </calculate>
+		</if-not-empty>
+            
+        <store-value value-field="fact"/>
+    </simple-method>
+    
+    <simple-method method-name="importCustRequestData" short-description="Import Cust Request Data">
+    	<!-- CustRequestStatus没有数据，由于custRequest都是xml导入的，所以没有做status数据，需要补上 -->
+    	<!-- 
+        <entity-condition list="custRequestStatusList" entity-name="CustRequestStatus">
+            <condition-list combine="and">
+                <condition-expr field-name="statusId" value="CRQ_ACCEPTED"/>
+                <condition-expr field-name="statusDatetime" operator="greater-equals" from-field="parameters.fromDate"/>
+                <condition-expr field-name="statusDatetime" operator="less" from-field="parameters.thruDate"/>
+            </condition-list>
+        </entity-condition>
+        <iterate list="custRequestStatusList" entry="custRequestStatus">
+            <clear-field field="inMap"/>
+            <set field="inMap.custRequestId" from-field="custRequestStatus.custRequestId"/>
+            <call-service service-name="loadRequestFact" in-map-name="inMap"></call-service>
+            <check-errors/>
+        </iterate>
+         -->
+        <entity-condition list="custRequestList" entity-name="CustRequest">
+            <condition-list combine="and">
+                <condition-expr field-name="custRequestDate" operator="greater-equals" from-field="parameters.fromDate"/>
+                <condition-expr field-name="custRequestDate" operator="less" from-field="parameters.thruDate"/>
+            </condition-list>
+        </entity-condition>
+        <iterate list="custRequestList" entry="custRequest">
+            <clear-field field="inMap"/>
+            <set field="inMap.custRequestId" from-field="custRequest.custRequestId"/>
+            <call-service service-name="loadRequestFact" in-map-name="inMap"></call-service>
+            <check-errors/>
+        </iterate>
+        
+    </simple-method>
+    
+</simple-methods>

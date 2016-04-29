@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<entitygroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitygroup.xsd">
+
+    <!-- ========================================================= -->
+    <!-- Dw Dimensions                                             -->
+    <!-- ========================================================= -->
+    
+    <!-- <entity-group group="org.ofbiz.olap" entity="ZuczugSalesOrderItemFact"/>-->
+    <entity-group group="org.ofbiz.olap" entity="CustomerDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="ZzSalesOrderItemFact"/>
+    <entity-group group="org.ofbiz.olap" entity="ZzSalesOrderFact"/>
+    <entity-group group="org.ofbiz.olap" entity="PaymentMethodDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="ZzStoreDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="ZzProductDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="Ds161ProductDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="TmpWashInfo"/><!-- ZzWashInfoDimension -->
+    <entity-group group="org.ofbiz.olap" entity="ZzProductColorDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="ZzBulkCustomerDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="ErpVip"/>
+
+    <!-- ========================================================= -->
+    <!-- Dw Facts                                                  -->
+    <!-- ========================================================= -->
+    <!-- 
+    <entity-group group="org.ofbiz.olap" entity="TempQuoteItemFact"/>
+    <entity-group group="org.ofbiz.olap" entity="TempRequestItemFact"/>
+     -->
+    <entity-group group="org.ofbiz.olap" entity="CustRequestItemFact"/>
+    <entity-group group="org.ofbiz.olap" entity="QuoteItemFact"/>
+    <entity-group group="org.ofbiz.olap" entity="RequirementFact"/>
+    <entity-group group="org.ofbiz.olap" entity="ProductContentFact"/>
+    <entity-group group="org.ofbiz.olap" entity="CategoryContentFact"/>
+    <entity-group group="org.ofbiz.olap" entity="CategoryMemberFact"/>
+    <entity-group group="org.ofbiz.olap" entity="DSRegentOrder"/>
+    <entity-group group="org.ofbiz.olap" entity="DSRegentOrderPayment"/>
+    <entity-group group="org.ofbiz.olap" entity="InventoryItemSnapshotFact"/>
+    <!--
+    <entity-group group="org.ofbiz.olap" entity="ForecastDetailFact"/>
+    <entity-group group="org.ofbiz.olap" entity="TempRequirementFact"/>
+	 -->
+    <!-- ========================================================= -->
+    <!-- DM Facts                                                  -->
+    <!-- ========================================================= -->
+    <entity-group group="org.ofbiz.olap" entity="DinghuohuiItemFact"/>
+    <!-- ========================================================= -->
+    <!-- Star Schema                                               -->
+    <!-- ========================================================= -->
+    <entity-group group="org.ofbiz.olap" entity="RequestFactStarSchema"/>
+    <entity-group group="org.ofbiz.olap" entity="RequestVirtualProductStarSchema"/>
+    <entity-group group="org.ofbiz.olap" entity="DinghuohuiFactStarSchema"/>
+    <entity-group group="org.ofbiz.olap" entity="ZzSalesOrderItemFactStarSchema"/>
+    <!-- ========================================================= -->
+    <!-- Analysis Tables                                           -->
+    <!-- ========================================================= -->
+    <entity-group group="org.ofbiz.olap" entity="DsAnalysisDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="DsAnalysisStoreFeatureScore"/>
+    <entity-group group="org.ofbiz.olap" entity="DsForecastStoreProductScore"/>
+    <entity-group group="org.ofbiz.olap" entity="ZzProductSalesOrder"/>
+    <entity-group group="org.ofbiz.olap" entity="ZzProductStoreSalesOrder"/>
+
+    <!-- ========================================================= -->
+    <!-- Olap Dimensions                                           -->
+    <!-- ========================================================= -->
+    <!-- 
+    <entity-group group="org.ofbiz.olap" entity="DmTempagentStoreDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="DmProdSalesDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="DmFinanceSalesDeptProdDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="DmSalesDeptOrderFactStarSchema"/>
+     -->
+    
+    <!-- ========================================================= -->
+    <!-- Olap Facts                                                -->
+    <!-- ========================================================= -->
+    <!-- 
+    <entity-group group="org.ofbiz.olap" entity="DmSalesDeptOrderFact"/> 
+    <entity-group group="org.ofbiz.olap" entity="DmFinanceOrderFact"/>
+     --> 
+    
+    <!-- ========================================================= -->
+    <!-- Ods                                                       -->
+    <!-- ========================================================= -->
+    <!-- 
+    <entity-group group="org.ofbiz.olap" entity="DkOrders"/>
+    <entity-group group="org.ofbiz.olap" entity="FinanceDeptOrders"/>
+    
+    <entity-group group="org.ofbiz.olap" entity="LijingRequestOrders"/>
+    <entity-group group="org.ofbiz.olap" entity="LijingCustAdjOrders"/>
+     -->
+    
+    
+</entitygroup>

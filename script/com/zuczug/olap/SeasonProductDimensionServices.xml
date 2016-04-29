@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+        <!-- zhoulei：生成161ProductDimension表数据 -->
+        <simple-method method-name="prepareSeasonProductDimensionData" short-description="">
+        <log message="=========1:${parameters.productId}" level="info"/>
+        	<entity-and list="productDimensionlist" entity-name="ZzProductDimension">
+        		<field-map field-name="productId" from-field="parameters.productId"/>
+        	</entity-and>
+	        <first-from-list entry="productDimension" list="productDimensionlist"/>
+        	<if-empty field="productDimension">
+	            <add-error>
+	                <fail-property resource="ProductUiLabels" property="ProductProductNotFoundWithProduct"/>
+	            </add-error>
+	        </if-empty>
+	        <check-errors/>
+	        
+			<make-value value-field="dsProductDimension" entity-name="Ds161ProductDimension"/>
+			
+	        <set field="dsProductDimension.productId" value="${productDimension.productId}"/>
+	        <set field="dsProductDimension.productColorId" from-field="productDimension.productColorId"/>
+	        <set field="dsProductDimension.productType" from-field="productDimension.productType"/>
+	        <set field="dsProductDimension.brandName" from-field="productDimension.brandName"/>
+	        <set field="dsProductDimension.internalName" from-field="productDimension.internalName"/>
+	        <set field="dsProductDimension.productName" from-field="productDimension.productName"/>
+	        <set field="dsProductDimension.groupname" from-field="productDimension.groupname"/>
+	        <set field="dsProductDimension.groupId" from-field="productDimension.groupId"/>
+	        <set field="dsProductDimension.series" from-field="productDimension.series"/>
+	        <set field="dsProductDimension.seriesId" from-field="productDimension.seriesId"/>
+	        <set field="dsProductDimension.subseries" from-field="productDimension.subseries"/>
+	        <set field="dsProductDimension.subseriesId" from-field="productDimension.subseriesId"/>
+	        <set field="dsProductDimension.zuczugSeason" from-field="productDimension.zuczugSeason"/>
+	        <set field="dsProductDimension.zuczugSeasonId" from-field="productDimension.zuczugSeasonId"/>
+	        <set field="dsProductDimension.colorCode" from-field="productDimension.colorCode"/>
+	        <set field="dsProductDimension.color" from-field="productDimension.color"/>
+	        <set field="dsProductDimension.productSize" from-field="productDimension.productSize"/>
+	        <set field="dsProductDimension.sizeCode" from-field="productDimension.sizeCode"/>
+	        <set field="dsProductDimension.modelYear" from-field="productDimension.modelYear"/>
+	        <set field="dsProductDimension.yearCode" from-field="productDimension.yearCode"/>
+	        <set field="dsProductDimension.wave" from-field="productDimension.wave"/>
+	        <set field="dsProductDimension.waveId" from-field="productDimension.waveId"/>
+	        <set field="dsProductDimension.style" from-field="productDimension.style"/>
+	        <set field="dsProductDimension.quantityUomId" from-field="productDimension.quantityUomId"/>
+	        <set field="dsProductDimension.ean" from-field="productDimension.ean"/>
+	        <set field="dsProductDimension.listPrice" from-field="productDimension.listPrice"/>
+	        <set field="dsProductDimension.estDesignEngineerCost" from-field="productDimension.estDesignEngineerCost"/>
+	        <set field="dsProductDimension.releaseDate" from-field="productDimension.releaseDate"/>
+	        <set field="dsProductDimension.virtualProductId" from-field="productDimension.virtualProductId"/>
+	        <set field="dsProductDimension.sellingPoint" from-field="productDimension.sellingPoint"/>
+	        <set field="dsProductDimension.materialFeature" from-field="productDimension.materialFeature"/>
+	        <set field="dsProductDimension.ingredientsText" from-field="productDimension.ingredientsText"/>
+	        <set field="dsProductDimension.specialInstructions" from-field="productDimension.specialInstructions"/>
+	        <set field="dsProductDimension.productDescription" from-field="productDimension.productDescription"/>
+	        <set field="dsProductDimension.designProductId" from-field="productDimension.designProductId"/>
+	        <set field="dsProductDimension.mainFabricId" from-field="productDimension.mainFabricId"/>
+	        <set field="dsProductDimension.mainSupplierPartyId" from-field="productDimension.mainSupplierPartyId"/>
+	        <set field="dsProductDimension.mainSupplierPartyName" from-field="productDimension.mainSupplierPartyName"/>
+	        
+	        <log message="++++++++++++++++++5" level="info"/>
+	        <field-to-result field="dsProductDimension"/>
+        </simple-method>
+        
+        <simple-method method-name="loadSeasonProductDimension" short-description="">
+        	<set-service-fields service-name="prepareSeasonProductDimensionData" map="parameters" to-map="inMap"/>
+	        <call-service service-name="prepareSeasonProductDimensionData" in-map-name="inMap">
+	            <result-to-field result-name="dsProductDimension"/>
+	        </call-service>
+	        <clear-field field="inMap"/>
+	        <set-service-fields service-name="storeGenericDimension" map="parameters" to-map="inMap"/>
+	        <set field="inMap.naturalKeyFields[]" value="productId"/>
+	        <set field="inMap.dimensionValue" from-field="dsProductDimension"/>
+	        <call-service service-name="storeGenericDimension" in-map-name="inMap"/>
+        </simple-method>
+        
+        
+        <!-- 查询么个季节商品 -->
+        <simple-method method-name="loadAllSeasonProductDimension" short-description="">
+	        <entity-condition list="productDimensionList" entity-name="ZzProductDimension">
+	        	<condition-list>
+	        		<condition-expr field-name="virtualProductId" operator="not-equals" value="_NA_"/>
+	        		<condition-expr field-name="zuczugSeason" operator="equals" from-field="parameters.zuczugSeason"/>
+	        	</condition-list>
+	        </entity-condition>
+        	<!-- entity-and list="productDimension" entity-name="ZzProductDimension">
+        		<field-map field-name="zuczugSeason" from-field="parameters.zuczugSeason"/>
+        	</entity-and-->
+        	<iterate entry="productDimension" list="productDimensionList">
+        		<set-service-fields service-name="loadSeasonProductDimension" map="parameters" to-map="inMap"/>
+	            <set field="inMap.productId" from-field="productDimension.productId"/>
+	            <call-service service-name="loadSeasonProductDimension" in-map-name="inMap"/>
+	            <clear-field field="inMap"/>
+        	</iterate>
+        	
+        </simple-method>
+        
+</simple-methods>

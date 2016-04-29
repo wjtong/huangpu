@@ -1,0 +1,65 @@
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+	
+    <simple-method method-name="snapshotAllInventoryItem" short-description="Take a snapshot of all inventory items">
+        <entity-condition entity-name="InventoryItem" list="inventoryItems">
+            <condition-list combine="and">
+	            <condition-expr field-name="quantityOnHandTotal" operator="not-equals" value="0"/>
+	            <condition-expr field-name="availableToPromiseTotal" operator="not-equals" value="0"/>
+	        </condition-list>
+        </entity-condition>
+        <iterate list="inventoryItems" entry="inventoryItem">
+            <clear-field field="inventMap"/>
+            <set field="inventMap.inventoryItemId" from-field="inventoryItem.inventoryItemId"/>
+            <call-service service-name="snapshotInventoryItem" in-map-name="inventMap"></call-service>
+            <check-errors/>
+        </iterate>
+
+    </simple-method>
+
+    <simple-method method-name="snapshotInventoryItem" short-description="">
+        <entity-one entity-name="InventoryItem" value-field="inventory">
+            <field-map field-name="inventoryItemId" from-field="parameters.inventoryItemId"/>
+        </entity-one>
+        <now-timestamp field="nowTimestamp"/>
+        <clear-field field="inMap"/>
+        <set field="inMap.dimensionEntityName" value="DateDimension"/>
+        <set field="inMap.naturalKeyFields.dateValue" from-field="nowTimestamp" type="Date"/>
+        <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+            <result-to-field result-name="dimensionId" field="dateDimensionId"/>
+        </call-service>
+        <entity-one entity-name="InventoryItemSnapshotFact" value-field="fact">
+            <field-map field-name="inventoryItemId" from-field="parameters.inventoryItemId"/>
+            <field-map field-name="snapshotDateDimId" from-field="dateDimensionId"/>
+        </entity-one>
+        <if-empty field="fact">
+            <make-value value-field="fact" entity-name="InventoryItemSnapshotFact"/>
+            <set field="fact.inventoryItemId" from-field="inventory.inventoryItemId"/>
+            <set field="fact.snapshotDateDimId" from-field="dateDimensionId"/>
+            <!-- conversion of the product id -->
+            <if-not-empty field="inventory.productId">
+                <clear-field field="inMap"/>
+                <set field="inMap.dimensionEntityName" value="ProductDimension"/>
+                <set field="inMap.naturalKeyFields.productId" from-field="inventory.productId"/>
+                <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+                    <result-to-field result-name="dimensionId" field="fact.productDimId"/>
+                </call-service>
+                <if-empty field="fact.productDimId">
+                    <set field="fact.productDimId" value="_NF_"/>
+                </if-empty>
+                <else>
+                    <set field="fact.productDimId" value="_NA_"/>
+                </else>
+            </if-not-empty>
+            <create-value value-field="fact"/>
+        </if-empty>
+        
+        <set field="fact.facilityId" from-field="inventory.facilityId"/>
+        <set field="fact.inventoryItemId" from-field="inventory.inventoryItemId"/>
+        <set field="fact.quantityOnHandTotal" from-field="inventory.quantityOnHandTotal"/>
+        <set field="fact.availableToPromiseTotal" from-field="inventory.availableToPromiseTotal"/>
+        <set field="fact.unitCost" from-field="inventory.unitCost"/>
+        
+        <store-value value-field="fact"/>
+    </simple-method>
+</simple-methods>

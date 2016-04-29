@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<!-- zhoulei -->
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+        
+        <simple-method method-name="loadQuoteItemFact" short-description="">
+        	<entity-one value-field="quoteItem" entity-name="QuoteItem"/>
+        	<entity-one value-field="fact" entity-name="QuoteItemFact">
+      			<field-map field-name="quoteId" from-field="quoteItem.quoteId"/>
+      			<field-map field-name="quoteItemSeqId" from-field="quoteItem.quoteItemSeqId"/>
+      		</entity-one>
+      		<if-not-empty field="quoteItem">
+      			<if-empty field="fact">
+      				<make-value value-field="fact" entity-name="QuoteItemFact"/>
+        			<set field="fact.quoteId" from-field="quoteItem.quoteId" />
+        			<set field="fact.quoteItemSeqId" from-field="quoteItem.quoteItemSeqId" />
+        			<set field="fact.custRequestId" from-field="quoteItem.custRequestId" />
+        			<set field="fact.custRequestItemSeqId" from-field="quoteItem.custRequestItemSeqId" />
+        			<!-- 使用quoteItem.productId来获取productDimId -->
+        			<if-not-empty field="quoteItem.productId">
+        				<clear-field field="inMap"/>
+	                	<set field="inMap.dimensionEntityName" value="ZzProductDimension"/>
+	                	<set field="inMap.naturalKeyFields.productId" from-field="quoteItem.productId"/>
+	                	<call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+	                    	<result-to-field result-name="dimensionId" field="fact.productDimId"/>
+	                	</call-service>
+	                	<if-empty field="fact.productDimId">
+	                    	<set field="fact.productDimId" value="_NF_"/>
+	                	</if-empty>
+        			<else>
+        				<set field="fact.productDimId" value="_NA_"/>
+        			</else>
+        			</if-not-empty>
+        			
+        			<entity-one value-field="quote" entity-name="Quote">
+        				<field-map field-name="quoteId" from-field="quoteItem.quoteId"/>
+        			</entity-one>
+        			<if-not-empty field="quote">
+        				<!-- 使获取customerDimId -->
+	                	<clear-field field="inMap"/>
+	                	<set field="inMap.dimensionEntityName" value="ZzBulkCustomerDimension"/>
+	                	<set field="inMap.naturalKeyFields.partyId" from-field="quote.partyId"/>
+	                	<call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+	                    	<result-to-field result-name="dimensionId" field="fact.customerDimId"/>
+	                	</call-service>
+	                	<if-empty field="fact.customerDimId">
+	                    	<set field="fact.customerDimId" value="_NF_"/>
+	                	</if-empty>
+	                	
+	                	<!-- 获取validFromDateDimId -->
+	                	<if-not-empty field="quote.validFromDate">
+	                		<clear-field field="inMap"/>
+		                	<set field="inMap.dimensionEntityName" value="DateDimension"/>
+                			<set field="inMap.naturalKeyFields.dateValue" from-field="quote.validFromDate" type="Date"/>
+		                	<call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+		                    	<result-to-field result-name="dimensionId" field="fact.validFromDateDimId"/>
+		                	</call-service>
+		                	<if-empty field="fact.validFromDateDimId">
+		                    	<set field="fact.validFromDateDimId" value="_NF_"/>
+		                	</if-empty>
+		                <else>
+		                    <set field="fact.validFromDateDimId" value="_NA_"/>
+		                </else>
+	                	</if-not-empty>
+	                	
+	                	<!-- 获取validThruDateDimId -->
+	                	<if-not-empty field="quote.validThruDate">
+		                	<clear-field field="inMap"/>
+		                	<set field="inMap.dimensionEntityName" value="DateDimension"/>
+                			<set field="inMap.naturalKeyFields.dateValue" from-field="quote.validThruDate" type="Date"/>
+		                	<call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+		                    	<result-to-field result-name="dimensionId" field="fact.validThruDateDimId"/>
+		                	</call-service>
+		                	<if-empty field="fact.validThruDateDimId">
+		                    	<set field="fact.validThruDateDimId" value="_NF_"/>
+		                	</if-empty>
+	                	<else>
+	                    	<set field="fact.validThruDateDimId" value="_NA_"/>
+	                	</else>
+	                	</if-not-empty>
+	                	
+	            	<else>
+	               		<set field="fact.customerDimId" value="_NA_"/>
+	               		<set field="fact.validFromDateDimId" value="_NA_"/>
+	               		<set field="fact.validThruDateDimId" value="_NA_"/>
+	            	</else>
+        			</if-not-empty>
+        			
+      				<create-value value-field="fact"/>
+      			</if-empty>
+      			<!-- 数量 -->
+        		<set field="fact.quantity" from-field="quoteItem.quantity" />
+        		
+        		<set field="fact.quantitySize0" value="0" type="BigDecimal"/>
+		        <set field="fact.quantitySize2" value="0" type="BigDecimal"/>
+		        <set field="fact.quantitySize4" value="0" type="BigDecimal"/>
+		        <set field="fact.quantitySize6" value="0" type="BigDecimal"/>
+		        <set field="fact.quantitySize8" value="0" type="BigDecimal"/>
+		        
+		        <entity-and list="productFeatureAndAppls" entity-name="ProductFeatureAndAppl" filter-by-date="true">
+		        	<field-map field-name="productId" from-field="quoteItem.productId"/>
+		        	<field-map field-name="productFeatureTypeId" value="SIZE"/>
+		        </entity-and>
+		        <if-not-empty field="productFeatureAndAppls">
+		        	<first-from-list entry="productFeatureAndAppl" list="productFeatureAndAppls"/>
+		        	<log message="FEATURE SIZE ID = ${productFeatureAndAppl.productFeatureId}" level="info"/>
+		        	<if-compare operator="equals" value="SIZE_0" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize0" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_25" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize0" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_2" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize2" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_26" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize2" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_4" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize4" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_27" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize4" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_F" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize4" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_6" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize6" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_28" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize6" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_8" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize8" from-field="fact.quantity"/>
+		        	</if-compare>
+		        	<if-compare operator="equals" value="SIZE_29" field="productFeatureAndAppl.productFeatureId">
+				        <set field="fact.quantitySize8" from-field="fact.quantity"/>
+		        	</if-compare>
+		        </if-not-empty>
+		        
+		        
+        		<!-- quote单价 -->
+        		<set field="fact.quoteUnitPrice" from-field="quoteItem.quoteUnitPrice" />
+        		<!-- quote总价 -->
+       			<calculate field="fact.quotePriceAmount">
+       				<calcop field="fact.quoteUnitPrice" operator="multiply">
+       					<calcop operator="get" field="fact.quantity"></calcop>
+       				</calcop>
+       			</calculate>
+       			<!-- 吊牌总价 -->
+       			<entity-and list="productPrices" entity-name="ProductPrice">
+       				<field-map field-name="productId" from-field="quoteItem.productId"/>
+       				<field-map field-name="productPriceTypeId" value="LIST_PRICE"/>
+        		</entity-and>
+        		<first-from-list entry="productPrice" list="productPrices"/>
+        		<if-not-empty field="productPrices">
+	        		<calculate field="fact.listPriceAmount">
+	        			<calcop operator="multiply" field="productPrice.price">
+	        				<calcop operator="get" field="fact.quantity"></calcop>
+	        			</calcop>
+	        		</calculate>
+	        	</if-not-empty>
+      			<store-value value-field="fact"/>
+      		</if-not-empty>
+      		
+        </simple-method>
+        	
+        <simple-method method-name="loadQuoteData">
+        	<entity-one value-field="quote" entity-name="Quote">
+        		<field-map field-name="quoteId" from-field="parameters.quoteId"/>
+        	</entity-one>
+        	<if-not-empty field="quote">
+        			<entity-and list="quoteItems" entity-name="QuoteItem">
+        				<field-map field-name="quoteId" from-field="quote.quoteId"/>
+        			</entity-and>
+        			<if-not-empty field="quoteItems">
+        				<iterate entry="quoteItem" list="quoteItems">
+        					<clear-field field="inMap"/>
+        					<set field="inMap.quoteId" from-field="quoteItem.quoteId"/>
+        					<set field="inMap.quoteItemSeqId" from-field="quoteItem.quoteItemSeqId"/>
+        					<call-service service-name="loadQuoteItemFact" in-map-name="inMap"></call-service>
+        					<check-errors/>
+        				</iterate>
+        			</if-not-empty>
+        	</if-not-empty>
+        </simple-method>
+        
+        <simple-method method-name="importQuoteItemData">
+        	<entity-condition list="quotes" entity-name="Quote"></entity-condition>
+        	<iterate entry="quote" list="quotes">
+        		<clear-field field="inMap"/>
+        		<set field="inMap.quoteId" from-field="quote.quoteId"/>
+        		<call-service service-name="loadQuoteData" in-map-name="inMap"></call-service>
+        		<check-errors/>
+        	</iterate>
+        </simple-method>
+</simple-methods>

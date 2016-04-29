@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods.xsd">
+    <simple-method method-name="forecastStoreProductQuantity" short-description="Forecast sku amount for each store">
+    	<if-empty field="parameters.productId">
+    		<return/>
+    	</if-empty>
+    	<if-empty field="parameters.quantity">
+    		<return/>
+    	</if-empty>
+    	<set field="inMap.productId" from-field="parameters.productId"/>
+    	<call-service service-name="analysis.forecastStorePercent" in-map-name="inMap">
+    		<result-to-field result-name="storePercentList"/>
+    	</call-service>
+        <iterate entry="storePercent" list="storePercentList">
+        	<clear-field field="resultItem"/>
+        	<set field="resultItem.productStoreId" from-field="storePercent.productStoreId"/>
+        	<set field="resultItem.percent" from-field="storePercent.percent"/>
+            <calculate field="resultItem.quantity" decimal-scale="0" rounding-mode="HalfUp">
+                <calcop field="parameters.quantity" operator="multiply">
+                    <calcop field="storePercent.percent" operator="get"/>
+                </calcop>
+            </calculate>
+            <set field="resultItem.score" from-field="storePercent.score"/>
+            <set field="resultItem.comment" from-field="storePercent.comment"/>
+            <set field="storeProductQuantityList[]" from-field="resultItem"/>
+        </iterate>
+        <field-to-result field="storeProductQuantityList"/>
+	</simple-method>
+	
+    <simple-method method-name="forecastStoreProductQuantityTest" short-description="Test forecast sku amount for each store">
+    	<if-empty field="parameters.productId">
+    		<return/>
+    	</if-empty>
+		<entity-and list="salesOrderItems" entity-name="ZzSalesOrderItemFactStarSchema">
+			<field-map field-name="productProductId" from-field="parameters.productId"/>
+		</entity-and>
+		<set field="totalQuantity" value="0" type="BigDecimal"/>
+		<iterate entry="saleOrderItem" list="salesOrderItems">
+			<calculate field="totalQuantity">
+				<calcop field="totalQuantity" operator="add">
+					<calcop field="saleOrderItem.quantity" operator="get"></calcop>
+				</calcop>
+			</calculate>
+		</iterate>
+    	<set field="inMap.productId" from-field="parameters.productId"/>
+    	<call-service service-name="analysis.forecastStorePercent" in-map-name="inMap">
+    		<result-to-field result-name="storePercentList"/>
+    	</call-service>
+        <iterate entry="storePercent" list="storePercentList">
+        	<clear-field field="resultItem"/>
+        	<set field="resultItem.productStoreId" from-field="storePercent.productStoreId"/>
+        	<set field="resultItem.percent" from-field="storePercent.percent"/>
+            <calculate field="resultItem.forecastQuantity" decimal-scale="0" rounding-mode="HalfUp">
+                <calcop field="totalQuantity" operator="multiply">
+                    <calcop field="storePercent.percent" operator="get"/>
+                </calcop>
+            </calculate>
+            <!-- 获取该店铺实际销售量 -->
+			<entity-and list="storeItems" entity-name="ZzSalesOrderItemFactStarSchema">
+				<field-map field-name="productProductId" from-field="parameters.productId"/>
+				<field-map field-name="storeProductStoreId" from-field="storePercent.productStoreId"/>
+			</entity-and>
+			<set field="resultItem.soldQuantity" value="0" type="BigDecimal"/>
+			<iterate entry="storeItem" list="storeItems">
+				<calculate field="resultItem.soldQuantity">
+					<calcop field="resultItem.soldQuantity" operator="add">
+						<calcop field="storeItem.quantity" operator="get"></calcop>
+					</calcop>
+				</calculate>
+			</iterate>
+            <set field="resultItem.score" from-field="storePercent.score"/>
+            <set field="resultItem.comment" from-field="storePercent.comment"/>
+            <set field="storeProductQuantityList[]" from-field="resultItem"/>
+        </iterate>
+        <field-to-result field="storeProductQuantityList"/>
+    </simple-method>
+</simple-methods>

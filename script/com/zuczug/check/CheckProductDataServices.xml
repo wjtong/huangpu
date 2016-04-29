@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<!-- zhoulei -->
+    <simple-method method-name="checkNoVirtualNoVariant" short-description="Check non virtual non variant product has variant">
+    	<entity-and list="nonoProducts" entity-name="Product">
+    		<field-map field-name="isVirtual" value="N"/>
+    		<!-- 
+    		<field-map field-name="isVariant" value="N"/> -->
+    	</entity-and>
+    	
+    	<iterate entry="nonoProduct" list="nonoProducts">
+    		<entity-and list="productAssocs" entity-name="ProductAssoc" filter-by-date="true">
+    			<field-map field-name="productId" from-field="nonoProduct.productId"/>
+    			<field-map field-name="productAssocTypeId" value="PRODUCT_VARIANT"/>
+    		</entity-and>
+    		<if-not-empty field="productAssocs">
+    			<!-- 检查是不是胚布，如果是胚布，属于正常 -->
+    			<entity-and list="productFeatureAppls" entity-name="ProductFeatureAppl" filter-by-date="true">
+    				<field-map field-name="productId" from-field="nonoProduct.productId"/>
+    				<field-map field-name="productFeatureId" value="FABRIC"/>
+    			</entity-and>
+    			<if-empty field="productFeatureAppls">
+    				<set field="productIdList[]" from-field="nonoProduct.productId"/>
+    			</if-empty>
+    		</if-not-empty>
+    	</iterate>
+    	
+    	<iterate entry="productId" list="productIdList">
+    		<set field="noFact" value="false"/>
+	        <entity-condition entity-name="ProductAssoc" list="productAssocs" filter-by-date="true">
+	            <condition-list combine="and">
+	                <condition-expr field-name="productIdTo" from-field="productId"/>
+	                <condition-list combine="or">
+	                    <condition-expr field-name="productAssocTypeId" operator="equals" value="ENGINEER_COMPONENT"/>
+	                    <condition-expr field-name="productAssocTypeId" operator="equals" value="MANUF_COMPONENT"/>
+	                </condition-list>
+	            </condition-list>
+	        </entity-condition>
+	        <if-empty field="productAssocs">
+	        	<entity-and list="inventoryItems" entity-name="InventoryItem">
+	        		<field-map field-name="productId" from-field="productId"/>
+	        	</entity-and>
+	        	<if-empty field="inventoryItems">
+	        		<entity-and list="orderItems" entity-name="OrderItem">
+	        			<field-map field-name="productId" from-field="productId"/>
+	        		</entity-and>
+	        		<if-empty field="orderItems">
+	        			<entity-and list="requirements" entity-name="Requirement">
+	        				<field-map field-name="productId" from-field="productId"/>
+	        			</entity-and>
+	        			<if-empty field="requirements">
+	        				<set field="noFactProductIds[]" from-field="productId"/>
+	        				<set field="noFact" value="true"/>
+	        			</if-empty>
+	        		</if-empty>
+	        	</if-empty>
+	        </if-empty>
+	        <if-compare operator="equals" value="false" field="noFact">
+	        	<set field="hasFactProductIds[]" from-field="productId"/>
+	        </if-compare>
+    	</iterate>
+    	
+    	<field-to-result field="productIdList"/>
+    	<field-to-result field="noFactProductIds"/>
+    	<field-to-result field="hasFactProductIds"/>
+    </simple-method>
+    
+    <simple-method method-name="checkNoVirtualNoVariantBM">
+    	
+    	<entity-and list="nonoProducts" entity-name="Product">
+    		<field-map field-name="isVirtual" value="N"/>
+    	</entity-and>
+    	
+    	<iterate entry="nonoProduct" list="nonoProducts">
+    		<entity-and list="productAssocs" entity-name="ProductAssoc" filter-by-date="true">
+    			<field-map field-name="productId" from-field="nonoProduct.productId"/>
+    			<field-map field-name="productAssocTypeId" value="PRODUCT_VARIANT"/>
+    		</entity-and>
+    		<if-not-empty field="productAssocs">
+    			<!-- 检查是不是辅料或纱线，如果是辅料或纱线，属于正常 -->
+    			<entity-condition list="productFeatureAppls" entity-name="ProductFeatureAppl">
+    				<condition-list combine="and">
+    					<condition-expr field-name="productId" operator="equals" from-field="nonoProduct.productId"/>
+    					<condition-list combine="or">
+    						<condition-expr field-name="productFeatureId" operator="equals" value="FABRIC"/>
+    						<condition-expr field-name="productFeatureId" operator="equals" value="YARN"/>
+    					</condition-list>
+    				</condition-list>
+    			</entity-condition>
+    			<if-empty field="productFeatureAppls">
+    				<set field="productIdList[]" from-field="nonoProduct.productId"/>
+    			</if-empty>
+    		</if-not-empty>
+    	</iterate>
+    	
+    	<iterate entry="productId" list="productIdList">
+    		<set field="noBom" value="null"/>
+    		<set field="noInventory" value="null"/>
+    		<set field="noOrder" value="null"/>
+    		<!-- 检查是否有Bom -->
+    		<entity-condition entity-name="ProductAssoc" list="productAssocs" filter-by-date="true">
+	            <condition-list combine="and">
+	                <condition-expr field-name="productIdTo" from-field="productId"/>
+	                <condition-list combine="or">
+	                    <condition-expr field-name="productAssocTypeId" operator="equals" value="ENGINEER_COMPONENT"/>
+	                    <condition-expr field-name="productAssocTypeId" operator="equals" value="MANUF_COMPONENT"/>
+	                </condition-list>
+	            </condition-list>
+	        </entity-condition>
+	        <if-empty field="productAssocs">
+	        	<set field="noBom" value="false"/>
+	        <else>
+	        	<set field="noBom" value="true"/>
+	        </else>
+	        </if-empty>
+	        <!-- 检查是否有库存 -->
+	        <entity-and list="inventoryItems" entity-name="InventoryItem">
+	        	<field-map field-name="productId" from-field="productId"/>
+	        </entity-and>
+	        <if-empty field="inventoryItems">
+	        	<set field="noInventory" value="false"/>
+	        <else>
+	        	<set field="noInventory" value="true"/>
+	        </else>
+	        </if-empty>
+	        <!-- 检查是否有订单 -->
+	        <entity-and list="orderItems" entity-name="OrderItem">
+       			<field-map field-name="productId" from-field="productId"/>
+       		</entity-and>
+       		<if-empty field="orderItems">
+       			<set field="noOrder" value="false"/>
+       		<else>
+       			<set field="noOrder" value="true"/>
+       		</else>
+       		</if-empty>
+       		
+       		<if-compare operator="equals" value="false" field="noInventory">
+       			<if-compare operator="equals" value="false" field="noOrder">
+       				<if-compare operator="equals" value="false" field="noBom">
+       					<set field="noBusinessData[]" from-field="productId"/>
+       				<else>
+       					<clear-field field="inMap"/>
+	       				<set field="inMap.productId" from-field="productId"/>
+	       				<call-service service-name="judgeDataNumber" in-map-name="inMap">
+	       					<result-to-field result-name="number" field="number"/>
+	       				</call-service>
+	       				<log message="${number}" level="info"/>
+	       				<if-compare operator="equals" value="1" field="number">
+	       					<set field="productAssocsOne[]" from-field="productId"/>
+	       				<else>
+	       					<set field="productAssocsMultiple[]" from-field="productId"/>
+	       				</else>
+	       				</if-compare>
+       				</else>
+       				</if-compare>
+       				
+       				
+       			<else>
+       				<set field="thereBusinessData[]" from-field="productId"/>
+       			</else>
+       			</if-compare>
+   			<else>
+   				<set field="thereBusinessData[]" from-field="productId"/>
+   			</else>
+       		</if-compare>
+    	</iterate>
+    	<!-- <field-to-result field="productIdList"/> -->
+    	<field-to-result field="noBusinessData"/>
+    	<field-to-result field="thereBusinessData"/>
+    	<field-to-result field="productAssocsOne"/>
+    	<field-to-result field="productAssocsMultiple"/>
+    	
+    </simple-method>
+    
+    <simple-method method-name="checkVariantNoCorrectVirtual" short-description="Check non virtual non variant product has variant">
+    	<entity-and list="variantProducts" entity-name="Product">
+    		<field-map field-name="isVariant" value="Y"/>
+    		<field-map field-name="productTypeId" value="RAW_MATERIAL"/>
+    	</entity-and>
+    	<iterate entry="variantProduct" list="variantProducts">
+    		<entity-and list="productAssocs" entity-name="ProductAssoc" filter-by-date="true">
+    			<field-map field-name="productIdTo" from-field="variantProduct.productId"/>
+    			<field-map field-name="productAssocTypeId" value="PRODUCT_VARIANT"/>
+    		</entity-and>
+    		<if-empty field="productAssocs"><!-- 如果连变型关联都没有，肯定有问题 -->
+    			<set field="productIdList[]" from-field="variantProduct.productId"/>
+    			<set field="noVirtualProductIds[]" from-field="variantProduct.productId"/>
+    		<else><!-- 如果有变型关联，还要看看被关联的是否是虚拟 -->
+    			<first-from-list entry="productAssoc" list="productAssocs"/>
+    			<entity-one value-field="virtualProduct" entity-name="Product">
+    				<field-map field-name="productId" from-field="productAssoc.productId"/>
+    			</entity-one>
+    			<if-compare operator="equals" value="N" field="virtualProduct.isVirtual"><!-- 只有一种情况，允许关联非虚拟，那就是胚布，所以检查该辅料是否是FABRIC -->
+	    			<entity-and list="productFeatureAppls" entity-name="ProductFeatureAppl" filter-by-date="true">
+	    				<field-map field-name="productId" from-field="virtualProduct.productId"/>
+	    				<field-map field-name="productFeatureId" value="FABRIC"/>
+	    			</entity-and>
+	    			<if-empty field="productFeatureAppls"><!-- 如果不是胚布，那肯定有问题 -->
+	    				<set field="productIdList[]" from-field="variantProduct.productId"/>
+		    			<set field="wrongVirtualProductIds[]" from-field="variantProduct.productId"/>
+	    			</if-empty>
+    			</if-compare>
+    		</else>
+    		</if-empty>
+    	</iterate>
+    	<log message="productIdList size = ${util:size(productIdList)}" level="info"/>
+    	<log message="noVirtualProductIds size = ${util:size(noVirtualProductIds)}" level="info"/>
+    	<log message="wrongVirtualProductIds size = ${util:size(wrongVirtualProductIds)}" level="info"/>
+    	<field-to-result field="productIdList"/>
+    	<field-to-result field="noVirtualProductIds"/>
+    	<field-to-result field="wrongVirtualProductIds"/>
+    </simple-method>
+	
+	<simple-method method-name="productRelevanceProduct">
+		<entity-condition list="products" entity-name="Product"></entity-condition>
+		<iterate entry="product" list="products">
+			<entity-and list="productAssocs" entity-name="ProductAssoc">
+				<field-map field-name="productIdTo" from-field="product.productId"/>
+				<field-map field-name="productId" from-field="product.productId"/>
+			</entity-and>
+			<if-not-empty field="productAssocs">
+				<log message="${product.productId}-----------2" level="info"/>
+				<set field="productIdList[]" from-field="product.productId"/>
+			<!-- <else>
+				<set field="productIdList[]" value="null"/>
+			</else> -->
+			</if-not-empty>
+		</iterate>
+		<field-to-result field="productIdList"/>
+	</simple-method>
+	
+	<simple-method method-name="checkAcceOther">
+		<entity-and list="products" entity-name="Product">
+			<field-map field-name="primaryProductCategoryId" value="ACCE_OTHER"/>
+		</entity-and>
+		<iterate entry="product" list="products">
+			<entity-and list="productFeatureAppls" entity-name="ProductFeatureAppl">
+				<field-map field-name="productId" from-field="product.productId"/>
+				<field-map field-name="productFeatureId" value="ACCESSORIES"/>
+			</entity-and>
+			<if-not-empty field="productFeatureAppls">
+				<set field="productAcceOther[].productId" from-field="product.productId"/>
+				<set field="productAcceOther[].internalName" from-field="product.internalName"/>
+				<set field="productAcceOther[].description" from-field="product.description"/>
+			</if-not-empty>
+		</iterate>
+		<field-to-result field="productAcceOther"/>
+	</simple-method>
+	
+</simple-methods>

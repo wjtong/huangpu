@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <description>OLAP</description>
+
+    <entity entity-name="InventoryItemSnapshotFact" package-name="org.ofbiz.bi.fact.product" title="Inventory Item Fact">
+        <description>A transaction fact entity with inventory item.</description>
+        <field name="inventoryItemId" type="id-ne"></field>
+        <field name="facilityId" type="id-ne"></field>
+        <field name="productDimId" type="id-ne"></field>
+        <field name="snapshotDateDimId" type="id-ne"></field>
+        
+        <field name="quantityOnHandTotal" type="fixed-point"></field>
+        <field name="availableToPromiseTotal" type="fixed-point"></field>
+        <field name="accountingQuantityTotal" type="fixed-point"></field>
+        <field name="unitCost" type="fixed-point"></field>
+        <!-- <field name="soldoutAmount" type="fixed-point"></field> -->
+
+        <prim-key field="inventoryItemId"/>
+        <prim-key field="snapshotDateDimId"/>
+        <relation type="one" fk-name="IIF_INVPRODUCT" rel-entity-name="ProductDimension">
+            <key-map field-name="productDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="IIF_INVCURRENCY" rel-entity-name="CurrencyDimension">
+            <key-map field-name="origCurrencyDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="IIF_INVDATE" rel-entity-name="DateDimension">
+            <key-map field-name="snapshotDateDimId" rel-field-name="dimensionId"/>
+        </relation>
+    </entity>
+	
+</entitymodel>

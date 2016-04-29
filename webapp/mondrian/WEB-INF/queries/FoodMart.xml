@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Schema name="FoodMart">
+<!--
+  == This software is subject to the terms of the Eclipse Public License v1.0
+  == Agreement, available at the following URL:
+  == http://www.eclipse.org/legal/epl-v10.html.
+  == You must accept the terms of that agreement to use this software.
+  ==
+  == Copyright (C) 2000-2005 Julian Hyde
+  == Copyright (C) 2005-2011 Pentaho and others
+  == All Rights Reserved.
+  -->
+
+<!-- Shared dimensions -->
+
+  <Dimension name="Date">
+    <Hierarchy hasAll="true" primaryKey="dimension_id">
+        <Table name="date_dimension"/>
+        <Level name="Year" column="year_name" uniqueMembers="true" hideMemberIf="IfBlankName">
+        </Level>
+        <Level name="Month" column="month_of_year" uniqueMembers="true">
+        </Level>
+        <Level name="Day" column="day_of_month"
+        uniqueMembers="false"/>
+    </Hierarchy>
+  </Dimension>
+
+  <Dimension name="Week">
+    <Hierarchy hasAll="true" primaryKey="dimension_id">
+        <Table name="date_dimension"/>
+        <Level name="Year" column="year_name" uniqueMembers="true" hideMemberIf="IfBlankName">
+        </Level>
+        <Level name="Week Of Year" column="week_of_year" uniqueMembers="true" hideMemberIf="IfBlankName">
+        </Level>
+    </Hierarchy>
+  </Dimension>
+
+  <Dimension name="Store">
+    <Hierarchy hasAll="true" allMemberName="All Store" primaryKey="dimension_id">
+        <Table name="zz_store_dimension"/>
+        <Level name="City Name" column="city_name" uniqueMembers="true" hideMemberIf="IfBlankName">
+        </Level>
+        <Level name="Store ID" column="product_store_id" uniqueMembers="true">
+        </Level>
+    </Hierarchy>
+  </Dimension>
+
+  <Dimension name="Product">
+    <Hierarchy hasAll="true" primaryKey="dimension_id">
+        <Table name="zz_product_dimension"/>
+        <Level name="Series" column="series_id" uniqueMembers="true" hideMemberIf="IfBlankName">
+	        <NameExpression>
+	            <SQL dialect="mysql">
+	                zz_product_dimension.series
+	            </SQL>
+	        </NameExpression>
+        </Level>
+        <!-- Level name="Subseries" column="subseries_id" uniqueMembers="true">
+	        <NameExpression>
+	            <SQL dialect="mysql">
+	                zz_product_dimension.subseries
+	            </SQL>
+	        </NameExpression>
+        </Level-->
+        <Level name="Virtual Product" column="virtual_product_id"
+        uniqueMembers="false"/>
+        <Level name="Product Color" column="product_color_id"
+        uniqueMembers="false"/>
+    </Hierarchy>
+  </Dimension>
+  
+  <Dimension name="ProductColor">
+  	<Hierarchy hasAll="true" primaryKey="dimension_id">
+  		<Table name="zz_product_dimension"/>
+  		<Level name="ProductColor" column="product_color_id" uniqueMembers="true">
+  		</Level>
+  	</Hierarchy>
+  </Dimension>
+  
+  <Dimension name="VirtualProductId">
+  	<Hierarchy hasAll="true" primaryKey="dimension_id">
+  		<Table name="zz_product_dimension"/>
+  		<Level name="VirtualProductId" column="virtual_product_id">
+  		</Level>
+  	</Hierarchy>
+  </Dimension>
+  
+  <Dimension name="ColorCode">
+  	<Hierarchy hasAll="true" primaryKey="dimension_id">
+  		<Table name="zz_product_dimension"/>
+  		<Level name="ColorCode" column="color_code">
+  		</Level>
+  	</Hierarchy>
+  </Dimension>
+  
+  <Dimension name="SizeCode">
+  	<Hierarchy hasAll="true" primaryKey="dimension_id">
+  		<Table name="zz_product_dimension"/>
+  		<Level name="SizeCode" column="size_code">
+  		</Level>
+  	</Hierarchy>
+  </Dimension>
+
+  <Dimension name="Wave">
+    <Hierarchy hasAll="true" primaryKey="dimension_id">
+    	<Table name="zz_product_dimension"/>
+    	<Level name="Wave" column="wave_id" uniqueMembers="true">
+	        <NameExpression>
+	            <SQL dialect="mysql">
+	                zz_product_dimension.wave
+	            </SQL>
+	        </NameExpression>
+    	</Level>
+    </Hierarchy>
+  </Dimension>
+
+  <Dimension name="Group">
+    <Hierarchy hasAll="true" primaryKey="dimension_id">
+    	<Table name="zz_product_dimension"/>
+    	<Level name="Group" column="group_id" uniqueMembers="true">
+	        <NameExpression>
+	            <SQL dialect="mysql">
+	                zz_product_dimension.groupname
+	            </SQL>
+	        </NameExpression>
+    	</Level>
+    </Hierarchy>
+  </Dimension>
+
+  <Dimension name="Style">
+    <Hierarchy hasAll="true" primaryKey="dimension_id">
+    	<Table name="zz_product_dimension"/>
+    	<Level name="Style" column="style" uniqueMembers="true"/>
+    </Hierarchy>
+  </Dimension>
+
+  <Dimension name="MainSupplier">
+    <Hierarchy hasAll="true" primaryKey="dimension_id">
+    	<Table name="zz_product_dimension"/>
+    	<Level name="Main Supplier Party Name" column="main_supplier_party_name" uniqueMembers="true"/>
+    </Hierarchy>
+  </Dimension>
+
+  <Dimension name="Customers">
+    <Hierarchy hasAll="true" allMemberName="All Customers" primaryKey="dimension_id">
+        <Table name="zz_bulk_customer_dimension"/>
+        <Level name="Agent" column="organization_party_id" uniqueMembers="true"/>
+        <Level name="Store" column="party_id" uniqueMembers="true"/>
+    </Hierarchy>
+  </Dimension>
+  
+  <Dimension name="Agent">
+    <Hierarchy hasAll="true" allMemberName="All Customers" primaryKey="dimension_id">
+        <Table name="zz_bulk_customer_dimension"/>
+        <Level name="Party" column="party_id" uniqueMembers="true"/>
+    </Hierarchy>
+  </Dimension>
+
+  
+  <Dimension name="CustomerVip">
+  	<Hierarchy hasAll="true" allMemberName="All CustomerVip" primaryKey="dimension_id">
+  		<Table name="customer_dimension"/>
+        <Level name="Agent" column="member_Id" uniqueMembers="true"/>
+        <Level name="Store" column="party_id" uniqueMembers="true"/>
+  	</Hierarchy>
+  </Dimension>
+  
+  <Cube name="Sales">
+      <Table name="dinghuohui_item_fact">
+      </Table>
+      <DimensionUsage name="Product" source="Product" foreignKey="product_dim_id"/>
+      <DimensionUsage name="ProductColor" source="ProductColor" foreignKey="product_dim_id"/>
+      <DimensionUsage name="Wave" source="Wave" foreignKey="product_dim_id"/>
+      <DimensionUsage name="Group" source="Group" foreignKey="product_dim_id"/>
+      <DimensionUsage name="MainSupplier" source="MainSupplier" foreignKey="product_dim_id"/>
+      <Dimension name="Customers" foreignKey="customer_dim_id">
+          <Hierarchy hasAll="true" allMemberName="All Customers" primaryKey="dimension_id">
+              <Table name="zz_bulk_customer_dimension"/>
+              <Level name="Agent" column="organization_party_id" uniqueMembers="true">
+                <NameExpression>
+                    <SQL dialect="mysql">
+                        zz_bulk_customer_dimension.organization_party_name
+                    </SQL>
+                </NameExpression>
+              </Level>
+              <Level name="Store" column="party_id" uniqueMembers="false"/>
+          </Hierarchy>
+      </Dimension>
+      <Measure name="Request List Price" column="list_price_amount" aggregator="sum"
+      formatString="Standard" caption="&#35746;&#36135;&#20250;&#21514;&#29260;&#20215;"/>
+      <Measure name="Request Quantity" column="quantity" aggregator="sum"
+      formatString="Standard" caption="&#35746;&#36135;&#20250;&#25968;&#37327;"/>
+      <Measure name="Dinghuo Size 0" column="quantity_size0" aggregator="sum"
+      formatString="Standard" caption="&#35746;0"/>
+      <Measure name="Dinghuo Size 2" column="quantity_size2" aggregator="sum"
+      formatString="Standard" caption="&#35746;2"/>
+      <Measure name="Dinghuo Size 4" column="quantity_size4" aggregator="sum"
+      formatString="Standard" caption="&#35746;4"/>
+      <Measure name="Dinghuo Size 6" column="quantity_size6" aggregator="sum"
+      formatString="Standard" caption="&#35746;6"/>
+      <Measure name="Dinghuo Size 8" column="quantity_size8" aggregator="sum"
+      formatString="Standard" caption="&#35746;8"/>
+  </Cube>
+
+  <Cube name="Requirements">
+      <Table name="requirement_fact">
+      </Table>
+      <DimensionUsage name="Product" source="Product" foreignKey="product_dim_id"/>
+      <DimensionUsage name="ProductColor" source="ProductColor" foreignKey="product_dim_id"/>
+      <DimensionUsage name="Wave" source="Wave" foreignKey="product_dim_id"/>
+      <DimensionUsage name="Style" source="Style" foreignKey="product_dim_id"/>
+      <DimensionUsage name="Group" source="Group" foreignKey="product_dim_id"/>
+      <DimensionUsage name="MainSupplier" source="MainSupplier" foreignKey="product_dim_id"/>
+      <Measure name="Requirement List Price" column="list_price_amount" aggregator="sum"
+      formatString="Standard" caption="&#21830;&#21697;&#37096;&#21514;&#29260;&#20215;"/>
+      <Measure name="Requirement Quantity" column="quantity" aggregator="sum"
+      formatString="Standard" caption="&#21830;&#21697;&#37096;&#25968;&#37327;"/>
+      <Measure name="Requirement Size 0" column="quantity_size0" aggregator="sum"
+      formatString="Standard" caption="&#21830;0"/>
+      <Measure name="Requirement Size 2" column="quantity_size2" aggregator="sum"
+      formatString="Standard" caption="&#21830;2"/>
+      <Measure name="Requirement Size 4" column="quantity_size4" aggregator="sum"
+      formatString="Standard" caption="&#21830;4"/>
+      <Measure name="Requirement Size 6" column="quantity_size6" aggregator="sum"
+      formatString="Standard" caption="&#21830;6"/>
+      <Measure name="Requirement Size 8" column="quantity_size8" aggregator="sum"
+      formatString="Standard" caption="&#21830;8"/>
+  </Cube>
+
+  <Cube name="SalesOrderItem">
+      <Table name="zz_sales_order_item_fact">
+      </Table>
+      <DimensionUsage name="Product" source="Product" foreignKey="product_dim_id"/>
+      <DimensionUsage name="Wave" source="Wave" foreignKey="product_dim_id"/>
+      <DimensionUsage name="Style" source="Style" foreignKey="product_dim_id"/>
+      <DimensionUsage name="Group" source="Group" foreignKey="product_dim_id"/>
+      <DimensionUsage name="Date" source="Date" foreignKey="order_date_dim_id"/>
+      <DimensionUsage name="Store" source="Store" foreignKey="product_store_dim_id"/>
+      <DimensionUsage name="CustomerVip" source="CustomerVip" foreignKey="bill_to_customer_dim_id"/>
+      
+      <Measure name="List Price" column="list_price" aggregator="sum"
+      formatString="Standard" caption="&#21514;&#29260;&#20215;"/>
+      <Measure name="Quantity" column="quantity" aggregator="sum"
+      formatString="Standard" caption="&#25968;&#37327;"/>
+      <Measure name="Gross Amount" column="ext_gross_amount" aggregator="sum"
+      formatString="Standard" caption="&#37329;&#39069;"/>
+      <Measure name="Order Count" column="count_order" aggregator="sum"
+      formatString="Standard" caption="&#35746;&#21333;&#25968;"/>
+  </Cube>
+  
+  <Cube name="QuoteItem">
+      <Table name="quote_item_fact">
+      </Table>
+      
+      <DimensionUsage name="Product" source="Product" foreignKey="product_dim_id"/>
+      <DimensionUsage name="ProductColor" source="ProductColor" foreignKey="product_dim_id"/>
+      <DimensionUsage name="Wave" source="Wave" foreignKey="product_dim_id"/>
+      <DimensionUsage name="Group" source="Group" foreignKey="product_dim_id"/>
+      <DimensionUsage name="MainSupplier" source="MainSupplier" foreignKey="product_dim_id"/>
+      <DimensionUsage name="Date" source="Date" foreignKey="valid_from_date_dimId"/>
+      <DimensionUsage name="Customers" source="Customers" foreignKey="customer_dim_id"/>
+      
+      <Measure name="Quantity" column="quantity" aggregator="sum"
+      formatString="Standard" caption="&#38144;&#21806;&#37096;&#25968;&#37327;"/>
+      
+      <Measure name="List Price Amount" column="list_price_amount" aggregator="sum"
+      formatString="#,###.00" datatype="Numeric" caption="&#38144;&#21806;&#37096;&#21514;&#29260;&#20215;"/>
+      
+      <Measure name="Quote Price Amount" column="quote_price_amount" aggregator="sum"
+      formatString="#,###.00" datatype="Numeric" caption="&#38144;&#21806;&#37096;&#37329;&#39069;"/>
+      
+      <Measure name="QuoteItem Size 0" column="quantity_size0" aggregator="sum"
+      formatString="Standard" caption="&#38144;0"/>
+      <Measure name="QuoteItem Size 2" column="quantity_size2" aggregator="sum"
+      formatString="Standard" caption="&#38144;2"/>
+      <Measure name="QuoteItem Size 4" column="quantity_size4" aggregator="sum"
+      formatString="Standard" caption="&#38144;4"/>
+      <Measure name="QuoteItem Size 6" column="quantity_size6" aggregator="sum"
+      formatString="Standard" caption="&#38144;6"/>
+      <Measure name="QuoteItem Size 8" column="quantity_size8" aggregator="sum"
+      formatString="Standard" caption="&#38144;8"/>
+  </Cube>
+  
+  
+  <Cube name="QuoteDataAnalysis">
+      <Table name="quote_item_fact">
+      </Table>
+      
+      <DimensionUsage name="Agent" source="Agent" foreignKey="customer_dim_id"/>
+      <DimensionUsage name="VirtualProductId" source="VirtualProductId" foreignKey="product_dim_id"/>
+      <DimensionUsage name="ColorCode" source="ColorCode" foreignKey="product_dim_id"/>
+      <DimensionUsage name="SizeCode" source="SizeCode" foreignKey="product_dim_id"/>
+      
+      <Measure name="Quantity" column="quantity" aggregator="sum" formatString="Standard" caption="&#38144;&#21806;&#37096;&#25968;&#37327;"/>
+  </Cube>
+
+	<VirtualCube name="RequirementsAndSales">
+		<VirtualCubeDimension cubeName="Sales" name="Customers"/>
+		<VirtualCubeDimension name="Product"/>
+		<VirtualCubeDimension name="ProductColor"/>
+		<VirtualCubeDimension name="Wave"/>
+		<VirtualCubeDimension name="Style"/>
+		<VirtualCubeDimension name="Group"/>
+		<VirtualCubeDimension name="MainSupplier"/>
+		
+		<VirtualCubeMeasure cubeName="Sales" name="[Measures].[Request List Price]" caption="&#21514;&#29260;&#20215;"/>
+		<VirtualCubeMeasure cubeName="Sales" name="[Measures].[Request Quantity]" caption="&#25968;&#37327;"/>
+		<VirtualCubeMeasure cubeName="Sales" name="[Measures].[Dinghuo Size 0]" caption="D0"/>
+		<VirtualCubeMeasure cubeName="Sales" name="[Measures].[Dinghuo Size 2]" caption="D2"/>
+		<VirtualCubeMeasure cubeName="Sales" name="[Measures].[Dinghuo Size 4]" caption="D4"/>
+		<VirtualCubeMeasure cubeName="Sales" name="[Measures].[Dinghuo Size 6]" caption="D6"/>
+		<VirtualCubeMeasure cubeName="Sales" name="[Measures].[Dinghuo Size 8]" caption="D8"/>
+		<VirtualCubeMeasure cubeName="Requirements" name="[Measures].[Requirement List Price]" caption="&#21830;&#21697;&#37096;&#21514;&#29260;&#20215;"/>
+		<VirtualCubeMeasure cubeName="Requirements" name="[Measures].[Requirement Quantity]" caption="&#21830;&#21697;&#37096;&#25968;&#37327;"/>
+		<VirtualCubeMeasure cubeName="Requirements" name="[Measures].[Requirement Size 0]" caption="&#21830;0"/>
+		<VirtualCubeMeasure cubeName="Requirements" name="[Measures].[Requirement Size 2]" caption="&#21830;2"/>
+		<VirtualCubeMeasure cubeName="Requirements" name="[Measures].[Requirement Size 4]" caption="&#21830;4"/>
+		<VirtualCubeMeasure cubeName="Requirements" name="[Measures].[Requirement Size 6]" caption="&#21830;6"/>
+		<VirtualCubeMeasure cubeName="Requirements" name="[Measures].[Requirement Size 8]" caption="&#21830;8"/>
+		<VirtualCubeMeasure cubeName="QuoteItem" name="[Measures].[List Price Amount]" caption="&#38144;&#21806;&#37096;&#21514;&#29260;&#20215;"/>
+		<VirtualCubeMeasure cubeName="QuoteItem" name="[Measures].[Quote Price Amount]" caption="&#38144;&#21806;&#37096;&#37329;&#39069;"/>
+		<VirtualCubeMeasure cubeName="QuoteItem" name="[Measures].[Quantity]" caption="&#38144;&#21806;&#37096;&#25968;&#37327;"/>
+		<VirtualCubeMeasure cubeName="QuoteItem" name="[Measures].[QuoteItem Size 0]" caption="&#38144;0"/>
+		<VirtualCubeMeasure cubeName="QuoteItem" name="[Measures].[QuoteItem Size 2]" caption="&#38144;2"/>
+		<VirtualCubeMeasure cubeName="QuoteItem" name="[Measures].[QuoteItem Size 4]" caption="&#38144;4"/>
+		<VirtualCubeMeasure cubeName="QuoteItem" name="[Measures].[QuoteItem Size 6]" caption="&#38144;6"/>
+		<VirtualCubeMeasure cubeName="QuoteItem" name="[Measures].[QuoteItem Size 8]" caption="&#38144;8"/>
+	</VirtualCube>
+	
+	<VirtualCube name="SalesOrderItemBM">
+      <VirtualCubeDimension cubeName="Sales" name="Customers"/>
+      <VirtualCubeDimension name="Product"/>
+      <VirtualCubeDimension name="ProductColor"/>
+      <VirtualCubeDimension name="Wave"/>
+      <VirtualCubeDimension name="Style"/>
+      <VirtualCubeDimension name="Group"/>
+      <VirtualCubeDimension name="Store"/>
+      <VirtualCubeDimension name="CustomerVip"/>
+      
+
+      <VirtualCubeMeasure cubeName="SalesOrderItem" name="[Measures].[List Price]" caption="&#38144;8"/>
+      <VirtualCubeMeasure cubeName="SalesOrderItem" name="[Measures].[Quantity]" caption="&#38144;8"/>
+      <VirtualCubeMeasure cubeName="SalesOrderItem" name="[Measures].[Gross Amount]" caption="&#38144;8"/>
+      <VirtualCubeMeasure cubeName="SalesOrderItem" name="[Measures].[Order Count]" caption="&#38144;8"/>
+</VirtualCube>
+	
+
+</Schema>

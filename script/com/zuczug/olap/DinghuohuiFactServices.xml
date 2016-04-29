@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<!-- zhoulei -->
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+
+    <simple-method method-name="loadDinghuohuiRequestFact" short-description="">
+        <entity-one entity-name="CustRequest" value-field="custRequest"/>
+        <if-empty field="custRequest">
+            <add-error>
+                <fail-property resource="OrderErrorUiLabels" property="OrderOrderIdDoesNotExists"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+        <if-compare field="custRequest.custRequestTypeId" operator="equals" value="RF_QUOTE">
+            <if-compare field="custRequest.statusId" operator="equals" value="CRQ_SUBMITTED">
+                <entity-condition entity-name="CustRequestItem" list="custRequestItems">
+                    <condition-list combine="and">
+                        <condition-expr field-name="custRequestId" operator="equals" from-field="custRequest.custRequestId"/>
+                    </condition-list>
+                </entity-condition>
+                
+                <iterate list="custRequestItems" entry="custRequestItem">
+                    <clear-field field="inMap"/>
+                    <set field="inMap.custRequestId" from-field="custRequest.custRequestId"/>
+                    <set field="inMap.custRequestItemSeqId" from-field="custRequestItem.custRequestItemSeqId"/>
+                    <call-service service-name="loadDinghuohuiItemFact" in-map-name="inMap"/>
+                </iterate>
+            </if-compare>
+        </if-compare>
+    </simple-method>
+    
+    <simple-method method-name="loadDinghuohuiRequirementFact" short-description="">
+        <entity-one entity-name="Requirement" value-field="requirement"/>
+        <if-empty field="requirement">
+            <add-error>
+                <fail-property resource="OrderErrorUiLabels" property="OrderOrderIdDoesNotExists"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+        <if-compare field="requirement.facilityId" operator="not-equals" value="ZUCZUG_CLOTHESFACILITY">
+            <if-compare field="requirement.statusId" operator="not-equals" value="REQ_REJECTED">
+                <clear-field field="inMap"/>
+                <set field="inMap.requirementId" from-field="requirement.requirementId"/>
+                <call-service service-name="loadDinghuohuiItemFact" in-map-name="inMap"/>
+            </if-compare>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="loadDinghuohuiItemFact" short-description="">
+    	<entity-one value-field="requirement" entity-name="Requirement"/>
+    	<if-not-empty field="requirement"><!-- 这条订货会数据是直营的，属于Requirement -->
+	        <entity-one entity-name="DinghuohuiItemFact" value-field="fact" auto-field-map="false">
+	            <field-map field-name="requirementId" from-field="requirement.requirementId"/>
+	            <field-map field-name="custRequestId" value="_NA_"/>
+	            <field-map field-name="custRequestItemSeqId" value="_NA_"/>
+	        </entity-one>
+	        <!-- key handling -->
+	        <if-empty field="fact">
+		        <make-value entity-name="DinghuohuiItemFact" value-field="fact"/>
+		        <set field="fact.requirementId" from-field="requirement.requirementId"/>
+		        <set field="fact.custRequestId" value="_NA_"/>
+		        <set field="fact.custRequestItemSeqId" value="_NA_"/>
+	            <!-- conversion of the product id -->
+	            <if-not-empty field="requirement.productId">
+	            	<set field="productId" from-field="requirement.productId"/>
+	                <clear-field field="inMap"/>
+	                <set field="inMap.dimensionEntityName" value="ZzProductDimension"/>
+	                <set field="inMap.naturalKeyFields.productId" from-field="requirement.productId"/>
+	                <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+	                    <result-to-field result-name="dimensionId" field="fact.productDimId"/>
+	                </call-service>
+	                <if-empty field="fact.productDimId">
+	                    <set field="fact.productDimId" value="_NF_"/>
+	                </if-empty>
+	            <else>
+	                <set field="fact.productDimId" value="_NA_"/>
+	            </else>
+	            </if-not-empty>
+	            <!-- 使用requirement.createdDate来获取时间 -->
+	            <if-not-empty field="requirement.createdDate">
+	                <clear-field field="inMap"/>
+	                <set field="inMap.dimensionEntityName" value="DateDimension"/>
+	                <set field="inMap.naturalKeyFields.dateValue" from-field="requirement.createdDate" type="Date"/>
+	                <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+	                    <result-to-field result-name="dimensionId" field="fact.dateDimId"/>
+	                </call-service>
+	                <if-empty field="fact.dateDimId">
+	                    <set field="fact.dateDimId" value="_NF_"/>
+	                </if-empty>
+	            <else>
+	                <set field="fact.dateDimId" value="_NA_"/>
+	            </else>
+	            </if-not-empty>
+	            <!-- conversion of the customer party id -->
+	            <entity-and list="requirementRoles" entity-name="RequirementRole" filter-by-date="true">
+	            	<field-map field-name="requirementId" from-field="requirement.requirementId"/>
+	            	<field-map field-name="roleTypeId" value="REQ_REQUESTER"/>
+	            </entity-and>
+	            <if-not-empty field="requirementRoles">
+	            	<first-from-list entry="requirementRole" list="requirementRoles"/>
+	                <clear-field field="inMap"/>
+	                <set field="inMap.dimensionEntityName" value="ZzBulkCustomerDimension"/>
+	                <set field="inMap.naturalKeyFields.partyId" from-field="requirementRole.partyId"/>
+	                <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+	                    <result-to-field result-name="dimensionId" field="fact.customerDimId"/>
+	                </call-service>
+	                <if-empty field="fact.customerDimId">
+	                    <set field="fact.customerDimId" value="_NF_"/>
+	                </if-empty>
+	            <else>
+	                <set field="fact.customerDimId" value="_NA_"/>
+	            </else>
+	            </if-not-empty>
+		        
+	            <create-value value-field="fact"/>
+	        </if-empty>
+	        <!-- =============== -->
+	        <!-- facts handling  -->
+	        <!-- =============== -->
+	        
+	        <log message="Requirement Id=${fact.requirementId}+++1" level="info"/>
+	        <set field="fact.quantity" from-field="requirement.quantity" type="BigDecimal"/>
+			<entity-and list="listPrices" entity-name="ProductPrice" filter-by-date="true">
+				<field-map field-name="productId" from-field="requirement.productId"/>
+				<field-map field-name="productPriceTypeId" value="LIST_PRICE"/>
+			</entity-and>
+			<if-not-empty field="listPrices">
+				<first-from-list entry="listPrice" list="listPrices"/>
+	            <calculate field="fact.listPriceAmount">
+	                <calcop field="fact.quantity" operator="multiply">
+	                    <calcop field="listPrice.price" operator="get"/>
+	                </calcop>
+	            </calculate>
+			</if-not-empty>
+	        <!-- for zuczug Hengpai data -->
+	        <set field="fact.quantitySize0" value="0" type="BigDecimal"/>
+	        <set field="fact.quantitySize2" value="0" type="BigDecimal"/>
+	        <set field="fact.quantitySize4" value="0" type="BigDecimal"/>
+	        <set field="fact.quantitySize6" value="0" type="BigDecimal"/>
+	        <set field="fact.quantitySize8" value="0" type="BigDecimal"/>
+	        <log message="PRODUCT ID = ${requirement.productId}" level="info"/>
+	        <log message="Requirement Id=${fact.requirementId}+++2" level="info"/>
+	        <entity-and list="productFeatureAndAppls" entity-name="ProductFeatureAndAppl" filter-by-date="true">
+	        	<field-map field-name="productId" from-field="requirement.productId"/>
+	        	<field-map field-name="productFeatureTypeId" value="SIZE"/>
+	        </entity-and>
+	        <if-not-empty field="productFeatureAndAppls">
+	        	<first-from-list entry="productFeatureAndAppl" list="productFeatureAndAppls"/>
+	        	<log message="FEATURE SIZE ID = ${productFeatureAndAppl.productFeatureId}" level="info"/>
+	        	<if-compare operator="equals" value="SIZE_0" field="productFeatureAndAppl.productFeatureId">
+			        <set field="fact.quantitySize0" from-field="fact.quantity"/>
+	        	</if-compare>
+	        	<if-compare operator="equals" value="SIZE_25" field="productFeatureAndAppl.productFeatureId">
+			        <set field="fact.quantitySize0" from-field="fact.quantity"/>
+	        	</if-compare>
+	        	<if-compare operator="equals" value="SIZE_2" field="productFeatureAndAppl.productFeatureId">
+			        <set field="fact.quantitySize2" from-field="fact.quantity"/>
+	        	</if-compare>
+	        	<if-compare operator="equals" value="SIZE_26" field="productFeatureAndAppl.productFeatureId">
+			        <set field="fact.quantitySize2" from-field="fact.quantity"/>
+	        	</if-compare>
+	        	<if-compare operator="equals" value="SIZE_4" field="productFeatureAndAppl.productFeatureId">
+			        <set field="fact.quantitySize4" from-field="fact.quantity"/>
+	        	</if-compare>
+	        	<if-compare operator="equals" value="SIZE_27" field="productFeatureAndAppl.productFeatureId">
+			        <set field="fact.quantitySize4" from-field="fact.quantity"/>
+	        	</if-compare>
+	        	<if-compare operator="equals" value="SIZE_F" field="productFeatureAndAppl.productFeatureId">
+			        <set field="fact.quantitySize4" from-field="fact.quantity"/>
+	        	</if-compare>
+	        	<if-compare operator="equals" value="SIZE_6" field="productFeatureAndAppl.productFeatureId">
+			        <set field="fact.quantitySize6" from-field="fact.quantity"/>
+	        	</if-compare>
+	        	<if-compare operator="equals" value="SIZE_28" field="productFeatureAndAppl.productFeatureId">
+			        <set field="fact.quantitySize6" from-field="fact.quantity"/>
+	        	</if-compare>
+	        	<if-compare operator="equals" value="SIZE_8" field="productFeatureAndAppl.productFeatureId">
+			        <set field="fact.quantitySize8" from-field="fact.quantity"/>
+	        	</if-compare>
+	        	<if-compare operator="equals" value="SIZE_29" field="productFeatureAndAppl.productFeatureId">
+			        <set field="fact.quantitySize8" from-field="fact.quantity"/>
+	        	</if-compare>
+	        </if-not-empty>
+	        <!-- end for zuczug Hengpai data -->
+        	<store-value value-field="fact"/>
+        	<return/>
+    	</if-not-empty><!-- if-not-empty requirement -->
+    	
+    	<log message="It's from CustRequest" level="info"/>
+    	<!-- It's from CustRequest -->
+        <entity-one entity-name="CustRequest" value-field="custRequest"/>
+        <entity-one entity-name="CustRequestItem" value-field="custRequestItem"/>
+        
+        <entity-one entity-name="DinghuohuiItemFact" value-field="fact" auto-field-map="false">
+            <field-map field-name="custRequestId" from-field="custRequestItem.custRequestId"/>
+            <field-map field-name="custRequestItemSeqId" from-field="custRequestItem.custRequestItemSeqId"/>
+            <field-map field-name="requirementId" value="_NA_"/>
+        </entity-one>
+        <!-- key handling -->
+        <if-empty field="fact">
+	        <make-value entity-name="DinghuohuiItemFact" value-field="fact"/>
+	        <set field="fact.custRequestId" from-field="custRequestItem.custRequestId"/>
+	        <set field="fact.custRequestItemSeqId" from-field="custRequestItem.custRequestItemSeqId"/>
+	        <set field="fact.requirementId" value="_NA_"/>
+            <!-- conversion of the product id -->
+            <if-not-empty field="custRequestItem.productId">
+            	<set field="productId" from-field="custRequestItem.productId"/>
+                <clear-field field="inMap"/>
+                <set field="inMap.dimensionEntityName" value="ZzProductDimension"/>
+                <set field="inMap.naturalKeyFields.productId" from-field="custRequestItem.productId"/>
+                <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+                    <result-to-field result-name="dimensionId" field="fact.productDimId"/>
+                </call-service>
+                <if-empty field="fact.productDimId">
+                    <set field="fact.productDimId" value="_NF_"/>
+                </if-empty>
+            <else>
+                <set field="fact.productDimId" value="_NA_"/>
+            </else>
+            </if-not-empty>
+            <!-- 使用custRequest.custRequestDate来获取时间 -->
+            <if-not-empty field="custRequest.custRequestDate">
+                <clear-field field="inMap"/>
+                <set field="inMap.dimensionEntityName" value="DateDimension"/>
+                <set field="inMap.naturalKeyFields.dateValue" from-field="custRequest.custRequestDate" type="Date"/>
+                <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+                    <result-to-field result-name="dimensionId" field="fact.dateDimId"/>
+                </call-service>
+                <if-empty field="fact.dateDimId">
+                    <set field="fact.dateDimId" value="_NF_"/>
+                </if-empty>
+            <else>
+                <set field="fact.dateDimId" value="_NA_"/>
+            </else>
+            </if-not-empty>
+            <!-- conversion of the customer party id -->
+            <if-not-empty field="custRequest.fromPartyId">
+                <clear-field field="inMap"/>
+                <set field="inMap.dimensionEntityName" value="ZzBulkCustomerDimension"/>
+                <set field="inMap.naturalKeyFields.partyId" from-field="custRequest.fromPartyId"/>
+                <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+                    <result-to-field result-name="dimensionId" field="fact.customerDimId"/>
+                </call-service>
+                <if-empty field="fact.customerDimId">
+                    <set field="fact.customerDimId" value="_NF_"/>
+                </if-empty>
+            <else>
+                <set field="fact.customerDimId" value="_NA_"/>
+            </else>
+            </if-not-empty>
+	        
+            <create-value value-field="fact"/>
+        </if-empty>
+        <!-- =============== -->
+        <!-- facts handling  -->
+        <!-- =============== -->
+        <set field="fact.quantity" from-field="custRequestItem.quantity" type="BigDecimal"/>
+        
+		<entity-and list="listPrices" entity-name="ProductPrice" filter-by-date="true">
+			<field-map field-name="productId" from-field="custRequestItem.productId"/>
+			<field-map field-name="productPriceTypeId" value="LIST_PRICE"/>
+		</entity-and>
+		<if-not-empty field="listPrices">
+			<first-from-list entry="listPrice" list="listPrices"/>
+            <calculate field="fact.listPriceAmount">
+                <calcop field="fact.quantity" operator="multiply">
+                    <calcop field="listPrice.price" operator="get"/>
+                </calcop>
+            </calculate>
+		</if-not-empty>
+
+        <!-- for zuczug Hengpai data -->
+        <set field="fact.quantitySize0" value="0" type="BigDecimal"/>
+        <set field="fact.quantitySize2" value="0" type="BigDecimal"/>
+        <set field="fact.quantitySize4" value="0" type="BigDecimal"/>
+        <set field="fact.quantitySize6" value="0" type="BigDecimal"/>
+        <set field="fact.quantitySize8" value="0" type="BigDecimal"/>
+        <log message="PRODUCT ID = ${custRequestItem.productId}" level="info"/>
+        <entity-and list="productFeatureAndAppls" entity-name="ProductFeatureAndAppl" filter-by-date="true">
+        	<field-map field-name="productId" from-field="custRequestItem.productId"/>
+        	<field-map field-name="productFeatureTypeId" value="SIZE"/>
+        </entity-and>
+        <if-not-empty field="productFeatureAndAppls">
+        	<first-from-list entry="productFeatureAndAppl" list="productFeatureAndAppls"/>
+        	<log message="FEATURE SIZE ID = ${productFeatureAndAppl.productFeatureId}" level="info"/>
+        	<if-compare operator="equals" value="SIZE_0" field="productFeatureAndAppl.productFeatureId">
+		        <set field="fact.quantitySize0" from-field="fact.quantity"/>
+        	</if-compare>
+        	<if-compare operator="equals" value="SIZE_25" field="productFeatureAndAppl.productFeatureId">
+		        <set field="fact.quantitySize0" from-field="fact.quantity"/>
+        	</if-compare>
+        	<if-compare operator="equals" value="SIZE_2" field="productFeatureAndAppl.productFeatureId">
+		        <set field="fact.quantitySize2" from-field="fact.quantity"/>
+        	</if-compare>
+        	<if-compare operator="equals" value="SIZE_26" field="productFeatureAndAppl.productFeatureId">
+		        <set field="fact.quantitySize2" from-field="fact.quantity"/>
+        	</if-compare>
+        	<if-compare operator="equals" value="SIZE_4" field="productFeatureAndAppl.productFeatureId">
+		        <set field="fact.quantitySize4" from-field="fact.quantity"/>
+        	</if-compare>
+        	<if-compare operator="equals" value="SIZE_27" field="productFeatureAndAppl.productFeatureId">
+		        <set field="fact.quantitySize4" from-field="fact.quantity"/>
+        	</if-compare>
+        	<if-compare operator="equals" value="SIZE_F" field="productFeatureAndAppl.productFeatureId">
+		        <set field="fact.quantitySize4" from-field="fact.quantity"/>
+        	</if-compare>
+        	<if-compare operator="equals" value="SIZE_6" field="productFeatureAndAppl.productFeatureId">
+		        <set field="fact.quantitySize6" from-field="fact.quantity"/>
+        	</if-compare>
+        	<if-compare operator="equals" value="SIZE_28" field="productFeatureAndAppl.productFeatureId">
+		        <set field="fact.quantitySize6" from-field="fact.quantity"/>
+        	</if-compare>
+        	<if-compare operator="equals" value="SIZE_8" field="productFeatureAndAppl.productFeatureId">
+		        <set field="fact.quantitySize8" from-field="fact.quantity"/>
+        	</if-compare>
+        	<if-compare operator="equals" value="SIZE_29" field="productFeatureAndAppl.productFeatureId">
+		        <set field="fact.quantitySize8" from-field="fact.quantity"/>
+        	</if-compare>
+        </if-not-empty>
+        <!-- end for zuczug Hengpai data -->
+        <store-value value-field="fact"/>
+    </simple-method>
+    
+    <simple-method method-name="importDinghuohuiData" short-description="Import Dinghuohui Data">
+        <entity-condition list="custRequestList" entity-name="CustRequest">
+            <condition-list combine="and">
+                <condition-expr field-name="custRequestDate" operator="greater-equals" from-field="parameters.fromDate"/>
+                <condition-expr field-name="custRequestDate" operator="less" from-field="parameters.thruDate"/>
+            </condition-list>
+        </entity-condition>
+        <iterate list="custRequestList" entry="custRequest">
+            <clear-field field="inMap"/>
+            <set field="inMap.custRequestId" from-field="custRequest.custRequestId"/>
+            <call-service service-name="loadDinghuohuiRequestFact" in-map-name="inMap"></call-service>
+            <check-errors/>
+        </iterate>
+        
+        <entity-condition list="requirements" entity-name="Requirement">
+            <condition-list combine="and">
+                <condition-expr field-name="createdDate" operator="greater-equals" from-field="parameters.fromDate"/>
+                <condition-expr field-name="createdDate" operator="less" from-field="parameters.thruDate"/>
+            </condition-list>
+        </entity-condition>
+        <iterate list="requirements" entry="requirement">
+            <clear-field field="inMap"/>
+            <set field="inMap.requirementId" from-field="requirement.requirementId"/>
+            <call-service service-name="loadDinghuohuiRequirementFact" in-map-name="inMap"></call-service>
+            <check-errors/>
+        </iterate>
+    </simple-method>
+    
+</simple-methods>

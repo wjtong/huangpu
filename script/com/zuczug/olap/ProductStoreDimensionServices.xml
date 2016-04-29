@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+      <!-- zhoulei -->  
+    <simple-method method-name="loadAllZzStoreDimension" short-description="">
+        <entity-condition entity-name="ProductStore" list="productStores"/>
+        <iterate list="productStores" entry="productStore">
+        	<log level="info" message="productStore.productStoreId is: ${productStore.productStoreId}"></log>
+            <set-service-fields service-name="loadZzStoreDimension" map="parameters" to-map="inMap"/>
+            <set field="inMap.productStoreId" from-field="productStore.productStoreId"/>
+            <call-service service-name="loadZzStoreDimension" in-map-name="inMap"/>
+            <clear-field field="inMap"/>
+        </iterate>
+    </simple-method>
+    
+    <simple-method method-name="loadZzStoreDimension" short-description="">
+
+        <set-service-fields service-name="prepareZzStoreDimensionData" map="parameters" to-map="inMap"/>
+        <call-service service-name="prepareZzStoreDimensionData" in-map-name="inMap">
+            <result-to-field result-name="zzStoreDimension"/>
+        </call-service>
+        <clear-field field="inMap"/>
+        <set-service-fields service-name="storeGenericDimension" map="parameters" to-map="inMap"/>
+        <set field="inMap.naturalKeyFields[]" value="productStoreId"/>
+        <set field="inMap.dimensionValue" from-field="zzStoreDimension"/>
+        <call-service service-name="storeGenericDimension" in-map-name="inMap"/>
+    </simple-method>
+    
+    <simple-method method-name="prepareZzStoreDimensionData" short-description="">
+        <entity-one entity-name="ProductStore" value-field="productStore">
+        </entity-one>
+        <if-empty field="productStore">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductProductNotFoundWithProduct"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+        <make-value value-field="zzStoreDimension" entity-name="ZzStoreDimension"/>
+        <set field="zzStoreDimension.productStoreId" from-field="productStore.productStoreId"/>
+        <set field="zzStoreDimension.storeName" from-field="productStore.storeName"/>
+        
+		<!-- payToPartyId||payToPartyName --> 
+		<if-not-empty field="productStore.payToPartyId">
+			<set field="zzStoreDimension.payToPartyId" from-field="productStore.payToPartyId"/>
+			<entity-one value-field="partyGroup" entity-name="PartyGroup">
+				<field-map field-name="partyId" from-field="productStore.payToPartyId"/>
+				<select-field field-name="groupName"/>
+			</entity-one>
+			<log message="${partyGroup.groupName}=====2" level="info"/>
+			<set field="zzStoreDimension.payToPartyName" from-field="partyGroup.groupName"/>
+		<else>
+			<set field="zzStoreDimension.payToPartyId" value="_NA_"/>
+			<set field="zzStoreDimension.payToPartyName" value="_NA_"/>
+		</else>
+		</if-not-empty>
+		
+		<!-- cityGeoId||cityName -->
+		<set field="zzStoreDimension.cityGeoId" value="_NA_"/>
+		<entity-and list="productStoreFacilityList" entity-name="ProductStoreFacility">
+			<field-map field-name="productStoreId" from-field="productStore.productStoreId"/>
+		</entity-and>
+		<if-not-empty field="productStoreFacilityList">
+			<first-from-list entry="productStoreFacility" list="productStoreFacilityList"/>
+			<entity-and list="facilityContactMechPurposeList" entity-name="FacilityContactMechPurpose" filter-by-date="true">
+				<field-map field-name="facilityId" from-field="productStoreFacility.facilityId"/>
+				<field-map field-name="contactMechPurposeTypeId" value="PRIMARY_LOCATION"/>
+			</entity-and>
+			<if-not-empty field="facilityContactMechPurposeList">
+				<first-from-list entry="facilityContactMechPurpose" list="facilityContactMechPurposeList"/>
+				<entity-one value-field="postalAddress" entity-name="PostalAddress">
+					<field-map field-name="contactMechId" from-field="facilityContactMechPurpose.contactMechId"/>
+				</entity-one>
+				<if-not-empty field="postalAddress">
+					
+					<set field="zzStoreDimension.cityName" from-field="postalAddress.city"/>
+				</if-not-empty>
+			<else>
+				<set field="zzStoreDimension.cityName" value="_NA_"/>
+			</else>
+			</if-not-empty>
+		<else>
+			<set field="zzStoreDimension.cityName" value="_NA_"/>
+		</else>
+		</if-not-empty>
+		
+		<!--if-not-empty field="productStore.primaryStoreGroupId">
+			<entity-one value-field="cityGeo" entity-name="ProductStoreGroup">
+				<field-map field-name="productStoreGroupId" from-field="productStore.primaryStoreGroupId"/>
+			</entity-one>
+			<if-not-empty field="cityGeo">
+				<set field="zzStoreDimension.cityGeoId" from-field="cityGeo.productStoreGroupId"/>
+				<set field="zzStoreDimension.cityName" from-field="cityGeo.productStoreGroupName"/>
+			<else>
+				<set field="zzStoreDimension.cityGeoId" value="_NA_"/>
+				<set field="zzStoreDimension.cityName" value="_NA_"/>
+			</else>
+			</if-not-empty>
+		<else>
+			<set field="zzStoreDimension.cityGeoId" value="_NA_"/>
+			<set field="zzStoreDimension.cityName" value="_NA_"/>
+		</else>
+		</if-not-empty-->
+		
+		<!-- isRetailStoreGroupId||isRetailStoreGroupName -->
+		<entity-and list="productStoreGroupMembers" entity-name="ProductStoreGroupMember">
+			<field-map field-name="productStoreId" from-field="productStore.productStoreId"/>
+		</entity-and>
+		<log message="+++++++++++++++++++++++++1" level="info"/>
+		<if-not-empty field="productStoreGroupMembers">
+		<log message="+++++++++++++++++++++++++2" level="info"/>
+			<iterate entry="productStoreGroupMember" list="productStoreGroupMembers">
+				<if>
+					<condition>
+						<or>
+							<if-compare operator="equals" value="B2B" field="productStoreGroupMember.productStoreGroupId"/>
+							<if-compare operator="equals" value="RETAIL" field="productStoreGroupMember.productStoreGroupId"/>
+						</or>
+					</condition>
+					<then>
+						<entity-one value-field="productStoreGroup" entity-name="ProductStoreGroup">
+						<field-map field-name="productStoreGroupId" from-field="productStoreGroupMember.productStoreGroupId" />
+						</entity-one>
+						<set field="zzStoreDimension.isRetailStoreGroupId" from-field="productStoreGroup.productStoreGroupId"/>
+						<set field="zzStoreDimension.isRetailStoreGroupName" from-field="productStoreGroup.productStoreGroupName"/>
+					</then>
+				<else>
+					<set field="zzStoreDimension.isRetailStoreGroupId" value="_NA_"/>
+	           	 	<set field="zzStoreDimension.isRetailStoreGroupName" value="_NA_"/>	
+				</else>
+				</if>
+			</iterate>
+		<else>
+			<set field="zzStoreDimension.isRetailStoreGroupId" value="_NA_"/>
+            <set field="zzStoreDimension.isRetailStoreGroupName" value="_NA_"/>
+		</else>
+		</if-not-empty>
+		
+        <field-to-result field="zzStoreDimension"/>
+    </simple-method>
+
+</simple-methods>

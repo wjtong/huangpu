@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+
+    <simple-method method-name="prepareBulkCustomerDimensionData" short-description="">
+        <entity-one entity-name="PartyGroup" value-field="partyGroup"/>
+        <if-empty field="partyGroup">
+            <add-error>
+                <fail-property resource="PartyUiLabels" property="PartyNotFound"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+        <make-value value-field="bulkCustomerDimension" entity-name="ZzBulkCustomerDimension"/>
+        <set-nonpk-fields map="partyGroup" value-field="bulkCustomerDimension"/>
+
+        <set field="bulkCustomerDimension.partyName" from-field="partyGroup.groupName"/>
+        
+        <!-- 设置这个客户所属的代理商 -->
+   		<set field="bulkCustomerDimension.organizationPartyId" value="_NA_"/>
+   		<set field="bulkCustomerDimension.organizationPartyName" value="_NA_"/>
+        <entity-and list="partyRoles" entity-name="PartyRole">
+        	<field-map field-name="partyId" from-field="partyGroup.partyId"/>
+        	<field-map field-name="roleTypeId" value="DISTRIBUTOR"/>
+        </entity-and>
+        <if-not-empty field="partyRoles"><!-- 说明这个客户本身就是代理商自己 -->
+        	<set field="bulkCustomerDimension.organizationPartyId" from-field="partyGroup.partyId"/>
+        	<set field="bulkCustomerDimension.organizationPartyName" from-field="partyGroup.groupName"/>
+        <else><!-- 找到所属代理商 -->
+        	<entity-and list="partyRelationships" entity-name="PartyRelationship">
+        		<field-map field-name="partyIdTo" from-field="partyGroup.partyId"/>
+        		<field-map field-name="roleTypeIdFrom" value="PARENT_ORGANIZATION"/>
+        		<field-map field-name="partyRelationshipTypeId" value="GROUP_ROLLUP"/>
+        	</entity-and>
+        	<if-not-empty field="partyRelationships"><!-- 找到代理商了 -->
+        		<first-from-list entry="partyRelationship" list="partyRelationships"/>
+        		<set field="bulkCustomerDimension.organizationPartyId" from-field="partyRelationship.partyIdFrom"/>
+        		<entity-one value-field="parentPartyGroup" entity-name="PartyGroup">
+        			<field-map field-name="partyId" from-field="partyRelationship.partyIdFrom"/>
+        		</entity-one>
+        		<set field="bulkCustomerDimension.organizationPartyName" from-field="parentPartyGroup.groupName"/>
+        	</if-not-empty>
+        </else>
+        </if-not-empty>
+        
+        <!-- 设置这个客户的所属城市等地区信息 -->
+        <set field="bulkCustomerDimension.countryName" value="_NA_"/>
+        <set field="bulkCustomerDimension.provinceName" value="_NA_"/>
+        <set field="bulkCustomerDimension.cityName" value="_NA_"/>
+        <set field="bulkCustomerDimension.address1" value="_NA_"/>
+
+        <field-to-result field="bulkCustomerDimension"/>
+    </simple-method>
+
+    <simple-method method-name="loadCustomerInBulkCustomerDimension" short-description="">
+        <set-service-fields service-name="zuczug.prepareBulkCustomerDimensionData" map="parameters" to-map="inMap"/>
+        <call-service service-name="zuczug.prepareBulkCustomerDimensionData" in-map-name="inMap">
+            <result-to-field result-name="bulkCustomerDimension"/>
+        </call-service>
+        <clear-field field="inMap"/>
+        <set-service-fields service-name="storeGenericDimension" map="parameters" to-map="inMap"/>
+        <set field="inMap.naturalKeyFields[]" value="partyId"/>
+        <set field="inMap.dimensionValue" from-field="bulkCustomerDimension"/>
+        <call-service service-name="storeGenericDimension" in-map-name="inMap"/>
+    </simple-method>
+    <simple-method method-name="loadAllCustomerInBulkCustomerDimension" short-description="">
+        <entity-and list="partyRoles" entity-name="PartyRole">
+        	<field-map field-name="roleTypeId" value="BULK_CUSTOMER"/>
+        </entity-and>
+        <iterate list="partyRoles" entry="partyRole">
+            <set-service-fields service-name="zuczug.loadCustomerInBulkCustomerDimension" map="parameters" to-map="inMap"/>
+            <set field="inMap.partyId" from-field="partyRole.partyId"/>
+            <call-service service-name="zuczug.loadCustomerInBulkCustomerDimension" in-map-name="inMap"/>
+            <clear-field field="inMap"/>
+        </iterate>
+    </simple-method>
+</simple-methods>

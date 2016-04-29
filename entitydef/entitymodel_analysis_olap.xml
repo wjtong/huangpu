@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <description>OLAP</description>
+
+    <entity entity-name="DsAnalysisDimension" package-name="org.ofbiz.olap" title="Product Feature Dimension">
+        <description>Product feature dimension for scoring.</description>
+        <field name="analysisDimensionId" type="id-ne"></field>
+        <field name="analysisDimensionTypeId" type="id-ne"></field>
+        <field name="description" type="description"></field>
+
+        <prim-key field="analysisDimensionId"/>
+    </entity>
+    <entity entity-name="DsAnalysisStoreFeatureScore" package-name="org.ofbiz.olap" title="Store Feature Score">
+        <description>Store feature score.</description>
+        <field name="productStoreId" type="id-ne"></field>
+     	<field name="analysisDimensionId" type="id-ne"></field>
+        <field name="score" type="fixed-point"></field>
+
+        <prim-key field="productStoreId"/>
+        <prim-key field="analysisDimensionId"/>
+        <relation type="one" fk-name="SFS_ANALYSISDIM" rel-entity-name="DsAnalysisDimension">
+            <key-map field-name="analysisDimensionId" rel-field-name="analysisDimensionId"/>
+        </relation>
+    </entity>
+    <entity entity-name="DsForecastStoreProductScore" package-name="org.ofbiz.olap" title="Store Feature Score">
+        <description>Forecast store product score.</description>
+        <field name="productStoreId" type="id-ne"></field>
+        <field name="productId" type="id-ne"></field>
+        <field name="score" type="fixed-point"></field>
+        <field name="comment" type="very-long"></field>
+
+        <prim-key field="productStoreId"/>
+        <prim-key field="productId"/>
+    </entity>
+	
+    <view-entity entity-name="ZzProductSalesOrder" package-name="com.zuczug.olap">
+        <member-entity entity-alias="ZSOIF" entity-name="ZzSalesOrderItemFact"/>
+        <alias entity-alias="ZSOIF" name="quantityTotal" field="quantity" function="sum"/>
+        <alias entity-alias="ZSOIF" name="listPriceTotal" field="listPrice" function="sum"/>
+        <alias entity-alias="ZSOIF" name="extGrossAmountTotal" field="extGrossAmount" function="sum"/>
+        <alias entity-alias="ZSOIF" name="productDimId" group-by="true"/>
+    </view-entity>
+	
+    <view-entity entity-name="ZzProductStoreSalesOrder" package-name="com.zuczug.olap">
+        <member-entity entity-alias="ZSOIF" entity-name="ZzSalesOrderItemFact"/>
+        <alias entity-alias="ZSOIF" name="quantityTotal" field="quantity" function="sum"/>
+        <alias entity-alias="ZSOIF" name="listPriceTotal" field="listPrice" function="sum"/>
+        <alias entity-alias="ZSOIF" name="extGrossAmountTotal" field="extGrossAmount" function="sum"/>
+        <alias entity-alias="ZSOIF" name="productStoreDimId" group-by="true"/>
+        <alias entity-alias="ZSOIF" name="productDimId" group-by="true"/>
+    </view-entity>
+</entitymodel>

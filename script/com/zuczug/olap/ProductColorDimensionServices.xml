@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+
+    <simple-method method-name="prepareProductColorDimensionData" short-description="">
+        <entity-one entity-name="Product" value-field="product"/>
+        <entity-one entity-name="ProductFeature" value-field="productFeature">
+        	<field-map field-name="productFeatureId" from-field="parameters.colorId"/>
+        </entity-one>
+        <if-empty field="product">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductProductNotFoundWithProduct"/>
+            </add-error>
+        </if-empty>
+        <if-empty field="productFeature">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductProductNotFoundWithProduct"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+        <make-value value-field="productColorDimension" entity-name="ZzProductColorDimension"/>
+        <set-nonpk-fields map="product" value-field="productColorDimension"/>
+        <set field="productColorDimension.productColorId" value="${product.productId}-${productFeature.idCode}"/>
+        <set field="productColorDimension.virtualProductId" from-field="product.productId"/>
+        <!-- 获取波段月份 -->
+        <if-not-empty field="product.releaseDate">
+        <clear-field field="inMap"/>
+        <set field="inMap.releaseDate" from-field="product.releaseDate"/>
+        <call-service service-name="findReleaseDate" in-map-name="inMap">
+				<result-to-field result-name="releaseMonth" field="releaseMonth"/>
+		</call-service>
+        <set field="productColorDimension.releaseMonth" from-field="releaseMonth"/>
+		</if-not-empty>
+        <!-- 之所以设置fproductId变量，是因为以下系列、组别、款型、颜色等代码都是从prepareProductDimensionData复制过来的 -->
+        <set field="fproductId" from-field="product.productId"/>
+
+        <!-- 系列、组别、款型、颜色、尺码 -->
+        <entity-and list="productCategoryMemberViews" entity-name="ProductCategoryMemberView" filter-by-date="true"><!-- 组别 -->
+        	<field-map field-name="productId" from-field="fproductId"/>
+        	<field-map field-name="productCategoryTypeId" value="GROUPNAME"/>
+        </entity-and>
+        <if-not-empty field="productCategoryMemberViews">
+        	<first-from-list entry="productCategoryMemberView" list="productCategoryMemberViews"/>
+        	<set field="productColorDimension.groupname" from-field="productCategoryMemberView.categoryName"/>
+        	<!-- 系列和季节都是从组别来的，所以想把组别的productCategoryId获得，然后后面根据此来查找系列和季节 -->
+        	<set field="groupnameCategoryId" from-field="productCategoryMemberView.productCategoryId"/>
+        <else>
+        	<set field="productColorDimension.groupname" value="_NA_"/>
+        </else>
+        </if-not-empty>
+        <entity-and list="categoryRollupAndParentByTypes" entity-name="CategoryRollupAndParentByType"><!-- 系列 -->
+        	<field-map field-name="productCategoryId" from-field="groupnameCategoryId"/>
+        	<field-map field-name="productCategoryTypeId" value="SERIES"/>
+        </entity-and>
+        <if-not-empty field="categoryRollupAndParentByTypes">
+        	<first-from-list entry="categoryRollupAndParentByType" list="categoryRollupAndParentByTypes"/>
+        	<entity-one value-field="productCategory" entity-name="ProductCategory">
+        		<field-map field-name="productCategoryId" from-field="categoryRollupAndParentByType.parentProductCategoryId"/>
+        	</entity-one>
+        	<set field="productColorDimension.series" from-field="productCategory.categoryName"/>
+        	<set field="productColorDimension.seriesId" from-field="categoryRollupAndParentByType.parentProductCategoryId"/>
+        <else>
+        	<set field="productColorDimension.series" value="_NA_"/>
+        	<set field="productColorDimension.seriesId" value="_NA_"/>
+        </else>
+        </if-not-empty>
+        <entity-and list="categoryRollupAndParentByTypes" entity-name="CategoryRollupAndParentByType"><!-- 季节 -->
+        	<field-map field-name="productCategoryId" from-field="groupnameCategoryId"/>
+        	<field-map field-name="productCategoryTypeId" value="ZUCZUG_SEASON"/>
+        </entity-and>
+        <if-not-empty field="categoryRollupAndParentByTypes">
+        	<first-from-list entry="categoryRollupAndParentByType" list="categoryRollupAndParentByTypes"/>
+        	<entity-one value-field="productCategory" entity-name="ProductCategory">
+        		<field-map field-name="productCategoryId" from-field="categoryRollupAndParentByType.parentProductCategoryId"/>
+        	</entity-one>
+        	<set field="productColorDimension.zuczugSeason" from-field="productCategory.categoryName"/>
+        	<set field="productColorDimension.zuczugSeasonId" from-field="categoryRollupAndParentByType.parentProductCategoryId"/>
+        <else>
+        	<set field="productColorDimension.zuczugSeason" value="_NA_"/>
+        	<set field="productColorDimension.zuczugSeasonId" value="_NA_"/>
+        </else>
+        </if-not-empty>
+        <entity-and list="productFeatures" entity-name="ProductFeatureAndAppl" filter-by-date="true"><!-- 款型 -->
+        	<field-map field-name="productId" from-field="fproductId"/>
+        	<field-map field-name="productFeatureApplTypeId" value="STANDARD_FEATURE"/>
+        	<field-map field-name="productFeatureTypeId" value="STYLE"/>
+        </entity-and>
+        <if-not-empty field="productFeatures">
+        	<first-from-list entry="productFeature" list="productFeatures"/>
+        	<set field="productColorDimension.style" from-field="productFeature.description"/>
+        <else>
+        	<set field="productColorDimension.style" value="_NA_"/>
+        </else>
+        </if-not-empty>
+        <entity-and list="productFeatures" entity-name="ProductFeatureAndAppl" filter-by-date="true"><!-- 颜色 -->
+        	<field-map field-name="productId" from-field="product.productId"/>
+        	<field-map field-name="productFeatureTypeId" value="COLOR"/>
+        </entity-and>
+        <if-not-empty field="productFeatures">
+        	<first-from-list entry="productFeature" list="productFeatures"/>
+        	<set field="productColorDimension.color" from-field="productFeature.description"/>
+        	<set field="productColorDimension.colorCode" from-field="productFeature.idCode"/>
+        <else>
+        	<set field="productColorDimension.color" value="_NA_"/>
+        	<set field="productColorDimension.colorCode" value="_NA_"/>
+        </else>
+        </if-not-empty>
+        <!-- 年份在老的设计里，是有个ProductFeature代表年份，在新的ProductCategory的设计里面，没有单独年份的分类。因为季的名称就已经包含了年份，如153代表2015，161代表2016 -->
+        <!-- 以下做法不太好，因为硬编码了许多数据，今后要改。因为还在考虑是否再次使用ProductFeature来代表年份，还是说用个新的ProductCategory，尚未考虑好，先硬编码吧 -->
+        <if-compare operator="equals" value="153" field="productColorDimension.zuczugSeason">
+        	<set field="productColorDimension.modelYear" value="2015"/>
+        	<set field="productColorDimension.yearCode" value="MODEL_YEAR_2015"/>
+        </if-compare>
+        <if-compare operator="equals" value="161" field="productColorDimension.zuczugSeason">
+        	<set field="productColorDimension.modelYear" value="2016"/>
+        	<set field="productColorDimension.yearCode" value="MODEL_YEAR_2016"/>
+        </if-compare>
+        <if-compare operator="equals" value="163" field="productColorDimension.zuczugSeason">
+        	<set field="productColorDimension.modelYear" value="2016"/>
+        	<set field="productColorDimension.yearCode" value="MODEL_YEAR_2016"/>
+        </if-compare>
+        <if-compare operator="equals" value="171" field="productColorDimension.zuczugSeason">
+        	<set field="productColorDimension.modelYear" value="2017"/>
+        	<set field="productColorDimension.yearCode" value="MODEL_YEAR_2017"/>
+        </if-compare>
+        <if-compare operator="equals" value="173" field="productColorDimension.zuczugSeason">
+        	<set field="productColorDimension.modelYear" value="2017"/>
+        	<set field="productColorDimension.yearCode" value="MODEL_YEAR_2017"/>
+        </if-compare>
+        <if-compare operator="equals" value="181" field="productColorDimension.zuczugSeason">
+        	<set field="productColorDimension.modelYear" value="2018"/>
+        	<set field="productColorDimension.yearCode" value="MODEL_YEAR_2018"/>
+        </if-compare>
+        <if-compare operator="equals" value="183" field="productColorDimension.zuczugSeason">
+        	<set field="productColorDimension.modelYear" value="2018"/>
+        	<set field="productColorDimension.yearCode" value="MODEL_YEAR_2018"/>
+        </if-compare>
+        <if-empty field="productColorDimension.modelYear">
+        	<set field="productColorDimension.modelYear" value="_NA_"/>
+        	<set field="productColorDimension.yearCode" value="_NA_"/>
+        </if-empty>
+        <entity-and list="productCategoryMemberViews" entity-name="ProductCategoryMemberView" filter-by-date="true"><!-- 波段 -->
+        	<field-map field-name="productId" from-field="fproductId"/>
+        	<field-map field-name="productCategoryTypeId" value="WAVE"/>
+        </entity-and>
+        <if-not-empty field="productCategoryMemberViews">
+        	<first-from-list entry="productCategoryMemberView" list="productCategoryMemberViews"/>
+        	<set field="productColorDimension.wave" from-field="productCategoryMemberView.categoryName"/>
+        	<set field="productColorDimension.waveId" from-field="productCategoryMemberView.productCategoryId"/>
+        <else>
+        	<set field="productColorDimension.wave" value="_NA_"/>
+        	<set field="productColorDimension.waveId" value="_NA_"/>
+        </else>
+        </if-not-empty>
+        
+       	<!-- list price -->
+        <entity-and list="productPrices" entity-name="ProductPrice" filter-by-date="true">
+        	<field-map field-name="productId" from-field="product.productId"/>
+        	<field-map field-name="productPriceTypeId" value="LIST_PRICE"/>
+        </entity-and>
+        <if-not-empty field="productPrices">
+        	<first-from-list entry="productPrice" list="productPrices"/>
+        	<set field="productColorDimension.listPrice" from-field="productPrice.price"/>
+        <else>
+        	<set field="productColorDimension.listPrice" value="0" type="BigDecimal"/>
+        </else>
+        </if-not-empty>
+        
+        <!-- 对应设计商品计算的ENGINEER BOM的成本 -->
+        <clear-field field="inMap"/>
+        <set field="inMap.productId" from-field="product.productId"/>
+        <call-service service-name="getDesignProductIdByProductId" in-map-name="inMap">
+        	<result-to-field result-name="designProductId"/>
+        </call-service>
+        <if-not-empty field="designProductId">
+        	<set field="productColorDimension.designVirtualProductId" from-field="designProductId"/>
+	    <else>
+	    	<set field="productColorDimension.designVirtualProductId" value="_NA_"/>
+	    </else>
+        </if-not-empty>
+        
+        <field-to-result field="productColorDimension"/>
+    </simple-method>
+
+    <simple-method method-name="loadProductInProductColorDimension" short-description="">
+        <set-service-fields service-name="zuczug.prepareProductColorDimensionData" map="parameters" to-map="inMap"/>
+        <call-service service-name="zuczug.prepareProductColorDimensionData" in-map-name="inMap">
+            <result-to-field result-name="productColorDimension"/>
+        </call-service>
+        <clear-field field="inMap"/>
+        <set-service-fields service-name="storeGenericDimension" map="parameters" to-map="inMap"/>
+        <set field="inMap.naturalKeyFields[]" value="productColorId"/>
+        <set field="inMap.dimensionValue" from-field="productColorDimension"/>
+        <call-service service-name="storeGenericDimension" in-map-name="inMap"/>
+    </simple-method>
+    <simple-method method-name="loadAllProductsInProductColorDimension" short-description="">
+    	<entity-and list="productFeatureAndAppls" entity-name="ProductFeatureAndAppl" filter-by-date="true">
+    		<field-map field-name="productFeatureTypeId" value="COLOR"/>
+    		<field-map field-name="productFeatureApplTypeId" value="STANDARD_FEATURE"/>
+    	</entity-and>
+    	<iterate entry="productFeatureAndAppl" list="productFeatureAndAppls">
+    		<clear-field field="theProductId"/>
+    		<entity-one value-field="product" entity-name="Product">
+    			<field-map field-name="productId" from-field="productFeatureAndAppl.productId"/>
+    		</entity-one>
+    		<if-compare operator="equals" value="FINISHED_GOOD" field="product.productTypeId">
+    			<if-compare operator="equals" value="Y" field="product.isVariant"><!-- 如果是变型，就要找它的虚拟商品 -->
+		    		<entity-and list="productAssocs" entity-name="ProductAssoc" filter-by-date="true">
+		    			<field-map field-name="productIdTo" from-field="productFeatureAndAppl.productId"/>
+		    			<field-map field-name="productAssocTypeId" value="PRODUCT_VARIANT"/>
+		    		</entity-and>
+		    		<if-not-empty field="productAssocs">
+		    			<first-from-list entry="productAssoc" list="productAssocs"/>
+		    			<set field="theProductId" from-field="productAssoc.productId"/>
+		    		</if-not-empty>
+    			<else>
+		    		<set field="theProductId" from-field="productFeatureAndAppl.productId"/>
+    			</else>
+    			</if-compare>
+    			<if-not-empty field="theProductId">
+		            <set-service-fields service-name="zuczug.loadProductInProductColorDimension" map="parameters" to-map="inMap"/>
+		            <set field="inMap.productId" from-field="theProductId"/>
+		            <set field="inMap.colorId" from-field="productFeatureAndAppl.productFeatureId"/>
+		            <call-service service-name="zuczug.loadProductInProductColorDimension" in-map-name="inMap"/>
+		            <clear-field field="inMap"/>
+    			</if-not-empty>
+    		</if-compare>
+    	</iterate>
+    </simple-method>
+</simple-methods>

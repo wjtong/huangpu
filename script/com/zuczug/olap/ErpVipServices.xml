@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+        
+        <simple-method method-name="importAllErpVip" short-description="">
+        	<set field="fromDate" from-field="parameters.fromDate"/>
+	        <set field="thruDate" from-field="parameters.thruDate"/>
+        	<entity-condition list="erpVipList" entity-name="ErpVip">
+        		<condition-list combine="and">
+	        		<condition-expr field-name="begaindate" operator="greater-equals" from-field="fromDate"/>
+				    <condition-expr field-name="begaindate" operator="less" from-field="thruDate"/>
+				</condition-list>
+        	</entity-condition>
+        	<if-not-empty field="erpVipList">
+        		<iterate entry="erpVip" list="erpVipList">
+	       			<set-service-fields service-name="loadCustomerDimension" map="parameters" to-map="inMap"/>
+	       			<log message="++++++++++++++++++1:${erpVip.vipcode}" level="info"/>
+			        <set field="inMap.vipcode" from-field="erpVip.vipcode"/>
+			        <call-service service-name="loadCustomerDimension" in-map-name="inMap"/>
+			        <clear-field field="inMap"/>
+	        	</iterate>
+        	</if-not-empty>
+        </simple-method>
+        
+        <simple-method method-name="loadCustomerDimension">
+        	<log message="++++++++++++++++++2:${parameters.vipcode}" level="info"/>
+        	<set-service-fields service-name="prepareErpCustomerDimension" map="parameters" to-map="inMap"/>
+        	<log message="++++++++++++++++++3:${inMap.vipcode}" level="info"/>
+        	<call-service service-name="prepareErpCustomerDimension" in-map-name="inMap">
+	            <result-to-field result-name="customerDimension"/>
+	        </call-service>
+	        <clear-field field="inMap"/>
+	        <set-service-fields service-name="storeGenericDimension" map="parameters" to-map="inMap"/>
+	        <set field="inMap.naturalKeyFields[]" value="partyId"/>
+	        <set field="inMap.dimensionValue" from-field="customerDimension"/>
+	        <call-service service-name="storeGenericDimension" in-map-name="inMap"/>
+        </simple-method>
+        
+        <simple-method method-name="prepareErpCustomerDimension">
+        	<log message="++++++++++++++++++4:${parameters.vipcode}" level="info"/>
+        	<entity-one value-field="erpVip" entity-name="ErpVip"/>
+        	<if-empty field="erpVip">
+	            <add-error>
+	                <fail-property resource="erpVip" property="ProductProductNotFoundWithProduct"/>
+	            </add-error>
+	        </if-empty>
+	        <check-errors/>
+	        <make-value value-field="customerDimension" entity-name="CustomerDimension"/>
+	        <set field="customerDimension.partyId" from-field="erpVip.vipcode"/>
+	        <set field="customerDimension.name" from-field="erpVip.name"/>
+	        <set field="customerDimension.mobile" from-field="erpVip.mobiletel"/>
+	        <set field="customerDimension.birthDate" from-field="erpVip.birthDate"/>
+	        <set field="customerDimension.integral" from-field="erpVip.integralAmount" type="String"/>
+	        <set field="customerDimension.memberId" from-field="erpVip.customerId"/>
+	        <entity-one value-field="productStore" entity-name="ProductStore">
+	        	<field-map field-name="productStoreId" from-field="customerDimension.memberId"/>
+	        </entity-one>
+	        <if-not-empty field="productStore">
+	        	<set field="customerDimension.memberStoreName" from-field="productStore.storeName"/>
+	        	<set field="customerDimension.memberStoreCityId" from-field="productStore.primaryStoreGroupId"/>	
+	        <else>
+	        	<set field="customerDimension.memberStoreName" value="_NA_"/>
+	        	<set field="customerDimension.memberStoreCityId" value="_NA_"/>
+	        </else>
+	        </if-not-empty>
+	        
+	        <entity-one value-field="productStoreGroup" entity-name="ProductStoreGroup">
+	        	<field-map field-name="productStoreGroupId" from-field="customerDimension.memberStoreCityId"/>
+	        </entity-one>
+	        <if-not-empty field="productStoreGroup">
+	        	<set field="customerDimension.memberStoreCity" from-field="productStoreGroup.productStoreGroupName"/>
+	        <else>
+	        	<set field="customerDimension.memberStoreCity" value="_NA_"/>
+	        </else>
+	        </if-not-empty>
+	        <!-- 性别 -->
+	        <if-compare operator="equals" value="女" field="erpVip.sex">
+	        	<set field="customerDimension.gender" value="F"/>
+	        <else>
+	        	<if-compare operator="equals" value="男" field="erpVip.sex">
+	        		<set field="customerDimension.gender" value="M"/>
+	        	<else>
+	        		<set field="customerDimension.gender" value="_"/>
+	        	</else>
+	        	</if-compare>
+	        </else>
+	        </if-compare>
+	        <set field="customerDimension.createdDate" from-field="erpVip.begaindate" type="Timestamp"/>
+	        <set field="customerDimension.openCardStoreId" from-field="customerDimension.memberId"/>
+	        <set field="customerDimension.openCardStoreName" from-field="customerDimension.memberStoreName"/>
+	        <set field="customerDimension.openCardStoreCityId" from-field="customerDimension.memberStoreCityId"/>
+	        <set field="customerDimension.openCardStoreCity" from-field="customerDimension.memberStoreCity"/>
+	        <log message="+++++++++++++++++5:${customerDimension}" level="info"/>
+	        <field-to-result field="customerDimension"/>
+        </simple-method>
+        
+        
+        <simple-method method-name="checkErpVipImport" short-description="check if vip is imported">
+			<entity-condition list="erpVips" entity-name="ErpVip">
+				<condition-expr field-name="isImported" operator="not-equals" value="Y"/>
+			</entity-condition>
+			<iterate entry="erpVip" list="erpVips">
+				<entity-and list="customerDimension" entity-name="CustomerDimension">
+					<field-map field-name="partyId" from-field="erpVip.vipcode"/>
+				</entity-and>
+				<if-not-empty field="customerDimension">
+					<set field="erpVip.isImported" value="Y"/>
+					<store-value value-field="erpVip"/>
+				<else>
+					<set field="erpVip.isImported" value="N"/>
+					<store-value value-field="erpVip"/>
+				</else>
+				</if-not-empty>
+			</iterate>
+	    </simple-method>
+		
+		        
+</simple-methods>

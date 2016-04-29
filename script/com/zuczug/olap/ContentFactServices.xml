@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<!-- zhou lei -->
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<!-- 单品图数据   zhoulei-->
+    <simple-method method-name="loadProductContentFact" short-description="">
+    
+    	<entity-condition list="ProductContentAndInfoList" entity-name="ProductContentAndInfo" filter-by-date="true">
+            <condition-list combine="and">
+                <condition-expr field-name="productId" operator="equals" from-field="parameters.productId"/>
+                <condition-expr field-name="contentId" operator="equals" from-field="parameters.contentId"/>
+                <condition-expr field-name="productContentTypeId" operator="equals" from-field="parameters.productContentTypeId"/>
+            </condition-list>
+        </entity-condition>
+     	
+        <if-not-empty field="ProductContentAndInfoList">
+        	<!-- 获取第一条数据 -->
+        	<first-from-list list="ProductContentAndInfoList" entry="pca"/>
+        	<!-- 查询ProductContentFact里面是否有这条数据 -->
+            <entity-and entity-name="ProductContentFact" list="currentPCFList" filter-by-date="true">
+                    <field-map field-name="productId"  from-field="pca.productId"/>
+                    <field-map field-name="contentId" from-field="pca.contentId"/>
+                    <field-map field-name="productContentTypeId" from-field="pca.productContentTypeId"/>
+            </entity-and>
+            <entity-one value-field="productFeatureAndAppl" entity-name="ProductFeatureAndAppl">
+            	<field-map field-name="productId" from-field="pca.productId"/>
+            	<field-map field-name="productFeatureTypeId" value="LIST_IMAGE_TYPE"/>
+            </entity-one>
+            <!-- 判断是否有数据 -->
+            <if-empty field="currentPCFList">
+            	<make-value value-field="pcf" entity-name="ProductContentFact"/>
+        		<set from-field="pca.productId" field="pcf.productId"/>
+ 	    	   	<set from-field="pca.contentId" field="pcf.contentId"/>
+    	    	<set from-field="pca.productContentTypeId" field="pcf.productContentTypeId"/>
+       			<set from-field="pca.fromDate" field="pcf.fromDate"/>
+       			<set from-field="pca.thruDate" field="pcf.thruDate"/>
+       			<set from-field="pca.purchaseFromDate" field="pcf.purchaseFromDate"/>
+       			<set from-field="pca.purchaseThruDate" field="pcf.purchaseThruDate"/>
+       			<set from-field="pca.useCountLimit" field="pcf.useCountLimit"/>
+       			<set from-field="pca.useTime" field="pcf.useTime"/>
+       			<set from-field="pca.useRoleTypeId" field="pcf.useRoleTypeId"/>
+        		<set from-field="pca.sequenceNum" field="pcf.sequenceNum"/>
+       			<set from-field="pca.contentTypeId" field="pcf.contentTypeId"/>
+       			<set from-field="pca.ownerContentId" field="pcf.ownerContentId"/>
+       			<set from-field="pca.decoratorContentId" field="pcf.decoratorContentId"/>
+       			<set from-field="pca.instanceOfContentId" field="pcf.instanceOfContentId"/>
+       			<set from-field="pca.dataResourceId" field="pcf.dataResourceId"/>
+       			<set from-field="pca.templateDataResourceId" field="pcf.templateDataResourceId"/>
+       			<set from-field="pca.dataSourceId" field="pcf.dataSourceId"/>
+       			<set from-field="pca.privilegeEnumId" field="pcf.privilegeEnumId"/>
+        		<set from-field="pca.serviceName" field="pcf.serviceName"/>
+        		<set from-field="pca.contentName" field="pcf.contentName"/>
+       			<set from-field="pca.description" field="pcf.description"/>
+       			<set from-field="pca.childLeafCount" field="pcf.childLeafCount"/>
+       			<set from-field="pca.childBranchCount" field="pcf.childBranchCount"/>
+       			<set from-field="pca.drDataResourceTypeId" field="pcf.dataResourceTypeId"/>
+       			<set from-field="pca.dataTemplateTypeId" field="pcf.dataTemplateTypeId"/>
+       			<set from-field="pca.dataCategoryId" field="pcf.dataCategoryId"/>
+        		<set from-field="pca.dataResourceName" field="pcf.dataResourceName"/>
+        		<set from-field="pca.drObjectInfo" field="pcf.objectInfo"/><!--  -->
+       			<set from-field="pca.statusId" field="pcf.statusId"/>
+       			<set from-field="pca.characterSetId" field="pcf.characterSetId"/>
+       			<set from-field="pca.localeString" field="pcf.localeString"/>
+       			<set from-field="pca.drMimeTypeId" field="pcf.mimeTypeId"/>
+       			<set from-field="pca.createdDate" field="pcf.createdDate"/>
+       			<set from-field="pca.createdByUserLogin" field="pcf.createdByUserLogin"/>
+       			<set from-field="pca.lastModifiedDate" field="pcf.lastModifiedDate"/>
+       			<set from-field="pca.lastModifiedByUserLogin" field="pcf.lastModifiedByUserLogin"/>
+       			<if-not-empty field="productFeatureAndAppl">
+       				<set from-field="productFeatureAndAppl.productFeatureId" field="pcf.listImageType"/>
+       			</if-not-empty>
+    			<create-value value-field="pcf"/>
+            <else>
+    	    	<first-from-list list="currentPCFList" entry="currentPCF"/>
+       			<set field="currentPCF.fromDate" from-field="pca.fromDate"/>
+       			<set field="currentPCF.thruDate" from-field="pca.thruDate"/>
+       			<set field="currentPCF.purchaseFromDate" from-field="pca.purchaseFromDate"/>
+       			<set field="currentPCF.purchaseThruDate" from-field="pca.purchaseThruDate"/>
+       			<set field="currentPCF.useCountLimit" from-field="pca.useCountLimit"/>
+       			<set field="currentPCF.useTime" from-field="pca.useTime"/>
+       			<set field="currentPCF.useRoleTypeId" from-field="pca.useRoleTypeId"/>
+        		<set field="currentPCF.sequenceNum" from-field="pca.sequenceNum"/>
+       			<set field="currentPCF.contentTypeId" from-field="pca.contentTypeId"/>
+       			<set field="currentPCF.ownerContentId" from-field="pca.ownerContentId"/>
+       			<set field="currentPCF.decoratorContentId" from-field="pca.decoratorContentId"/>
+       			<set field="currentPCF.instanceOfContentId" from-field="pca.instanceOfContentId"/>
+       			<set field="currentPCF.dataResourceId" from-field="pca.dataResourceId"/>
+       			<set field="currentPCF.templateDataResourceId" from-field="pca.templateDataResourceId"/>
+       			<set field="currentPCF.dataSourceId" from-field="pca.drdataSourceId"/>
+       			<set field="currentPCF.privilegeEnumId" from-field="pca.privilegeEnumId"/>
+        		<set field="currentPCF.serviceName" from-field="pca.serviceName"/>
+        		<set field="currentPCF.contentName" from-field="pca.contentName"/>
+       			<set field="currentPCF.description" from-field="pca.description"/>
+       			<set field="currentPCF.childLeafCount" from-field="pca.childLeafCount"/>
+       			<set field="currentPCF.childBranchCount" from-field="pca.childBranchCount"/>
+       			<set field="currentPCF.dataResourceTypeId" from-field="pca.drdataResourceTypeId"/>
+       			<set field="currentPCF.dataTemplateTypeId" from-field="pca.dataTemplateTypeId"/>
+       			<set field="currentPCF.dataCategoryId" from-field="pca.dataCategoryId"/>
+        		<set field="currentPCF.dataResourceName" from-field="pca.drDataResourceName"/>
+        		<set field="currentPCF.objectInfo" from-field="pca.drObjectInfo"/><!--  -->
+       			<set field="currentPCF.statusId" from-field="pca.statusId"/>
+       			<set field="currentPCF.characterSetId" from-field="pca.characterSetId"/>
+       			<set field="currentPCF.localeString" from-field="pca.localeString"/>
+       			<set field="currentPCF.mimeTypeId" from-field="pca.drMimeTypeId"/>
+       			<set field="currentPCF.createdDate" from-field="pca.createdDate"/>
+       			<set field="currentPCF.createdByUserLogin" from-field="pca.createdByUserLogin"/>
+       			<set field="currentPCF.lastModifiedDate" from-field="pca.lastModifiedDate"/>
+       			<set field="currentPCF.lastModifiedByUserLogin" from-field="pca.lastModifiedByUserLogin"/>
+       			<if-not-empty field="productFeatureAndAppl">
+       				<set from-field="productFeatureAndAppl.productFeatureId" field="currentPCF.listImageType"/>
+       			</if-not-empty>
+    			<store-value value-field="currentPCF"/>
+            </else>
+            </if-empty>
+        </if-not-empty>
+        
+    </simple-method>
+    
+    <simple-method method-name="importProductContentData" short-description="Import ProductContent Data">
+    	<entity-condition list="ProductContentAndInfoList" entity-name="ProductContentAndInfo" filter-by-date="true">
+    		<condition-list combine="or">
+    			<condition-expr field-name="productContentTypeId" operator="equals" from-field="DETAIL_PRODUCT_IMAGE"/>
+    			<condition-expr field-name="productContentTypeId" operator="equals" from-field="SINGLE_PRODUCT_IMAGE"/>
+    		</condition-list>
+    	</entity-condition>
+    	<if-not-empty field="ProductContentAndInfoList">
+    		<iterate entry="pcaList" list="ProductContentAndInfoList">
+    		
+    			<entity-one entity-name="Product" value-field="currentProduct" >
+                    <field-map field-name="productId"  from-field="pcaList.productId"/>
+            	</entity-one>
+
+	            <!-- 这个时候的pcmem.productId是变形商品，查找波段是要根据它的虚拟商品来查找，所以，先查找虚拟商品 -->
+	            <entity-and list="productAssocs" entity-name="ProductAssoc" filter-by-date="true">
+	            	<field-map field-name="productIdTo" from-field="pcaList.productId"/>
+	            	<field-map field-name="productAssocTypeId" value="PRODUCT_VARIANT"/>
+	            </entity-and>
+	            <first-from-list entry="productAssoc" list="productAssocs"/>
+	            <!-- 然后根据虚拟商品查找波段，虚拟商品的productId是productAssoc.productId -->
+
+            	<entity-and list="productcmList" entity-name="ProductCategoryAndMember">
+            		<field-map field-name="productId" from-field="productAssoc.productId"/>
+            		<field-map field-name="productCategoryTypeId" value="WAVE"/>
+            	</entity-and>
+            	<if-not-empty field="productcmList">
+            		<first-from-list list="productcmList" entry="productcm"/>
+            		<log message="${parameters.productCategoryId}+++++++++++++1" level="info"/>
+            		<log message="${productcm.productCategoryId}+++++++++++++1" level="info"/>
+            		<if-compare-field operator="equals" to-field="parameters.productCategoryId"  field="productcm.productCategoryId">
+            			<if-compare operator="equals" value="FINISHED_GOOD" field="currentProduct.productTypeId">
+            				<clear-field field="inMap"/>
+    						<set field="inMap.productId" from-field="pcaList.productId"/>
+    						<set field="inMap.contentId" from-field="pcaList.contentId"/>
+    						<set field="inMap.productContentTypeId" from-field="pcaList.productContentTypeId"/>
+    						<call-service service-name="loadProductContentFact" in-map-name="inMap"></call-service>
+            			</if-compare>
+            		</if-compare-field>
+            	</if-not-empty>
+            </iterate>
+    	</if-not-empty>
+    </simple-method>
+    
+    <!-- 搭配的图片数据 -->
+    <simple-method method-name="loadCategoryContentFact" short-description="">
+    	
+    	<entity-condition list="ProductCategoryContentAndInfoList" entity-name="ProductCategoryContentAndInfo" filter-by-date="true">
+            <condition-list combine="and">
+                <condition-expr field-name="productCategoryId" operator="equals" from-field="parameters.productCategoryId"/>
+                <condition-expr field-name="contentId" operator="equals" from-field="parameters.contentId"/>
+                <condition-expr field-name="prodCatContentTypeId" operator="equals" from-field="parameters.prodCatContentTypeId"/>
+            </condition-list>
+        </entity-condition>
+        
+        <if-not-empty field="ProductCategoryContentAndInfoList">
+            <!-- 获取第一条数据 -->
+            <first-from-list list="ProductCategoryContentAndInfoList" entry="pccaList"/>
+            
+            <!-- 查询CategoryContentFact里面是否有这条数据 -->
+            <entity-and entity-name="CategoryContentFact" list="currentCCFList" filter-by-date="true">
+                 <field-map field-name="productCategoryId"  from-field="pccaList.productCategoryId"/>
+                 <field-map field-name="contentId" from-field="pccaList.contentId"/>
+                 <field-map field-name="prodCatContentTypeId" from-field="pccaList.prodCatContentTypeId"/>
+            </entity-and>
+            <!-- 查询 productCategory表里面的信息-->
+            <entity-one value-field="proCate" entity-name="ProductCategory">
+           		<field-map field-name="productCategoryId" from-field="pccaList.productCategoryId"/>
+           	</entity-one>
+           	<!-- ipadSeq -->
+           	<entity-one value-field="productCategoryAttribute" entity-name="ProductCategoryAttribute">
+           		<field-map field-name="productCategoryId" from-field="pccaList.productCategoryId"/>
+           		<field-map field-name="attrName" value="ipadSeq"/>
+           	</entity-one>
+            
+            <!-- 判断是否有数据 -->
+            <if-not-empty field="proCate">
+            <if-empty field="currentCCFList">
+           		<make-value value-field="pcf" entity-name="CategoryContentFact"/>
+           		<set field="pcf.productCategoryId" from-field="pccaList.productCategoryId"/>
+           		<set field="pcf.contentId" from-field="pccaList.contentId"/>
+           		<set field="pcf.prodCatContentTypeId" from-field="pccaList.prodCatContentTypeId"/>
+           		<set field="pcf.productCategoryTypeId" from-field="proCate.productCategoryTypeId"/><!--  -->
+           		<set field="pcf.primaryParentCategoryId" from-field="proCate.primaryParentCategoryId"/><!--  -->
+           		<set field="pcf.categoryName" from-field="proCate.categoryName"/><!--  -->
+           		<set field="pcf.description" from-field="proCate.description"/><!--  -->
+           		<set field="pcf.longDescription" from-field="proCate.longDescription"/><!--  -->
+           		<set field="pcf.categoryImageUrl" from-field="pccaList.categoryImageUrl"/>
+           		<set field="pcf.linkOneImageUrl" from-field="pccaList.linkOneImageUrl"/>
+           		<set field="pcf.linkTwoImageUrl" from-field="pccaList.linkTwoImageUrl"/>
+           		<set field="pcf.detailScreen" from-field="pccaList.detailScreen"/>
+           		<set field="pcf.showInSelect" from-field="pccaList.showInSelect"/>
+           		<set field="pcf.fromDate" from-field="pccaList.fromDate"/>
+           		<set field="pcf.thruDate" from-field="pccaList.thruDate"/>
+           		<set field="pcf.purchaseFromDate" from-field="pccaList.purchaseFromDate"/>
+           		<set field="pcf.purchaseThruDate" from-field="pccaList.purchaseThruDate"/>
+           		<set field="pcf.useCountLimit" from-field="pccaList.useCountLimit"/>
+           		<set field="pcf.useDaysLimit" from-field="pccaList.useDaysLimit"/>
+           		<if-not-empty field="productCategoryAttribute">
+           			<set field="pcf.ipadSeq" from-field="productCategoryAttribute.attrValue"/>
+           		</if-not-empty>
+           		<set field="pcf.contentTypeId" from-field="pccaList.contentTypeId"/>
+           		<set field="pcf.ownerContentId" from-field="pccaList.ownerContentId"/>
+           		<set field="pcf.decoratorContentId" from-field="pccaList.decoratorContentId"/>
+           		<set field="pcf.instanceOfContentId" from-field="pccaList.instanceOfContentId"/>
+           		<set field="pcf.dataResourceId" from-field="pccaList.dataResourceId"/>
+           		<set field="pcf.templateDataResourceId" from-field="pccaList.templateDataResourceId"/>
+           		<set field="pcf.dataSourceId" from-field="pccaList.dataSourceId"/>
+           		<set field="pcf.privilegeEnumId" from-field="pccaList.privilegeEnumId"/>
+           		<set field="pcf.serviceName" from-field="pccaList.serviceName"/>
+           		<set field="pcf.sequenceNum" from-field="pccaList.sequenceNum"/>
+           		<set field="pcf.contentName" from-field="pccaList.contentName"/>
+           		<set field="pcf.contentDescription" from-field="pccaList.contentDescription"/>
+           		<set field="pcf.childLeafCount" from-field="pccaList.childLeafCount"/>
+           		<set field="pcf.childBranchCount" from-field="pccaList.childBranchCount"/>
+           		<set field="pcf.dataResourceTypeId" from-field="pccaList.dataResourceTypeId"/>
+           		<set field="pcf.dataTemplateTypeId" from-field="pccaList.dataTemplateTypeId"/>
+           		<set field="pcf.dataCategoryId" from-field="pccaList.dataCategoryId"/>
+           		<set field="pcf.dataResourceName" from-field="pccaList.drDataResourceName"/><!--  -->
+           		<set field="pcf.objectInfo" from-field="pccaList.drObjectInfo"/><!--  -->
+           		<set field="pcf.statusId" from-field="pccaList.drStatusId"/><!--  -->
+           		<set field="pcf.characterSetId" from-field="pccaList.characterSetId"/>
+           		<set field="pcf.localeString" from-field="pccaList.localeString"/>
+           		<set field="pcf.mimeTypeId" from-field="pccaList.drMimeTypeId"/><!--  -->
+           		<set field="pcf.createdDate" from-field="pccaList.createdDate"/>
+           		<set field="pcf.createdByUserLogin" from-field="pccaList.createdByUserLogin"/>
+           		<set field="pcf.lastModifiedDate" from-field="pccaList.lastModifiedDate"/>
+           		<set field="pcf.lastModifiedByUserLogin" from-field="pccaList.lastModifiedByUserLogin"/>
+    			<create-value value-field="pcf"/>
+            <else>
+            	<!-- 获取第一条数据 -->
+    	    	<first-from-list list="currentCCFList" entry="currentCCF"/>
+           		<set field="currentCCF.productCategoryTypeId" from-field="proCate.productCategoryTypeId"/><!--  -->
+           		<set field="currentCCF.primaryParentCategoryId" from-field="proCate.primaryParentCategoryId"/><!--  -->
+           		<set field="currentCCF.categoryName" from-field="proCate.categoryName"/><!--  -->
+           		<set field="currentCCF.description" from-field="proCate.description"/><!--  -->
+           		<set field="currentCCF.longDescription" from-field="proCate.longDescription"/><!--  -->
+           		<set field="currentCCF.categoryImageUrl" from-field="pccaList.categoryImageUrl"/>
+           		<set field="currentCCF.linkOneImageUrl" from-field="pccaList.linkOneImageUrl"/>
+           		<set field="currentCCF.linkTwoImageUrl" from-field="pccaList.linkTwoImageUrl"/>
+           		<set field="currentCCF.detailScreen" from-field="pccaList.detailScreen"/>
+           		<set field="currentCCF.showInSelect" from-field="pccaList.showInSelect"/>
+           		<set field="currentCCF.fromDate" from-field="pccaList.fromDate"/>
+           		<set field="currentCCF.thruDate" from-field="pccaList.thruDate"/>
+           		<set field="currentCCF.purchaseFromDate" from-field="pccaList.purchaseFromDate"/>
+           		<set field="currentCCF.purchaseThruDate" from-field="pccaList.purchaseThruDate"/>
+           		<set field="currentCCF.useCountLimit" from-field="pccaList.useCountLimit"/>
+           		<set field="currentCCF.useDaysLimit" from-field="pccaList.useDaysLimit"/>
+           		<if-not-empty field="productCategoryAttribute">
+           			<set field="currentCCF.ipadSeq" from-field="productCategoryAttribute.ipadSeq"/>
+           		</if-not-empty>
+           		<set field="currentCCF.contentTypeId" from-field="pccaList.contentTypeId"/>
+           		<set field="currentCCF.ownerContentId" from-field="pccaList.ownerContentId"/>
+           		<set field="currentCCF.decoratorContentId" from-field="pccaList.decoratorContentId"/>
+           		<set field="currentCCF.instanceOfContentId" from-field="pccaList.instanceOfContentId"/>
+           		<set field="currentCCF.dataResourceId" from-field="pccaList.dataResourceId"/>
+           		<set field="currentCCF.templateDataResourceId" from-field="pccaList.templateDataResourceId"/>
+           		<set field="currentCCF.dataSourceId" from-field="pccaList.dataSourceId"/>
+           		<set field="currentCCF.privilegeEnumId" from-field="pccaList.privilegeEnumId"/>
+           		<set field="currentCCF.serviceName" from-field="pccaList.serviceName"/>
+           		<set field="currentCCF.sequenceNum" from-field="pccaList.sequenceNum"/>
+           		<set field="currentCCF.contentName" from-field="pccaList.contentName"/>
+           		<set field="currentCCF.contentDescription" from-field="pccaList.contentDescription"/>
+           		<set field="currentCCF.childLeafCount" from-field="pccaList.childLeafCount"/>
+           		<set field="currentCCF.childBranchCount" from-field="pccaList.childBranchCount"/>
+           		<set field="currentCCF.dataResourceTypeId" from-field="pccaList.dataResourceTypeId"/>
+           		<set field="currentCCF.dataTemplateTypeId" from-field="pccaList.dataTemplateTypeId"/>
+           		<set field="currentCCF.dataCategoryId" from-field="pccaList.dataCategoryId"/>
+           		<set field="currentCCF.dataResourceName" from-field="pccaList.drDataResourceName"/><!--  -->
+           		<set field="currentCCF.objectInfo" from-field="pccaList.drObjectInfo"/><!--  -->
+           		<set field="currentCCF.statusId" from-field="pccaList.drStatusId"/><!--  -->
+           		<set field="currentCCF.characterSetId" from-field="pccaList.characterSetId"/>
+           		<set field="currentCCF.localeString" from-field="pccaList.localeString"/>
+           		<set field="currentCCF.mimeTypeId" from-field="pccaList.drMimeTypeId"/><!--  -->
+           		<set field="currentCCF.createdDate" from-field="pccaList.createdDate"/>
+           		<set field="currentCCF.createdByUserLogin" from-field="pccaList.createdByUserLogin"/>
+           		<set field="currentCCF.lastModifiedDate" from-field="pccaList.lastModifiedDate"/>
+           		<set field="currentCCF.lastModifiedByUserLogin" from-field="pccaList.lastModifiedByUserLogin"/>
+    			<store-value value-field="currentCCF"/>
+            </else>
+            </if-empty>
+            </if-not-empty>
+        </if-not-empty>
+
+    </simple-method>
+    
+    <simple-method method-name="importCategoryContentData" short-description="Import ProductCategoryContent Data">
+    	<!-- 查询出全部图片数据 -->
+    	<entity-condition list="ProductCategoryContentAndInfoList" entity-name="ProductCategoryContentAndInfo" filter-by-date="true"/>
+    	<if-not-empty field="ProductCategoryContentAndInfoList">
+    	<!-- 迭代全部图片数据 -->
+    	<iterate entry="pccaList" list="ProductCategoryContentAndInfoList">
+            <entity-and list="pcmemList" entity-name="ProductCategoryMember">
+            	<field-map field-name="productCategoryId" from-field="pccaList.productCategoryId"/>
+            </entity-and>
+            <first-from-list list="pcmemList" entry="pcmem"/>
+            <!-- 这个时候的pcmem.productId是变形商品，查找波段是要根据它的虚拟商品来查找，所以，先查找虚拟商品 -->
+            <entity-and list="productAssocs" entity-name="ProductAssoc" filter-by-date="true">
+            	<field-map field-name="productIdTo" from-field="pcmem.productId"/>
+            	<field-map field-name="productAssocTypeId" value="PRODUCT_VARIANT"/>
+            </entity-and>
+            <first-from-list entry="productAssoc" list="productAssocs"/>
+            <!-- 然后根据虚拟商品查找波段，虚拟商品的productId是productAssoc.productId -->
+            <entity-and list="procmemList" entity-name="ProductCategoryAndMember">
+            	<field-map field-name="productId" from-field="productAssoc.productId"/>
+            	<field-map field-name="productCategoryTypeId" value="WAVE"/>
+            </entity-and>
+            <first-from-list list="procmemList" entry="procmem"/>
+            
+            <entity-one entity-name="ProductCategory" value-field="currentProCat" >
+                <field-map field-name="productCategoryId"  from-field="pccaList.productCategoryId"/>
+            </entity-one>
+            
+            <if-not-empty field="procmemList">
+            <if-compare-field operator="equals" to-field="parameters.productCategoryId" field="procmem.productCategoryId">
+           	 	<if-compare operator="equals" value="MIXMATCH_CATEGORY" field="currentProCat.productCategoryTypeId">
+            		<clear-field field="inMap"/>
+    				<set field="inMap.productCategoryId" from-field="pccaList.productCategoryId"/>
+    				<set field="inMap.contentId" from-field="pccaList.contentId"/>
+    				<set field="inMap.prodCatContentTypeId" from-field="pccaList.prodCatContentTypeId"/>
+    				<call-service service-name="loadCategoryContentFact" in-map-name="inMap"></call-service>
+        	    </if-compare>
+        	</if-compare-field>
+        	</if-not-empty>
+    	</iterate>
+    	</if-not-empty>
+    </simple-method>
+    <!-- 搭配图关联表 -->
+    <simple-method method-name="loadCategoryMemberFact" short-description="">
+    	
+    	<entity-condition list="pcamList" entity-name="ProductCategoryAndMember" filter-by-date="true">
+    		<condition-list combine="and">
+    			<condition-expr field-name="productId" operator="equals" from-field="parameters.productId"/>
+    			<condition-expr field-name="productCategoryId" operator="equals" from-field="parameters.productCategoryId"/>
+    		</condition-list>
+    	</entity-condition>
+    	
+    	<if-not-empty field="pcamList">
+    		<first-from-list entry="pcam" list="pcamList"/>
+    		
+    		<entity-and list="categoryMemberFactList" entity-name="CategoryMemberFact" filter-by-date="true">
+    			<field-map field-name="productId" from-field="pcam.productId"/>
+    			<field-map field-name="productCategoryId" from-field="pcam.productCategoryId"/>
+    		</entity-and>
+    		
+    		<if-empty field="categoryMemberFactList">
+    			<make-value value-field="cmf" entity-name="CategoryMemberFact"/>
+    			<set field="cmf.productCategoryId" from-field="pcam.productCategoryId"/>
+    			<set field="cmf.productId" from-field="pcam.productId"/>
+    			<set field="cmf.fromDate" from-field="pcam.fromDate"/>
+    			<set field="cmf.thruDate" from-field="pcam.thruDate"/>
+    			<set field="cmf.comments" from-field="pcam.comments"/>
+    			<set field="cmf.sequenceNum" from-field="pcam.sequenceNum"/>
+    			<set field="cmf.quantity" from-field="pcam.quantity"/>
+    			<set field="cmf.productCategoryTypeId" from-field="pcam.productCategoryTypeId"/>
+    			<set field="cmf.primaryParentCategoryId" from-field="pcam.primaryParentCategoryId"/>
+    			<set field="cmf.categoryName" from-field="pcam.categoryName"/>
+    			<set field="cmf.description" from-field="pcam.description"/>
+    			<set field="cmf.longDescription" from-field="pcam.longDescription"/>
+    			<set field="cmf.categoryImageUrl" from-field="pcam.categoryImageUrl"/>
+    			<set field="cmf.linkOneImageUrl" from-field="pcam.linkOneImageUrl"/>
+    			<set field="cmf.linkTwoImageUrl" from-field="pcam.linkTwoImageUrl"/>
+    			<set field="cmf.detailScreen" from-field="pcam.detailScreen"/>
+    			<set field="cmf.showInSelect" from-field="pcam.showInSelect"/>
+    			<create-value value-field="cmf"/>
+    		<else>
+    			<first-from-list entry="cmfCurrent" list="categoryMemberFactList"/>
+    			<set field="cmfCurrent.productCategoryId" from-field="pcam.productCategoryId"/>
+    			<set field="cmfCurrent.productId" from-field="pcam.productId"/>
+    			<set field="cmfCurrent.fromDate" from-field="pcam.fromDate"/>
+    			<set field="cmfCurrent.thruDate" from-field="pcam.thruDate"/>
+    			<set field="cmfCurrent.comments" from-field="pcam.comments"/>
+    			<set field="cmfCurrent.sequenceNum" from-field="pcam.sequenceNum"/>
+    			<set field="cmfCurrent.quantity" from-field="pcam.quantity"/>
+    			<set field="cmfCurrent.productCategoryTypeId" from-field="pcam.productCategoryTypeId"/>
+    			<set field="cmfCurrent.primaryParentCategoryId" from-field="pcam.primaryParentCategoryId"/>
+    			<set field="cmfCurrent.categoryName" from-field="pcam.categoryName"/>
+    			<set field="cmfCurrent.description" from-field="pcam.description"/>
+    			<set field="cmfCurrent.longDescription" from-field="pcam.longDescription"/>
+    			<set field="cmfCurrent.categoryImageUrl" from-field="pcam.categoryImageUrl"/>
+    			<set field="cmfCurrent.linkOneImageUrl" from-field="pcam.linkOneImageUrl"/>
+    			<set field="cmfCurrent.linkTwoImageUrl" from-field="pcam.linkTwoImageUrl"/>
+    			<set field="cmfCurrent.detailScreen" from-field="pcam.detailScreen"/>
+    			<set field="cmfCurrent.showInSelect" from-field="pcam.showInSelect"/>
+    			<store-value value-field="cmfCurrent"/>
+    		</else>
+    		</if-empty>
+    	</if-not-empty>
+    	
+    </simple-method>
+    
+    <simple-method method-name="importCategoryMemberData" short-description="">
+    	<entity-and list="ProductCategoryAndMemberList" entity-name="ProductCategoryAndMember">
+    		<field-map field-name="productCategoryTypeId" value="MIXMATCH_CATEGORY"/>
+    	</entity-and>
+    	<if-not-empty field="ProductCategoryAndMemberList">
+    		<iterate entry="pcam" list="ProductCategoryAndMemberList">
+    		
+	            <!-- 这个时候的pcam.productId是变形商品，查找波段是要根据它的虚拟商品来查找，所以，先查找虚拟商品 -->
+	            <entity-and list="productAssocs" entity-name="ProductAssoc" filter-by-date="true">
+	            	<field-map field-name="productIdTo" from-field="pcam.productId"/>
+	            	<field-map field-name="productAssocTypeId" value="PRODUCT_VARIANT"/>
+	            </entity-and>
+	            <first-from-list entry="productAssoc" list="productAssocs"/>
+	            <!-- 然后根据虚拟商品查找波段，虚拟商品的productId是productAssoc.productId -->
+            	<entity-and list="productcmList" entity-name="ProductCategoryAndMember">
+            		<field-map field-name="productId" from-field="productAssoc.productId"/>
+            		<field-map field-name="productCategoryTypeId" value="WAVE"/>
+            	</entity-and>
+            	<if-not-empty field="productcmList">
+            	<iterate entry="productcm" list="productcmList">
+            		<if-compare-field operator="equals" to-field="parameters.productCategoryId" field="productcm.productCategoryId">
+    					<clear-field field="inMap"/>
+    					<set field="inMap.productId" from-field="pcam.productId"/>
+    					<set field="inMap.productCategoryId" from-field="pcam.productCategoryId"/>
+    					<call-service service-name="loadCategoryMemberFact" in-map-name="inMap"></call-service>
+    				</if-compare-field>
+    			</iterate>
+    			</if-not-empty>
+    		</iterate>
+    	</if-not-empty>
+    </simple-method>
+    
+    <simple-method method-name="loadAllImageData">
+    
+    	<clear-field field="inMap"/>
+    	<set field="inMap.productCategoryId" from-field="parameters.productCategoryId"/>
+    	<call-service service-name="importProductContentData" in-map-name="inMap"></call-service>
+    	<call-service service-name="importCategoryContentData" in-map-name="inMap"></call-service>
+    	<call-service service-name="importCategoryMemberData" in-map-name="inMap"></call-service>
+    	<check-errors/>
+    	
+    </simple-method>
+	<!-- 输入款号导图片到olap -->
+	<simple-method method-name="loadOneProductImageData">
+		<entity-and list="productAssocViewWithVariants" entity-name="ProductAssocViewWithVariant">
+			<field-map field-name="productId" from-field="parameters.productId"/>
+			<field-map field-name="productTypeId" value="FINISHED_GOOD"/>
+			<field-map field-name="isVirtual" value="N"/>
+			<field-map field-name="isVariant" value="Y"/>
+		</entity-and>
+		<log message="${parameters.productId}=============1" level="info"/>
+		<if-not-empty field="productAssocViewWithVariants">
+		
+			<iterate entry="productAssoc" list="productAssocViewWithVariants">
+				<log message="${productAssoc.productIdTo}=============2" level="info"/>
+				<!-- 单品图 -->
+				<entity-and list="ProductContentAndInfoList" entity-name="ProductContentAndInfo">
+					<field-map field-name="productId" from-field="productAssoc.productIdTo"/>
+				</entity-and>
+				<if-not-empty field="ProductContentAndInfoList">
+    				<iterate entry="pcaList" list="ProductContentAndInfoList">
+    					<clear-field field="inMap"/>
+   						<set field="inMap.productId" from-field="pcaList.productId"/>
+   						<set field="inMap.contentId" from-field="pcaList.contentId"/>
+   						<set field="inMap.productContentTypeId" from-field="pcaList.productContentTypeId"/>
+   						<call-service service-name="loadProductContentFact" in-map-name="inMap"></call-service>
+    				</iterate>
+				</if-not-empty>
+				<!-- 搭配图关联表 -->
+				<entity-and list="ProductCategoryAndMemberList" entity-name="ProductCategoryAndMember">
+					<field-map field-name="productId" from-field="productAssoc.productIdTo"/>
+		    		<field-map field-name="productCategoryTypeId" value="MIXMATCH_CATEGORY"/>
+		    	</entity-and>
+		    	<if-not-empty field="ProductCategoryAndMemberList">
+		    		<iterate entry="pcam" list="ProductCategoryAndMemberList">
+		    			<clear-field field="inMap"/>
+    					<set field="inMap.productId" from-field="pcam.productId"/>
+    					<set field="inMap.productCategoryId" from-field="pcam.productCategoryId"/>
+    					<call-service service-name="loadCategoryMemberFact" in-map-name="inMap"></call-service>
+    					
+    					
+    					<!-- 搭配图 -->
+			    		<entity-and list="productCategoryContentAndInfoList" entity-name="ProductCategoryContentAndInfo">
+			    			<field-map field-name="productCategoryId" from-field="pcam.productCategoryId"/>
+			    		</entity-and>
+			    		<if-not-empty field="productCategoryContentAndInfoList">
+			    			<iterate entry="pccaList" list="productCategoryContentAndInfoList">
+			    				<clear-field field="inMap"/>
+			    				<set field="inMap.productCategoryId" from-field="pccaList.productCategoryId"/>
+			    				<set field="inMap.contentId" from-field="pccaList.contentId"/>
+			    				<set field="inMap.prodCatContentTypeId" from-field="pccaList.prodCatContentTypeId"/>
+			    				<call-service service-name="loadCategoryContentFact" in-map-name="inMap"></call-service>
+			    			</iterate>
+			    		</if-not-empty>
+    					
+    					
+		    		</iterate>
+		    	</if-not-empty>
+			</iterate>
+		</if-not-empty>
+		
+	</simple-method>
+</simple-methods>

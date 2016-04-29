@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<!-- zhoulei -->
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+
+    <simple-method method-name="prepareMaterialDimensionData" short-description="">
+    	<entity-one value-field="product" entity-name="Product">
+    		<field-map field-name="productId" from-field="parameters.productId"/>
+    	</entity-one>
+    	
+		<make-value value-field="materialDimension" entity-name="ZzMaterialDimension"/>
+		<set field="materialDimension.productId" from-field="product.productId"/>
+		<set field="materialDimension.productType" from-field="product.productTypeId"/>
+		<set field="materialDimension.brandName" from-field="product.brandName"/>
+		<set field="materialDimension.internalName" from-field="product.internalName"/>
+		<if-not-empty field="product.productName">
+			<set field="materialDimension.productName" from-field="product.productName"/>
+		<else>
+			<set field="materialDimension.productName" value="_NA_"/>
+		</else>
+		</if-not-empty>
+		<if-not-empty field="product.quantityUomId">
+			<set field="materialDimension.quantityUomId" from-field="product.quantityUomId"/>
+		<else>
+			<set field="materialDimension.quantityUomId" value="_NA_"/>
+		</else>
+		</if-not-empty>
+		<if-not-empty field="product.releaseDate">
+			<set field="materialDimension.releaseDate" from-field="product.releaseDate"/>
+		</if-not-empty>
+		
+		<!-- virtualProductId -->
+		<entity-and list="porductAssocs" entity-name="ProductAssoc">
+			<field-map field-name="productIdTo" from-field="product.productId"/>
+			<field-map field-name="productAssocTypeId" value="PRODUCT_VARIANT"/>
+		</entity-and>
+		<if-not-empty field="porductAssocs">
+			<first-from-list entry="porductAssoc" list="porductAssocs"/>
+			<set field="materialDimension.virtualProductId" from-field="porductAssoc.productId"/>
+		</if-not-empty>
+		
+		<!-- color -->
+		<entity-and list="productFeatureAndAppls" entity-name="ProductFeatureAndAppl">
+			<field-map field-name="productId" from-field="product.productId"/>
+			<field-map field-name="productFeatureTypeId" value="COLOR"/>
+		</entity-and>
+		<if-not-empty field="productFeatureAndAppls">
+			<first-from-list entry="productFeatureAndAppl" list="productFeatureAndAppls"/>
+			<set field="materialDimension.colorCode" from-field="productFeatureAndAppl.productFeatureId"/>
+			<set field="materialDimension.color" from-field="productFeatureAndAppl.description"/>
+		</if-not-empty>
+		
+		<!-- supplier -->
+		<entity-and list="onlyProductSupplierViews" entity-name="OnlyProductSupplierView">
+			<field-map field-name="productId" from-field="product.productId"/>
+		</entity-and>
+		<if-not-empty field="onlyProductSupplierViews">
+			<first-from-list entry="onlyProductSupplierView" list="onlyProductSupplierViews"/>
+			<set field="materialDimension.mainSupplierProductId" from-field="onlyProductSupplierView.supplierProductId"/>
+			<if-not-empty field="onlyProductSupplierView.supplierProductName">
+				<set field="materialDimension.mainSupplierProductName" from-field="onlyProductSupplierView.supplierProductName"/>
+			<else>
+				<set field="materialDimension.mainSupplierProductName" value="_NA_"/>
+			</else>
+			</if-not-empty>
+			<set field="materialDimension.mainSupplierPartyId" from-field="onlyProductSupplierView.partyId"/>
+			<set field="materialDimension.mainSupplierPartyName" from-field="onlyProductSupplierView.groupName"/>
+			<set field="materialDimension.mainSupplierLastPrice" from-field="onlyProductSupplierView.lastPrice"/>
+			<set field="materialDimension.mainSupplierCurrency" from-field="onlyProductSupplierView.currencyUomId"/>
+		</if-not-empty>
+		
+		<field-to-result field="materialDimension"/>
+    	
+    </simple-method>
+
+    <simple-method method-name="loadMaterialInMaterialDimension" short-description="">
+        <set-service-fields service-name="prepareMaterialDimensionData" map="parameters" to-map="inMap"/>
+        <call-service service-name="prepareMaterialDimensionData" in-map-name="inMap">
+            <result-to-field result-name="materialDimension"/>
+        </call-service>
+        <clear-field field="inMap"/>
+        <set-service-fields service-name="storeGenericDimension" map="parameters" to-map="inMap"/>
+        <set field="inMap.naturalKeyFields[]" value="productId"/>
+        <set field="inMap.dimensionValue" from-field="materialDimension"/>
+        <call-service service-name="storeGenericDimension" in-map-name="inMap"/>
+    </simple-method>
+    
+    <simple-method method-name="loadAllMaterialsInMaterialDimension" short-description="">
+    	<entity-and list="products" entity-name="Product">
+    		<field-map field-name="productTypeId" value="RAW_MATERIAL"/>
+    		<field-map field-name="isVariant" value="Y"/>
+    		<field-map field-name="isVirtual" value="N"/>
+    	</entity-and>
+    	<iterate entry="product" list="products">
+    		<set-service-fields service-name="loadMaterialInMaterialDimension" to-map="inMap" map="parameters"/>
+    		<set field="inMap.productId" from-field="product.productId"/>
+    		<call-service service-name="loadMaterialInMaterialDimension" in-map-name="inMap"/>
+    		<clear-field field="inMap"/>
+    	</iterate>
+    </simple-method>
+    
+</simple-methods>

@@ -4,9 +4,60 @@
     <!-- ========================================================= -->
     <!-- ======================== Defaults ======================= -->
     <!-- ========================================================= -->
-    <title>Entity of HuangPu Component</title>
+    <title>Entity of ZuczugEtl Component</title>
     <description>None</description>
     <copyright></copyright>
     <version></version>
+	<extend-entity entity-name="ProductFeature">
+        <field name="description1" type="description"></field>
+    </extend-entity>
+    <!-- 服务于页面在显示商品类型时是否需要显示 -->
+    <!-- update Product_Feature_Type set product_Feature_Type_State='OLD_TYPE' where CREATED_STAMP < '2015-12-08 16:18:11'  and CREATED_STAMP > '2015-07-13 18:40:28'; -->
+	<extend-entity entity-name="ProductFeatureType">
+        <field name="productFeatureTypeState" type="description"></field>
+    </extend-entity>
+    <!-- <view-entity entity-name="ProdSalesDimensionAndTempRequestItemFact" package-name="org.ofbiz.bi.dw.dimension">
+        <member-entity entity-alias="PSD" entity-name="ZzProductDimension"/>
+        <member-entity entity-alias="TRIF" entity-name="CustRequestItemFact"/>
+        <alias name="dimensionId" entity-alias="PSD" field="dimensionId"/>
+        <alias name="quantity" entity-alias="TRIF" function="count"/>
+        <alias name="listAmount" entity-alias="TRIF" function="count"/>
+        <view-link entity-alias="PSD" rel-entity-alias="TRIF">
+            <key-map field-name="dimensionId" rel-field-name="productDimId"/>
+        </view-link>
+    </view-entity> -->
 
+    <view-entity entity-name="ProductFeatureAndIactn" package-name="org.ofbiz.product.feature">
+        <member-entity entity-alias="PFI" entity-name="ProductFeatureIactn"/>
+        <member-entity entity-alias="PF" entity-name="ProductFeature"/>
+		<alias-all entity-alias="PFI">
+		</alias-all>
+		<alias-all entity-alias="PF">
+		  <exclude field="productFeatureId"/>
+		</alias-all>
+        <view-link entity-alias="PFI" rel-entity-alias="PF">
+            <key-map field-name="productFeatureIdTo" rel-field-name="productFeatureId"/>
+        </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ProductContentAndElectronicText" package-name="org.ofbiz.product.product">
+    	<member-entity entity-alias="PC" entity-name="ProductContent"/>
+    	<member-entity entity-alias="CON" entity-name="Content"/>
+    	<member-entity entity-alias="ET" entity-name="ElectronicText"/>
+    	<alias-all entity-alias="PC">
+    		<exclude field="contentId"/>
+    	</alias-all>
+    	<alias-all entity-alias="CON">
+    		<exclude field="dataResourceId"/>
+    	</alias-all>
+    	<alias-all entity-alias="ET"/>
+    	
+        <view-link entity-alias="PC" rel-entity-alias="CON">
+            <key-map field-name="contentId" rel-field-name="contentId"/>
+        </view-link>
+        <view-link entity-alias="CON" rel-entity-alias="ET">
+            <key-map field-name="dataResourceId" rel-field-name="dataResourceId"/>
+        </view-link>
+    </view-entity>
+    
 </entitymodel>

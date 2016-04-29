@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<!-- zhoulei -->
+    <simple-method method-name="checkOrderData" short-description="Check Order Data By Order Id">
+    	<entity-one value-field="orderHeader" entity-name="OrderHeader">
+    		<field-map field-name="orderId"  from-field="parameters.orderId"/>
+    	</entity-one>
+    	<entity-and list="ordPayPreList" entity-name="OrderPaymentPreference" >
+    		<field-map field-name="orderId" from-field="parameters.orderId"/>
+    	</entity-and>
+    	<set field="amount" value="0" type="BigDecimal"/>
+    	<set field="itemAmount" value="0" type="BigDecimal"/>
+    	<set field="checkResult" value=""/>
+		<entity-condition list="orderItems" entity-name="OrderItem">
+			<condition-list combine="and">
+				<condition-expr field-name="orderId" operator="equals" from-field="parameters.orderId"/>
+				<condition-expr field-name="statusId" operator="not-equals" value="ITEM_CANCELLED"/>
+			</condition-list>
+		</entity-condition>
+		<iterate entry="orderItem" list="orderItems">
+			<set field="itemAmount" value="${itemAmount + ((orderItem.quantity-orderItem.cancelQuantity)*orderItem.unitPrice)}" type="BigDecimal"/>
+		</iterate>
+    	
+    	<if-not-empty field="ordPayPreList">
+    		<iterate entry="opp" list="ordPayPreList">
+    			<if-compare operator="not-equals" value="PAYMENT_CANCELLED" field="opp.statusId">
+    				<set field="amount" value="${amount + opp.maxAmount}" type="BigDecimal"/>
+    				
+    				<entity-and list="payments" entity-name="Payment">
+    					<field-map field-name="paymentPreferenceId" from-field="opp.orderPaymentPreferenceId"/>
+    				</entity-and>
+    				<if-empty field="payments">
+    					<set field="checkResult" value="订单[${parameters.orderId}]的有效OrderPaymentPreference信息没有对应的payment"/>
+    				</if-empty>
+    			</if-compare>
+    		</iterate>
+    	</if-not-empty>
+    	<!-- 如果已批准，3个金额都必须相等 -->
+    	<!-- <if-compare operator="equals" value="ORDER_APPROVED" field="orderHeader.statusId"> -->
+	    	<if>
+	    		<condition>
+	    			<and>
+		    			<or>
+		    				<if-compare operator="not-equals" value="${amount}" field="orderHeader.grandTotal"></if-compare>
+		    				<if-compare operator="not-equals" value="${amount}" field="itemAmount"></if-compare>
+		    				<if-compare operator="not-equals" value="${itemAmount}" field="orderHeader.grandTotal"></if-compare>
+		    			</or>
+		    			<if-compare operator="not-equals" value="ORDER_CREATED" field="orderHeader.statusId"></if-compare>
+	    			</and>
+	    		</condition>
+	    		<then>
+	    			<set field="checkResult" value="${checkResult}###订单[${parameters.orderId}]订单头的金额${orderHeader.grandTotal}，有效订单项总额${itemAmount}，与支付信息${amount}不相同"/>
+	    		</then>
+	    	</if>
+    	<!-- </if-compare> -->
+    	
+    	<!-- 如果已创建，2个金额都必须相等 -->
+    	<if-compare operator="equals" value="ORDER_CREATED" field="orderHeader.statusId">
+    		<log message="订单[${parameters.orderId}]订单头的金额${orderHeader.grandTotal}，有效订单项总额${itemAmount}不相同" level="info"/>
+			<if-compare operator="not-equals" value="${itemAmount}" field="orderHeader.grandTotal">
+	   			<set field="checkResult" value="订单[${parameters.orderId}]订单头的金额${orderHeader.grandTotal}，有效订单项总额${itemAmount}不相同"/>
+			</if-compare>
+    	</if-compare>
+    	
+    	<entity-and list="allItemBilling" entity-name="OrderItemBilling">
+    		<field-map field-name="orderId" from-field="parameters.orderId"/>
+    	</entity-and>
+    	<if-not-empty field="allItemBilling"><!-- 如果订单有发票了，就检查发票和货运 -->
+    		<!-- 检查支付和发票，正常情况下，每一个shipmentReceipt都会对应invoice -->
+	    	<entity-and list="shipmentReceipts" entity-name="ShipmentReceipt">
+	    		<field-map field-name="orderId" from-field="parameters.orderId"/>
+	    	</entity-and>
+	    	<iterate entry="sr" list="shipmentReceipts">
+	    		<entity-and list="orderItemBillings" entity-name="OrderItemBilling">
+	    			<field-map field-name="shipmentReceiptId" from-field="sr.receiptId"/>
+	    		</entity-and>
+	    		<if-empty field="orderItemBillings">
+	    			<set field="checkResult" value="${checkResult}####订单[${parameters.orderId}] 的收货信息shipmentReceipt[${sr.receiptId}]在发票中找不到"/>
+	    			<break></break>
+	    		</if-empty>
+	    	</iterate>
+    	</if-not-empty>
+    	<field-to-result field="checkResult"/>
+    </simple-method>
+    
+    <simple-method method-name="findAllOrderId" short-description="find all Order Id">
+    	<entity-condition list="orderHeader" entity-name="OrderHeader">
+    		<!-- <condition-list combine="and"> -->
+    			<condition-expr field-name="statusId" operator="not-equals" value="ORDER_CANCELLED"/>
+    		<!-- </condition-list> -->
+    	</entity-condition>
+    	<set field="wrongOrderIdStr" value=""/>
+    	<set field="wrongOrderIdList" value="${groovy:return []}" type="Object"/>
+    	<if-not-empty field="orderHeader">
+    		<iterate entry="ohList" list="orderHeader">
+    			<entity-one value-field="oa" entity-name="OrderAttribute">
+    				<field-map field-name="orderId" from-field="ohList.orderId"/>
+    				<field-map field-name="attrName" value="FABRIC_PURCHASE_TYPE"/>
+    			</entity-one>
+    			<clear-field field="inMap"/>
+    			<clear-field field="checkResult"/>
+    			<set field="inMap.orderId" from-field="ohList.orderId"/>
+    			<call-service service-name="checkOrderData" in-map-name="inMap">
+    				<result-to-field result-name="checkResult" field="checkResult"/>
+    			</call-service>
+    			<if-not-empty field="checkResult">
+    				<if-compare operator="equals" value="PROOFING" field="oa.attrValue">
+		    			<set field="wrongOrderIdStr" value="${wrongOrderIdStr}&lt;br/&gt;[打样单/${ohList.statusId}]${checkResult}"/>
+    				<else>
+		    			<set field="wrongOrderIdStr" value="${wrongOrderIdStr}&lt;br/&gt;[采购单/${ohList.statusId}]${checkResult}"/>
+    					<field-to-list list="wrongOrderIdList" field="ohList.orderId"/>
+    				</else>
+    				</if-compare>
+    			</if-not-empty>
+    		</iterate>
+    	</if-not-empty>
+    	<field-to-result field="wrongOrderIdStr"/>
+    	<field-to-result field="wrongOrderIdList"/>
+    </simple-method>
+	
+	<simple-method method-name="loadProductTimeCard">
+		<entity-condition list="productList" entity-name="Product">
+			<condition-list combine="and">
+				<condition-expr field-name="productId" operator="like" value="%${parameters.productKeyWord}%"/>
+				<condition-expr field-name="isVirtual" operator="equals" value="N"/>
+				<condition-list combine="or">
+					<condition-expr field-name="isVariant" operator="equals" value="Y"/>
+					<condition-expr field-name="isVariant" operator="equals" value="N"/>
+				</condition-list>
+			</condition-list>
+		</entity-condition>
+		<if-not-empty field="productList">
+			<iterate entry="product" list="productList">
+				<entity-and list="productPrices" entity-name="ProductPrice">
+					<field-map field-name="productId" from-field="product.productId"/>
+					<field-map field-name="productPriceTypeId" value="LIST_PRICE"/>
+					<field-map field-name="productPricePurposeId" value="PURCHASE"/>
+				</entity-and>
+				
+				<if-not-empty field="productPrices">
+					<first-from-list entry="productPrice" list="productPrices"/>
+					<set field="timeCardNumber" value=""/>
+					<set field="multiple" value="15"/>
+					
+					<calculate field="timeCardNumber">
+	        			<calcop operator="multiply" field="productPrice.price">
+	        				<calcop operator="get" field="multiple"></calcop>
+	        			</calcop>
+	        		</calculate>
+	        		<log message="${product.productId}+++++++++++++++++++1" level="info"/>
+		    		<make-value value-field="poductTimeCard" entity-name="ProductTimeCard"/>
+		    		<set field="poductTimeCard.productId" from-field="product.productId"/>
+		    		<set field="poductTimeCard.productStoreGroupId" value="RETAIL"/><!-- 
+		    		<set field="poductTimeCard.fromDate" value="2015-12-01 12:00:00"/>-->
+		    		<now-timestamp field="poductTimeCard.fromDate"/>
+		    		<set field="poductTimeCard.timeCardNumber" from-field="timeCardNumber"/>
+		    		<set field="poductTimeCard.discountNumber" from-field="100"/>
+	        		<log message="${poductTimeCard.productId}+++++++++++++++++++2" level="info"/>
+		    		<create-value value-field="poductTimeCard"/>
+				</if-not-empty>
+			</iterate>
+		</if-not-empty>
+    	<field-to-result field="productIdList"/>
+	</simple-method>
+	
+	<simple-method method-name="checkEstimateCalcMethod">
+		<entity-and list="productAssocs" entity-name="ProductAssoc">
+			<field-map field-name="productIdTo" from-field="parameters.productId"/>
+			<field-map field-name="estimateCalcMethod" value="CM_TO_METER_FORMULA"/>
+		</entity-and>
+		<if-not-empty field="productAssocs">
+			<iterate entry="productAssoc" list="productAssocs">
+        	<set field="inMap.userLogin" from-field="parameters.userLogin"/>
+            <set field="productAssoc.estimateCalcMethod" set-if-null="true" set-if-empty="true" />
+            <log message="${productAssoc.estimateCalcMethod}=======1" level="info"/>
+            <set-service-fields service-name="updateProductAssoc" map="productAssoc" to-map="inMap"/>
+			<call-service service-name="updateProductAssoc" in-map-name="inMap"></call-service>
+			</iterate>
+		</if-not-empty>
+	</simple-method>
+</simple-methods>
