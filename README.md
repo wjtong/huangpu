@@ -1,2 +1,0 @@
-# huangpu
-Bluemountain ETL component.
