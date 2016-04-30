@@ -1,5 +1,13 @@
 package com.zuczug.zuczugetl;
 
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
@@ -12,21 +20,11 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
-import org.ofbiz.widget.menu.ModelMenuCondition.IfEmpty;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javolution.util.FastMap;
-import jxl.*;
+import jxl.Cell;
+import jxl.Sheet;
+import jxl.Workbook;
 import jxl.read.biff.BiffException;
 
 /**
@@ -460,17 +458,15 @@ public class ZuczugEtlUtil {
     public static Map<String, Object> ImportInventoryData(DispatchContext dctx,Map<String, ? extends Object> context) {
     	LocalDispatcher dispatcher = dctx.getDispatcher();
     	Delegator delegator = dctx.getDelegator();
-    	Map<String, Object> result = ServiceUtil.returnSuccess();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
     	Timestamp fromDate = UtilDateTime.nowTimestamp();//时间
     	File outFilePath=new File("hot-deploy/zuczugetl/data/ImportInventoryData.xls");
-    	if (outFilePath.exists()) {
-    		Debug.log("++++++++++++存在");
-		}
+    	String returnMessage=""; 
+    	int sssh = 0;
 			try {
 				Workbook book = Workbook.getWorkbook(new File("hot-deploy/zuczugetl/data/ImportInventoryData.xls"));
 				Sheet sheet = (Sheet) book.getSheet(0);
-				for(int i=0;i<sheet.getRows()-1;i++){
+				for(int i=0;i<sheet.getRows();i++){
 					Cell cell1 = sheet.getCell( 0 , i );//前一个参数代表列，后一个参数代表行
 					String virtualProduct = cell1.getContents();//商品Id
 
@@ -495,13 +491,16 @@ public class ZuczugEtlUtil {
 					inventoryProduct.put("facilityId", "ZUCZUG_CLOTHESFACILITY");
 					inventoryProduct.put("userLogin", userLogin);
 	                //判断仓库里面是否有这条库存明细
-//	                List<GenericValue> inventory = delegator.findByAnd("InventoryItem", 
-//	                		UtilMisc.toMap("productId",productId,"facilityId","ZUCZUG_CLOTHESFACILITY"));
+	                List<GenericValue> inventory = delegator.findByAnd("InventoryItem", 
+	                		UtilMisc.toMap("productId",productId,"facilityId","ZUCZUG_CLOTHESFACILITY"));
 	                
-//	                if (UtilValidate.isEmpty(inventory)) {
+	                if (UtilValidate.isNotEmpty(inventory)) {
+	                	sssh+=1;
+	                	returnMessage+=productId+":"+sssh+",";
+					}
+
 	                dispatcher.runSync("receiveInventoryProduct", inventoryProduct);
-//	                	Debug.log("++++++++++++2"+productId);
-//					}
+	                
 				}
 			} catch (IOException e) {
 				Debug.log("++++++++++++11:"+e.getMessage());
@@ -511,13 +510,17 @@ public class ZuczugEtlUtil {
 				e.printStackTrace();
 			} catch (GenericServiceException e) {
 				e.printStackTrace();
+			} catch (GenericEntityException e) {
+				e.printStackTrace();
 			} 
 			
 			
 			
-
-    	return result;
+		if(UtilValidate.isNotEmpty(returnMessage)){
+        	return ServiceUtil.returnSuccess("已有的库存"+returnMessage);
+        }else {
+        	return ServiceUtil.returnSuccess();
+		}
     	
     }
-
 }
