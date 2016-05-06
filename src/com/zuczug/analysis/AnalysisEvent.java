@@ -40,7 +40,7 @@ public class AnalysisEvent {
         
         Map serviceResult;
 		try {
-			serviceResult = dispatcher.runSync("analysis.forecastQuantityByInventory", UtilMisc.toMap("productId", productId, "isManufactCount", false, "userLogin", userLogin));
+			serviceResult = dispatcher.runSync("analysis.forecastQuantityByInventory", UtilMisc.toMap("productId", productId, "isManufactCount", "F", "userLogin", userLogin));
 	        List<Map<String, Object>> storeProductQuantityList = (List<Map<String, Object>>) serviceResult.get("storeProductQuantityList");
 	        if (UtilValidate.isEmpty(storeProductQuantityList)) {
 	        	Debug.logInfo("====================== storeProductQuantityList is empty", module);
