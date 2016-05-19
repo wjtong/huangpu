@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
-    <description>HuangPu Services</description>
+    <description>huangpu Services</description>
     <vendor></vendor>
     <version>1.0</version>
 
@@ -61,16 +61,31 @@
     </service>
     
     <service name="analysis.forecastProductQuantity" auth="true" engine="java" transaction-timeout="720000"
-    	location="com.zuczug.analysis.ProductStoreAnalysis" invoke="forecastProductQuantity">
+    	location="com.zuczug.analysis.ProductQuantityAnalysis" invoke="forecastProductQuantity">
     	<description>预测一个新商品可能的销售数量  by liujia</description>
     	<attribute name="productId" mode="IN" type="String" optional="false"></attribute>
-    	<attribute name="prudouctForecastSaleQuantity" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="prudouctForecastSaleQuantity" mode="OUT" type="BigDecimal" optional="true"></attribute>
+    	<attribute name="method" mode="OUT" type="String" optional="true"></attribute>
     </service>
     
-     <service name="analysis.forecastProductQuantityByCat" auth="true" engine="java" use-transaction="false"
-    	location="com.zuczug.analysis.ProductStoreAnalysis" invoke="forecastProductQuantityByCat">
+    <service name="analysis.forecastProductQuantityByCat" auth="true" engine="java" use-transaction="false"
+    	location="com.zuczug.analysis.ProductQuantityAnalysis" invoke="forecastProductQuantityByCat">
     	<description>预测系列中商品销售数量  by liujia</description>
     	<attribute name="productCategoryId" mode="IN" type="String" optional="true"></attribute>
     	<attribute name="prudouctForecastSaleQuantityList" mode="OUT" type="List" optional="true"></attribute>
+    </service>
+    
+    <service name="CreateRequirementByForecast" auth="true" engine="java" use-transaction="false"
+    	location="com.zuczug.analysis.ProductQuantityAnalysis" invoke="createRequirementByForecast">
+    	<description>根据商品预测销售量生成Requirement对象  by liujia</description>
+    	<attribute name="productId" mode="IN" type="String" optional="false" ></attribute>
+    	<attribute name="isCancel" mode="IN" type="String" optional="true"></attribute>
+    </service>
+    
+    <service name="CreateRequirementByForecastCat" auth="true" engine="java" use-transaction="false"
+    	location="com.zuczug.analysis.ProductQuantityAnalysis" invoke="createRequirementByForecastCat">
+    	<description>根据系列中所有商品的预测销售量生成Requirement对象  by liujia</description>
+    	<attribute name="productCategoryId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="isCancel" mode="IN" type="String" optional="true"></attribute>
     </service>
 </services>

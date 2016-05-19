@@ -22,7 +22,7 @@
         <clear-field field="inMap"/>
         <set-service-fields service-name="storeGenericDimension" map="parameters" to-map="inMap"/>
         <set field="inMap.naturalKeyFields[]" value="productStoreId"/>
-        <set field="inMap.dimensionValue" from-field="zzStoreDimension"/>
+        <set field="inMap.dimensionValue" from-field="ZzStoreDimension"/>
         <call-service service-name="storeGenericDimension" in-map-name="inMap"/>
     </simple-method>
     

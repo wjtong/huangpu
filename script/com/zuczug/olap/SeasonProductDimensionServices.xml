@@ -33,8 +33,15 @@ under the License.
 	            </add-error>
 	        </if-empty>
 	        <check-errors/>
-	        
-			<make-value value-field="dsProductDimension" entity-name="Ds161ProductDimension"/>
+	        <if-compare operator="equals" value="153" field="parameters.keyword">
+	        	<make-value value-field="dsProductDimension" entity-name="Ds153ProductDimension"/>
+	        </if-compare>
+	        <if-compare operator="equals" value="161" field="parameters.keyword">
+	        	<make-value value-field="dsProductDimension" entity-name="Ds161ProductDimension"/>
+	        </if-compare>
+	        <if-compare operator="equals" value="163" field="parameters.keyword">
+	        	<make-value value-field="dsProductDimension" entity-name="Ds163ProductDimension"/>
+	        </if-compare>
 			
 	        <set field="dsProductDimension.productId" value="${productDimension.productId}"/>
 	        <set field="dsProductDimension.productColorId" from-field="productDimension.productColorId"/>
@@ -97,7 +104,7 @@ under the License.
 	        <entity-condition list="productDimensionList" entity-name="ZzProductDimension">
 	        	<condition-list>
 	        		<condition-expr field-name="virtualProductId" operator="not-equals" value="_NA_"/>
-	        		<condition-expr field-name="zuczugSeason" operator="equals" from-field="parameters.zuczugSeason"/>
+	        		<condition-expr field-name="zuczugSeason" operator="equals" from-field="parameters.keyword"/>
 	        	</condition-list>
 	        </entity-condition>
         	<!-- entity-and list="productDimension" entity-name="ZzProductDimension">
@@ -106,8 +113,47 @@ under the License.
         	<iterate entry="productDimension" list="productDimensionList">
         		<set-service-fields service-name="loadSeasonProductDimension" map="parameters" to-map="inMap"/>
 	            <set field="inMap.productId" from-field="productDimension.productId"/>
+	            <set field="inMap.keyword" from-field="parameters.keyword"/>
 	            <call-service service-name="loadSeasonProductDimension" in-map-name="inMap"/>
 	            <clear-field field="inMap"/>
+        	</iterate>
+        	
+        </simple-method>
+        
+        
+        <!-- 查询所有商品分季节导入不同的表 -->
+        <simple-method method-name="loadSeasonClassificationProductDimension" short-description="">
+	        <entity-condition list="productDimensionList" entity-name="ZzProductDimension">
+	        	<condition-list>
+	        		<condition-expr field-name="virtualProductId" operator="not-equals" value="_NA_"/>
+	        	</condition-list>
+	        </entity-condition>
+        	<iterate entry="productDimension" list="productDimensionList">
+        		<!-- 跑153商品数据 -->
+        		<if-compare operator="equals" value="153" field="productDimension.zuczugSeason">
+        			<set-service-fields service-name="loadSeasonProductDimension" map="parameters" to-map="inMap"/>
+		            <set field="inMap.productId" from-field="productDimension.productId"/>
+	            	<set field="inMap.keyword" from-field="productDimension.zuczugSeason"/>
+		            <call-service service-name="loadSeasonProductDimension" in-map-name="inMap"/>
+		            <clear-field field="inMap"/>
+        		</if-compare>
+        		<!-- 跑161商品数据 -->
+        		<if-compare operator="equals" value="161" field="productDimension.zuczugSeason">
+        			<set-service-fields service-name="loadSeasonProductDimension" map="parameters" to-map="inMap"/>
+		            <set field="inMap.productId" from-field="productDimension.productId"/>
+	            	<set field="inMap.keyword" from-field="productDimension.zuczugSeason"/>
+		            <call-service service-name="loadSeasonProductDimension" in-map-name="inMap"/>
+		            <clear-field field="inMap"/>
+        		</if-compare>
+        		<!-- 跑163商品数据 -->
+        		<if-compare operator="equals" value="163" field="productDimension.zuczugSeason">
+        			<set-service-fields service-name="loadSeasonProductDimension" map="parameters" to-map="inMap"/>
+		            <set field="inMap.productId" from-field="productDimension.productId"/>
+	            	<set field="inMap.keyword" from-field="productDimension.zuczugSeason"/>
+		            <call-service service-name="loadSeasonProductDimension" in-map-name="inMap"/>
+		            <clear-field field="inMap"/>
+        		</if-compare>
+        		
         	</iterate>
         	
         </simple-method>

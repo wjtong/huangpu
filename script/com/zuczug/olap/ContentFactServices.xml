@@ -30,7 +30,6 @@ under the License.
                 <condition-expr field-name="productContentTypeId" operator="equals" from-field="parameters.productContentTypeId"/>
             </condition-list>
         </entity-condition>
-     	
         <if-not-empty field="ProductContentAndInfoList">
         	<!-- 获取第一条数据 -->
         	<first-from-list list="ProductContentAndInfoList" entry="pca"/>
@@ -135,45 +134,52 @@ under the License.
     </simple-method>
     
     <simple-method method-name="importProductContentData" short-description="Import ProductContent Data">
-    	<entity-condition list="ProductContentAndInfoList" entity-name="ProductContentAndInfo" filter-by-date="true">
-    		<condition-list combine="or">
-    			<condition-expr field-name="productContentTypeId" operator="equals" from-field="DETAIL_PRODUCT_IMAGE"/>
-    			<condition-expr field-name="productContentTypeId" operator="equals" from-field="SINGLE_PRODUCT_IMAGE"/>
-    		</condition-list>
-    	</entity-condition>
+    	
+    	<entity-condition list="ProductContentAndInfoList" entity-name="ProductContentAndInfo" filter-by-date="true"/>
+    	
     	<if-not-empty field="ProductContentAndInfoList">
     		<iterate entry="pcaList" list="ProductContentAndInfoList">
-    		
-    			<entity-one entity-name="Product" value-field="currentProduct" >
-                    <field-map field-name="productId"  from-field="pcaList.productId"/>
-            	</entity-one>
-
-	            <!-- 这个时候的pcmem.productId是变形商品，查找波段是要根据它的虚拟商品来查找，所以，先查找虚拟商品 -->
-	            <entity-and list="productAssocs" entity-name="ProductAssoc" filter-by-date="true">
-	            	<field-map field-name="productIdTo" from-field="pcaList.productId"/>
-	            	<field-map field-name="productAssocTypeId" value="PRODUCT_VARIANT"/>
-	            </entity-and>
-	            <first-from-list entry="productAssoc" list="productAssocs"/>
-	            <!-- 然后根据虚拟商品查找波段，虚拟商品的productId是productAssoc.productId -->
-
-            	<entity-and list="productcmList" entity-name="ProductCategoryAndMember">
-            		<field-map field-name="productId" from-field="productAssoc.productId"/>
-            		<field-map field-name="productCategoryTypeId" value="WAVE"/>
-            	</entity-and>
-            	<if-not-empty field="productcmList">
-            		<first-from-list list="productcmList" entry="productcm"/>
-            		<log message="${parameters.productCategoryId}+++++++++++++1" level="info"/>
-            		<log message="${productcm.productCategoryId}+++++++++++++1" level="info"/>
-            		<if-compare-field operator="equals" to-field="parameters.productCategoryId"  field="productcm.productCategoryId">
-            			<if-compare operator="equals" value="FINISHED_GOOD" field="currentProduct.productTypeId">
-            				<clear-field field="inMap"/>
-    						<set field="inMap.productId" from-field="pcaList.productId"/>
-    						<set field="inMap.contentId" from-field="pcaList.contentId"/>
-    						<set field="inMap.productContentTypeId" from-field="pcaList.productContentTypeId"/>
-    						<call-service service-name="loadProductContentFact" in-map-name="inMap"></call-service>
-            			</if-compare>
-            		</if-compare-field>
-            	</if-not-empty>
+	    		<if>
+	    			<condition>
+	    				<or>
+	    					<if-compare operator="equals" value="DETAIL_PRODUCT_IMAGE" field="pcaList.productContentTypeId"></if-compare>
+	    					<if-compare operator="equals" value="SINGLE_PRODUCT_IMAGE" field="pcaList.productContentTypeId"></if-compare>
+	    				</or>
+	    			</condition>
+	    			<then>
+	    				<log message="++++++++++++++323:${pcaList.productId}" level="info"/>
+		    			<entity-one entity-name="Product" value-field="currentProduct" >
+		                    <field-map field-name="productId"  from-field="pcaList.productId"/>
+		            	</entity-one>
+		
+			            <!-- 这个时候的pcmem.productId是变形商品，查找波段是要根据它的虚拟商品来查找，所以，先查找虚拟商品 -->
+			            <entity-and list="productAssocs" entity-name="ProductAssoc" filter-by-date="true">
+			            	<field-map field-name="productIdTo" from-field="pcaList.productId"/>
+			            	<field-map field-name="productAssocTypeId" value="PRODUCT_VARIANT"/>
+			            </entity-and>
+			            <first-from-list entry="productAssoc" list="productAssocs"/>
+			            <!-- 然后根据虚拟商品查找波段，虚拟商品的productId是productAssoc.productId -->
+		
+		            	<entity-and list="productcmList" entity-name="ProductCategoryAndMember">
+		            		<field-map field-name="productId" from-field="productAssoc.productId"/>
+		            		<field-map field-name="productCategoryTypeId" value="WAVE"/>
+		            	</entity-and>
+		            	<if-not-empty field="productcmList">
+		            		<first-from-list list="productcmList" entry="productcm"/>
+		            		<log message="${parameters.productCategoryId}+++++++++++++1" level="info"/>
+		            		<log message="${productcm.productCategoryId}+++++++++++++1" level="info"/>
+		            		<if-compare-field operator="equals" to-field="parameters.productCategoryId"  field="productcm.productCategoryId">
+		            			<if-compare operator="equals" value="FINISHED_GOOD" field="currentProduct.productTypeId">
+		            				<clear-field field="inMap"/>
+		    						<set field="inMap.productId" from-field="pcaList.productId"/>
+		    						<set field="inMap.contentId" from-field="pcaList.contentId"/>
+		    						<set field="inMap.productContentTypeId" from-field="pcaList.productContentTypeId"/>
+		    						<call-service service-name="loadProductContentFact" in-map-name="inMap"></call-service>
+		            			</if-compare>
+		            		</if-compare-field>
+		            	</if-not-empty>
+	    			</then>
+	    		</if>
             </iterate>
     	</if-not-empty>
     </simple-method>
@@ -475,11 +481,9 @@ under the License.
 			<field-map field-name="isVirtual" value="N"/>
 			<field-map field-name="isVariant" value="Y"/>
 		</entity-and>
-		<log message="${parameters.productId}=============1" level="info"/>
 		<if-not-empty field="productAssocViewWithVariants">
 		
 			<iterate entry="productAssoc" list="productAssocViewWithVariants">
-				<log message="${productAssoc.productIdTo}=============2" level="info"/>
 				<!-- 单品图 -->
 				<entity-and list="ProductContentAndInfoList" entity-name="ProductContentAndInfo">
 					<field-map field-name="productId" from-field="productAssoc.productIdTo"/>

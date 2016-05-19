@@ -24,7 +24,8 @@ under the License.
 		<simple-method method-name="importAllRegentOrderInfo" short-description="">
 			<set field="fromDate" from-field="parameters.fromDate"/>
 	        <set field="thruDate" from-field="parameters.thruDate"/>
-	        
+	        <log message="===============1:${fromDate}" level="info"/>
+	        <log message="===============2:${thruDate}" level="info"/>
 	        <entity-condition list="dSRegentOrderList" entity-name="DSRegentOrder">
 		    	<condition-list combine="and">
 			        <condition-expr field-name="statuesItems" value="销售"/>
@@ -36,6 +37,7 @@ under the License.
 			    </condition-list>
 		    </entity-condition>
 		    
+	        <log message="===============3:${dSRegentOrderList}" level="info"/>
 		    <iterate entry="dSRegentOrder" list="dSRegentOrderList">
 		    	<entity-and list="zzSalesOrderItemFactList" entity-name="ZzSalesOrderItemFact">
 					<field-map field-name="orderId" from-field="dSRegentOrder.checkId"/>
@@ -47,7 +49,6 @@ under the License.
 						<field-map field-name="colorCode" from-field="dSRegentOrder.color"/>
 						<field-map field-name="sizeCode" from-field="dSRegentOrder.size"/>
 					</entity-and>
-					<log message="+++++++++++2:${dSRegentOrder.checkId}" level="info"></log>
 					<first-from-list entry="zzProductDimension" list="zzProductDimensionList"/>
 					<if-not-empty field="zzProductDimension">
 						<make-value value-field="salesOrderItem" entity-name="ZzSalesOrderItemFact"/>
@@ -317,173 +318,24 @@ under the License.
 			</if-not-empty>   
 		</simple-method>
 		
-		<simple-method method-name="loadDSRegentOrder" short-description="">
-			<entity-and list="dSRegentOrderlist" entity-name="DSRegentOrder">
-				<field-map field-name="checkId" from-field="parameters.checkId"/>
-			</entity-and>
-			<log message="+++++++++++3${parameters.checkId}" level="info"></log>
-			<if-empty field="dSRegentOrderlist">
-			    <add-error>
-			        <fail-property resource="dSRegentOrderlist" property="dSRegentOrderlistNotFoundWithProduct"/>
-			    </add-error>
-			</if-empty>
-			<check-errors/>
-			
-			
-			<iterate entry="dSRegentOrder" list="dSRegentOrderlist">
-				<entity-and list="zzSalesOrderItemFactList" entity-name="ZzSalesOrderItemFact">
-					<field-map field-name="orderId" from-field="dSRegentOrder.checkId"/>
-					<field-map field-name="orderItemSeqId" from-field="dSRegentOrder.sequenceId"/>
-				</entity-and>
-				<if-empty field="zzSalesOrderItemFactList">
-					<make-value value-field="salesOrderItem" entity-name="ZzSalesOrderItemFact"/>
-					<entity-and list="zzProductDimensionList" entity-name="ZzProductDimension">
-						<field-map field-name="virtualProductId" from-field="dSRegentOrder.goodsnoitems"/>
-						<field-map field-name="colorCode" from-field="dSRegentOrder.color"/>
-						<field-map field-name="sizeCode" from-field="dSRegentOrder.size"/>
-					</entity-and>
-					<first-from-list entry="zzProductDimension" list="zzProductDimensionList"/>
-					
-					<set field="salesOrderItem.orderId" from-field="dSRegentOrder.checkId"/>
-					<set field="salesOrderItem.orderItemSeqId" from-field="dSRegentOrder.sequenceId"/>
-					
-					<if-not-empty field="dSRegentOrder.checkDate">
-				         <clear-field field="inMap"/>
-				         <set field="inMap.dimensionEntityName" value="DateDimension"/>
-				         <set field="inMap.naturalKeyFields.dateValue" from-field="dSRegentOrder.checkDate" type="Date"/>
-				         <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
-				             <result-to-field result-name="dimensionId" field="salesOrderItem.orderDateDimId"/>
-				         </call-service>
-				         <if-empty field="salesOrderItem.orderDateDimId">
-				             <set field="salesOrderItem.orderDateDimId" value="_NF_"/>
-				         </if-empty>
-				     <else>
-				         <set field="salesOrderItem.orderDateDimId" value="_NA_"/>
-				     </else>
-				     </if-not-empty>
-				     
-			     	<if-empty field="zzProductDimension">
-			     		<set field="salesOrderItem.productDimId" value="_NA_"/>
-			     	<else>
-			     		<set field="salesOrderItem.productDimId" from-field="zzProductDimension.dimensionId"/>
-			     	</else>
-			     	</if-empty>
-					
-					<if-not-empty field="dSRegentOrder.vipCode">
-			            <clear-field field="inMap"/>
-			            <set field="inMap.dimensionEntityName" value="CustomerDimension"/>
-			            <set field="inMap.naturalKeyFields.partyId" from-field="dSRegentOrder.vipCode"/>
-			            <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
-			                <result-to-field result-name="dimensionId" field="salesOrderItem.billToCustomerDimId"/>
-			            </call-service>
-			            <if-empty field="salesOrderItem.billToCustomerDimId">
-			                <set field="salesOrderItem.billToCustomerDimId" value="_NF_"/>
-			            </if-empty>
-			        <else>
-				        <set field="salesOrderItem.billToCustomerDimId" value="_NA_"/>
-				    </else>
-			        </if-not-empty>
-			        
-			        <if-not-empty field="dSRegentOrder.customerId">
-						<clear-field field="inMap"/>
-				     	<set field="inMap.dimensionEntityName" value="ZzStoreDimension"/>
-				     	<set field="inMap.naturalKeyFields.productStoreId" from-field="dSRegentOrder.customerId"/>
-				     	<call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
-				         	<result-to-field result-name="dimensionId" field="salesOrderItem.productStoreDimId"/>
-				     	</call-service>
-				     	<if-empty field="salesOrderItem.productStoreDimId">
-				         	<set field="salesOrderItem.productStoreDimId" value="_NF_"/>
-				     	</if-empty>
-					<else>
-						<set field="salesOrderItem.productStoreDimId" value="_NA_"/>
-					</else>
-					</if-not-empty>
-			        
-			        
-			        <set field="salesOrderItem.salesChannelEnumId" value="WEB_SALES_CHANNEL"/>
-					
-					<set field="salesOrderItem.quantity" from-field="dSRegentOrder.quantity"/>
-					
-					<set field="salesOrderItem.quantitySize0" value="0" type="BigDecimal"/>
-		        	<set field="salesOrderItem.quantitySize2" value="0" type="BigDecimal"/>
-		        	<set field="salesOrderItem.quantitySize4" value="0" type="BigDecimal"/>
-		        	<set field="salesOrderItem.quantitySize6" value="0" type="BigDecimal"/>
-		        	<set field="salesOrderItem.quantitySize8" value="0" type="BigDecimal"/>
-		       		<set field="salesOrderItem.quantitySizeF" value="0" type="BigDecimal"/>
-		       		
-		       		<if-compare operator="equals" value="0" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize0" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="2" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize2" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="4" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize4" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="6" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize6" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="8" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize8" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="25" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize0" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="26" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize2" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="27" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize4" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="28" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize6" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="29" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize8" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="35" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize0" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="36" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize2" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <!-- Added by Neil -->
-		            <if-compare operator="equals" value="37" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize4" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="38" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize6" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="39" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySize8" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="N" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySizeF" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <if-compare operator="equals" value="F" field="zzProductDimension.productSize">
-		                <set field="salesOrderItem.quantitySizeF" from-field="salesOrderItem.quantity" type="BigDecimal"/>
-		            </if-compare>
-		            <!-- listPrice -->
-		            <calculate field="salesOrderItem.listPrice">
-		                <calcop field="salesOrderItem.quantity" operator="multiply">
-		                    <calcop field="zzProductDimension.listPrice" operator="get"/>
-		                </calcop>
-		            </calculate>
-					<set field="salesOrderItem.extGrossAmount" from-field="dSRegentOrder.discountPrice"/>
-					
-					<set field="salesOrderItem.brand" value="_NA_"/>
-					<set field="salesOrderItem.account" value="_NA_"/>
-					
-					<create-value value-field="salesOrderItem"/>
-					
-					<log message="+++++++++++4:${dSRegentOrder.checkId}" level="info"></log>
-				</if-empty>
-				
-			</iterate>
-			
-			
-		</simple-method>
-	
+		<simple-method method-name="loadRegentOrderInfo" short-description="loadPutawaySnapshotJob">
+	        <now-date-to-env field="nowDate"/>
+	        <set field="yesterday" value="${groovy:
+	            import java.text.SimpleDateFormat;
+	            def sdf = new SimpleDateFormat(&quot;yyyy-MM-dd 00:00:00.000&quot;);
+	            def yesterday = sdf.format(nowDate-1);
+	            return yesterday;
+	        }" type="Timestamp"/>
+	        <set field="today" value="${groovy:
+	            import java.text.SimpleDateFormat;
+	            def sdf = new SimpleDateFormat(&quot;yyyy-MM-dd 00:00:00.000&quot;);
+	            def today = sdf.format(nowDate);
+	            return today;
+	        }" type="Timestamp"/>
+	        <set field="inMap.fromDate" from-field="yesterday"/>
+	        <set field="inMap.thruDate" from-field="today"/>
+	        <call-service service-name="importAllRegentOrderInfo" in-map-name="inMap"/>
+	    </simple-method>
 		
 		
 

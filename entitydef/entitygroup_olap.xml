@@ -28,11 +28,23 @@ under the License.
     <!-- <entity-group group="org.ofbiz.olap" entity="ZuczugSalesOrderItemFact"/>-->
     <entity-group group="org.ofbiz.olap" entity="CustomerDimension"/>
     <entity-group group="org.ofbiz.olap" entity="ZzSalesOrderItemFact"/>
+    <entity-group group="org.ofbiz.olap" entity="Zz153SalesOrderItemFact"/>
+    <entity-group group="org.ofbiz.olap" entity="Zz161SalesOrderItemFact"/>
+    <entity-group group="org.ofbiz.olap" entity="Zz163SalesOrderItemFact"/>
+    
     <entity-group group="org.ofbiz.olap" entity="ZzSalesOrderFact"/>
     <entity-group group="org.ofbiz.olap" entity="PaymentMethodDimension"/>
     <entity-group group="org.ofbiz.olap" entity="ZzStoreDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="ZzFacilityDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="Zz153StoreDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="Zz161StoreDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="Zz163StoreDimension"/>
+    
     <entity-group group="org.ofbiz.olap" entity="ZzProductDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="Ds153ProductDimension"/>
     <entity-group group="org.ofbiz.olap" entity="Ds161ProductDimension"/>
+    <entity-group group="org.ofbiz.olap" entity="Ds163ProductDimension"/>
+    
     <entity-group group="org.ofbiz.olap" entity="TmpWashInfo"/><!-- ZzWashInfoDimension -->
     <entity-group group="org.ofbiz.olap" entity="ZzProductColorDimension"/>
     <entity-group group="org.ofbiz.olap" entity="ZzBulkCustomerDimension"/>
@@ -54,6 +66,7 @@ under the License.
     <entity-group group="org.ofbiz.olap" entity="DSRegentOrder"/>
     <entity-group group="org.ofbiz.olap" entity="DSRegentOrderPayment"/>
     <entity-group group="org.ofbiz.olap" entity="InventoryItemSnapshotFact"/>
+    <entity-group group="org.ofbiz.olap" entity="InventorySnapshotFact"/>
     <!--
     <entity-group group="org.ofbiz.olap" entity="ForecastDetailFact"/>
     <entity-group group="org.ofbiz.olap" entity="TempRequirementFact"/>

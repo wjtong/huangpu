@@ -31,7 +31,7 @@ under the License.
         <check-errors/>
         <make-value value-field="productDimension" entity-name="ZzProductDimension"/>
         <set-nonpk-fields map="product" value-field="productDimension"/>
-
+		
         <get-related-one value-field="product" relation-name="ProductType" to-value-field="productType"/>
         <set field="productDimension.productType" from-field="productType.description"/>
         
@@ -89,7 +89,6 @@ under the License.
         	<result-to-field result-name="ingredientsTextBm"/>
         	<result-to-field result-name="specialInstructionsBm"/>
         </call-service>
-        <log message="+++++++++++++${ingredientsText}" level="info"/>
         <if-not-empty field="ingredientsTextBm">
         	<set field="productDimension.ingredientsText" from-field="ingredientsTextBm"/>
         <else>
@@ -97,7 +96,6 @@ under the License.
         </else>
         </if-not-empty>
         
-        <log message="+++++++++++++${specialInstructions}" level="info"/>
         <if-not-empty field="specialInstructionsBm">
         	<set field="productDimension.specialInstructions" from-field="specialInstructionsBm"/>
         <else>
@@ -311,7 +309,6 @@ under the License.
         </if-not-empty>
         
         <!-- EAN码 -->
-        <log message="${product.productId}=======1" level="info"/>
         <entity-one value-field="goodIdentification" entity-name="GoodIdentification">
         	<field-map field-name="productId" from-field="product.productId"/>
         	<field-map field-name="goodIdentificationTypeId" value="EAN"/>
@@ -319,7 +316,6 @@ under the License.
        	<if-not-empty field="goodIdentification">
        		<set field="productDimension.ean" from-field="goodIdentification.idValue"/>
        	</if-not-empty>
-        <log message="${productDimension.ean}=======2" level="info"/>
        	<if-empty field="productDimension.ean">
        		<set field="productDimension.ean" value="_NA_"/>
        	</if-empty>
@@ -379,6 +375,16 @@ under the License.
 	        	<set field="productDimension.mainSupplierPartyName" value="_NA_"/>
 	        </else>
 	        </if-not-empty>
+	    <!-- 上货月份releaseMonthOfYear -->
+	    <log message="+++++++++++++++1:${productDimension.releaseDate}" level="info"/>
+	    <if-not-empty field="productDimension.releaseDate">
+	        <clear-field field="inMap"/>
+	        <set field="inMap.releaseDate" from-field="productDimension.releaseDate"/>
+	        <call-service service-name="findReleaseDate" in-map-name="inMap">
+					<result-to-field result-name="releaseMonth" field="releaseMonth"/>
+			</call-service>
+	        <set field="productDimension.releaseMonthOfYear" from-field="releaseMonth"/>
+		</if-not-empty>
 
         <field-to-result field="productDimension"/>
     </simple-method>
@@ -415,9 +421,7 @@ under the License.
     		<field-map field-name="productCategoryTypeId" value="WAVE"/>
     		<field-map field-name="productCategoryId" from-field="parameters.productCategoryId"/>
     	</entity-and>
-    	<log message="+++++++++++++++++++++1" level="info"/>
     	<if-not-empty field="productCategoryAndMemberList">
-    	<log message="+++++++++++++++++++++2" level="info"/>
     		<iterate entry="productCategoryAndMember" list="productCategoryAndMemberList">
 				<entity-one value-field="product" entity-name="Product">
 					<field-map field-name="productId" from-field="productCategoryAndMember.productId"/>
@@ -432,7 +436,6 @@ under the License.
 							</and>
 						</condition>
 						<then>
-	    					<log message="+++++++++++++++++++++3${productCategoryAndMember.productId}" level="info"/>
 								<entity-and list="productAssocList" entity-name="ProductAssoc">
 									<field-map field-name="productId" from-field="productCategoryAndMember.productId"/>
 									<field-map field-name="productAssocTypeId" value="PRODUCT_VARIANT"/>
@@ -440,7 +443,6 @@ under the License.
 								<if-not-empty field="productAssocList">
 									<iterate entry="productAssoc" list="productAssocList">
 									
-	    								<log message="+++++++++++++++++++++4${productAssoc.productIdTo}" level="info"/>
 										<set-service-fields service-name="zuczug.loadProductInProductDimension" map="parameters" to-map="inMap"/>
 							            <set field="inMap.productId" from-field="productAssoc.productIdTo"/>
 							            <call-service service-name="zuczug.loadProductInProductDimension" in-map-name="inMap"/>

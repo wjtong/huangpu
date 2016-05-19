@@ -78,6 +78,7 @@ under the License.
 		<field name="listPrice" type="currency-precise" />
 		<field name="estDesignEngineerCost" type="currency-precise" />
 		<field name="releaseDate" type="date-time" />
+		<field name="releaseMonthOfYear" type="description" />
 		<field name="virtualProductId" type="id-ne" />
 		<field name="sellingPoint" type="value"><description>买点介绍</description></field>
 		<field name="materialFeature" type="value"><description>材质特点</description></field>
@@ -134,6 +135,95 @@ under the License.
 		<field name="mainSupplierPartyName" type="name"/>
 		<prim-key field="dimensionId"/>  
     </entity>
+    
+    <entity entity-name="Ds153ProductDimension" package-name="com.zuczug.olap" title="Product Sales Dimension">
+    	<description>153 Product dimension only for sale. The natural key is [productId]</description>
+    	<field name="dimensionId" type="id-long-ne" />
+		<field name="productId" type="id-ne" />
+		<field name="productColorId" type="id-long" />
+		<field name="productType" type="name" />
+		<field name="brandName" type="name" />
+		<field name="internalName" type="name" />
+		<field name="productName" type="name" />
+		<field name="groupname" type="name" />
+		<field name="groupId" type="id-long" />
+		<field name="series" type="name" />
+		<field name="seriesId" type="id-long" />
+		<field name="subseries" type="name" />
+		<field name="subseriesId" type="id-long" />
+		<field name="zuczugSeason" type="description" />
+		<field name="zuczugSeasonId" type="id-long" />
+		<field name="colorCode" type="id-long" />
+		<field name="color" type="description" />
+		<field name="productSize" type="description" />
+		<field name="sizeCode" type="id-long" />
+		<field name="modelYear" type="description" />
+		<field name="yearCode" type="id-long" />
+		<field name="wave" type="description" />
+		<field name="waveId" type="id-long" />
+		<field name="style" type="description" />
+		<field name="quantityUomId" type="id" />
+		<field name="ean" type="id-long" />
+		<field name="listPrice" type="currency-precise" />
+		<field name="estDesignEngineerCost" type="currency-precise" />
+		<field name="releaseDate" type="date-time" />
+		<field name="virtualProductId" type="id-ne" />
+		<field name="sellingPoint" type="value"><description>买点介绍</description></field>
+		<field name="materialFeature" type="value"><description>材质特点</description></field>
+		<field name="ingredientsText" type="value"><description>成份</description></field>
+		<field name="specialInstructions" type="value"><description>特别提醒</description></field>
+		<field name="productDescription" type="value"><description>商品描述</description></field>
+		<field name="designProductId" type="id-ne"/>
+		<field name="mainFabricId" type="id"><description>主要面料</description></field>
+		<field name="mainSupplierPartyId" type="id"/>
+		<field name="mainSupplierPartyName" type="name"/>
+		<prim-key field="dimensionId"/>  
+    </entity>
+    
+    <entity entity-name="Ds163ProductDimension" package-name="com.zuczug.olap" title="Product Sales Dimension">
+    	<description>163 Product dimension only for sale. The natural key is [productId]</description>
+    	<field name="dimensionId" type="id-long-ne" />
+		<field name="productId" type="id-ne" />
+		<field name="productColorId" type="id-long" />
+		<field name="productType" type="name" />
+		<field name="brandName" type="name" />
+		<field name="internalName" type="name" />
+		<field name="productName" type="name" />
+		<field name="groupname" type="name" />
+		<field name="groupId" type="id-long" />
+		<field name="series" type="name" />
+		<field name="seriesId" type="id-long" />
+		<field name="subseries" type="name" />
+		<field name="subseriesId" type="id-long" />
+		<field name="zuczugSeason" type="description" />
+		<field name="zuczugSeasonId" type="id-long" />
+		<field name="colorCode" type="id-long" />
+		<field name="color" type="description" />
+		<field name="productSize" type="description" />
+		<field name="sizeCode" type="id-long" />
+		<field name="modelYear" type="description" />
+		<field name="yearCode" type="id-long" />
+		<field name="wave" type="description" />
+		<field name="waveId" type="id-long" />
+		<field name="style" type="description" />
+		<field name="quantityUomId" type="id" />
+		<field name="ean" type="id-long" />
+		<field name="listPrice" type="currency-precise" />
+		<field name="estDesignEngineerCost" type="currency-precise" />
+		<field name="releaseDate" type="date-time" />
+		<field name="virtualProductId" type="id-ne" />
+		<field name="sellingPoint" type="value"><description>买点介绍</description></field>
+		<field name="materialFeature" type="value"><description>材质特点</description></field>
+		<field name="ingredientsText" type="value"><description>成份</description></field>
+		<field name="specialInstructions" type="value"><description>特别提醒</description></field>
+		<field name="productDescription" type="value"><description>商品描述</description></field>
+		<field name="designProductId" type="id-ne"/>
+		<field name="mainFabricId" type="id"><description>主要面料</description></field>
+		<field name="mainSupplierPartyId" type="id"/>
+		<field name="mainSupplierPartyName" type="name"/>
+		<prim-key field="dimensionId"/>  
+    </entity>
+    
     
     
     
@@ -206,7 +296,65 @@ under the License.
         <prim-key field="dimensionId"/>
     </entity>
 
+    <entity entity-name="ZzFacilityDimension" package-name="com.zuczug.olap" title="Facility Dimension">
+        <description>Facility dimension. The natural key is [facilityId]</description>
+		<field name="dimensionId" type="id-long-ne" />
+		<field name="facilityId" type="id-ne" />
+		<field name="facilityName" type="name" />
+		<field name="cityGeoId" type="id-ne" />
+		<field name="cityName" type="name" />
+		<field name="payToPartyId" type="id-ne" />
+		<field name="ownerPartyId" type="id" />
+		<field name="ownerPartyName" type="name" />
+        <field name="openedDate" type="date-time"></field>
+        <field name="closedDate" type="date-time"></field>
+        <field name="facilityTypeId" type="id"></field>
+        <prim-key field="dimensionId"/>
+    </entity>
+
     <entity entity-name="ZzStoreDimension" package-name="com.zuczug.olap" title="Facility Dimension">
+        <description>PorductStore dimension. The natural key is [productStoreId]</description>
+		<field name="dimensionId" type="id-long-ne" />
+		<field name="productStoreId" type="id-ne" />
+		<field name="storeName" type="name" />
+		<field name="cityGeoId" type="id-ne" />
+		<field name="cityName" type="name" />
+		<field name="payToPartyId" type="id-ne" />
+		<field name="payToPartyName" type="name" />
+		<field name="isRetailStoreGroupId" type="id-ne" />
+		<field name="isRetailStoreGroupName" type="name" />
+        <prim-key field="dimensionId"/>
+    </entity>
+    
+    <entity entity-name="Zz153StoreDimension" package-name="com.zuczug.olap" title="Facility Dimension">
+        <description>PorductStore dimension. The natural key is [productStoreId]</description>
+		<field name="dimensionId" type="id-long-ne" />
+		<field name="productStoreId" type="id-ne" />
+		<field name="storeName" type="name" />
+		<field name="cityGeoId" type="id-ne" />
+		<field name="cityName" type="name" />
+		<field name="payToPartyId" type="id-ne" />
+		<field name="payToPartyName" type="name" />
+		<field name="isRetailStoreGroupId" type="id-ne" />
+		<field name="isRetailStoreGroupName" type="name" />
+        <prim-key field="dimensionId"/>
+    </entity>
+    
+    <entity entity-name="Zz161StoreDimension" package-name="com.zuczug.olap" title="Facility Dimension">
+        <description>PorductStore dimension. The natural key is [productStoreId]</description>
+		<field name="dimensionId" type="id-long-ne" />
+		<field name="productStoreId" type="id-ne" />
+		<field name="storeName" type="name" />
+		<field name="cityGeoId" type="id-ne" />
+		<field name="cityName" type="name" />
+		<field name="payToPartyId" type="id-ne" />
+		<field name="payToPartyName" type="name" />
+		<field name="isRetailStoreGroupId" type="id-ne" />
+		<field name="isRetailStoreGroupName" type="name" />
+        <prim-key field="dimensionId"/>
+    </entity>
+    
+    <entity entity-name="Zz163StoreDimension" package-name="com.zuczug.olap" title="Facility Dimension">
         <description>PorductStore dimension. The natural key is [productStoreId]</description>
 		<field name="dimensionId" type="id-long-ne" />
 		<field name="productStoreId" type="id-ne" />
@@ -341,6 +489,374 @@ under the License.
             <key-map field-name="paymentMethodDimId" rel-field-name="dimensionId"/>
         </relation>
         <relation type="one" fk-name="ZSOIF_STORE" rel-entity-name="ZzStoreDimension">
+            <key-map field-name="productStoreDimId" rel-field-name="dimensionId"/>
+        </relation>
+
+    </entity>
+    
+    <entity entity-name="Zz153SalesOrderItemFact" package-name="com.zuczug.olap" title="Sales Order Item Fact">
+        <description>A transaction fact entity with order item grain.</description>
+        <field name="orderId" type="id-ne"></field> <!-- degenerate dimension -->
+        <field name="orderItemSeqId" type="id-ne"></field> <!-- degenerate dimension -->
+        <field name="orderDateDimId" type="id-ne"></field>
+        <field name="productDimId" type="id-ne"></field>
+        <field name="billToCustomerDimId" type="id-ne"></field> <!-- TODO: implement the dimension -->
+        <field name="paymentMethodDimId" type="id-ne"></field>
+        <field name="cancelPaymentStatus" type="very-short"></field>
+        <!-- <field name="productStoreId" type="id-ne"></field> -->
+        <field name="productStoreDimId" type="id-ne"></field>
+        <field name="salesChannelEnumId" type="id-ne"></field>
+        <field name="statusId" type="id-ne"></field>
+        
+        <field name="brand" type="name"></field>
+        <field name="account" type="name"></field>
+        
+        <field name="productPromoCode" type="id-ne"></field>
+        
+        <field name="quantity" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity</description>
+        </field>
+
+        <!-- just for zuczug hengpai -->
+        <field name="quantitySize0" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 0</description>
+        </field>
+        <field name="quantitySize2" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 2</description>
+        </field>
+        <field name="quantitySize4" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 4</description>
+        </field>
+        <field name="quantitySize6" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 6</description>
+        </field>
+        <field name="quantitySize8" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 8</description>
+        </field>
+        <field name="quantitySizeF" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et F</description>
+        </field>
+        <!-- end of hengpai -->
+
+        <field name="listPrice" type="currency-precise">
+            <description>List Price. From OrderItem.unitListPrice</description>
+        </field>
+
+        <field name="extGrossAmount" type="currency-precise">
+            <description>Extended gross amount: quantity item multiplied by the unit price.</description>
+        </field>
+        <field name="extGrossCost" type="currency-precise">
+            <description>Extended gross cost: quantity item multiplied by the last price.</description>
+        </field>
+        <field name="extDiscountAmount" type="currency-precise">
+            <description>Extended discount amount.</description>
+        </field>
+        <field name="extNetAmount" type="currency-precise">
+            <description>Extended net amount: gross amount less discounts.</description>
+        </field>
+        <field name="extShippingAmount" type="currency-precise">
+            <description>Extended shipping amount.</description>
+        </field>
+        <field name="extTaxAmount" type="currency-precise">
+            <description>Extended tax amount.</description>
+        </field>
+        
+        <field name="GS" type="currency-precise">
+            <description>Gross Sales: Gross Amount plus Shipping Amount.</description>
+        </field>
+        <field name="GMS" type="currency-precise">
+            <description>Gross Merchandize Sales: Gross Amount.</description>
+        </field>
+        <field name="GMP" type="currency-precise">
+            <description>Gross Merchandize Profit: Gross Merchandize Sales less Gross Cost.</description>
+        </field>
+        <field name="GSS" type="currency-precise">
+            <description>Gross Shipping Sales: Shipping Amount</description>
+        </field>
+        <field name="GSC" type="currency-precise">
+            <description>Gross Shipping Cost</description>
+        </field>
+        <field name="GSP" type="currency-precise">
+            <description>Gross Shipping Profit: Gross Shipping Sales less Gross Shipping Cost.</description>
+        </field>
+        <field name="GP" type="currency-precise">
+            <description>Gross Profit: Gross Merchandize Profit less Gross Shipping Profit.</description>
+        </field>
+        
+        <field name="integralAmount" type="fixed-point"></field>
+        <field name="couponAmount" type="currency-precise"></field>
+        <field name="integralAmountDiscount" type="currency-precise"></field>
+        <field name="isGift" type="id-ne"></field>
+		<field name="integralProd" type="id-ne"></field>
+
+        <field name="countOrder" type="fixed-point">
+            <description>Count of order.</description>
+        </field>
+
+        <prim-key field="orderId"/>
+        <prim-key field="orderItemSeqId"/>
+
+        <relation type="one" fk-name="ZSOIF_ORDERDATE" rel-entity-name="DateDimension">
+            <key-map field-name="orderDateDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_CURRENCY" rel-entity-name="CurrencyDimension">
+            <key-map field-name="origCurrencyDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_PRODUCT" rel-entity-name="Ds153ProductDimension">
+            <key-map field-name="productDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_CUSTOMER" rel-entity-name="CustomerDimension">
+            <key-map field-name="billToCustomerDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_PAYMENT" rel-entity-name="PaymentMethodDimension">
+            <key-map field-name="paymentMethodDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_STORE" rel-entity-name="Zz153StoreDimension">
+            <key-map field-name="productStoreDimId" rel-field-name="dimensionId"/>
+        </relation>
+
+    </entity>
+    
+    <entity entity-name="Zz161SalesOrderItemFact" package-name="com.zuczug.olap" title="Sales Order Item Fact">
+        <description>A transaction fact entity with order item grain.</description>
+        <field name="orderId" type="id-ne"></field> <!-- degenerate dimension -->
+        <field name="orderItemSeqId" type="id-ne"></field> <!-- degenerate dimension -->
+        <field name="orderDateDimId" type="id-ne"></field>
+        <field name="productDimId" type="id-ne"></field>
+        <field name="billToCustomerDimId" type="id-ne"></field> <!-- TODO: implement the dimension -->
+        <field name="paymentMethodDimId" type="id-ne"></field>
+        <field name="cancelPaymentStatus" type="very-short"></field>
+        <!-- <field name="productStoreId" type="id-ne"></field> -->
+        <field name="productStoreDimId" type="id-ne"></field>
+        <field name="salesChannelEnumId" type="id-ne"></field>
+        <field name="statusId" type="id-ne"></field>
+        
+        <field name="brand" type="name"></field>
+        <field name="account" type="name"></field>
+        
+        <field name="productPromoCode" type="id-ne"></field>
+        
+        <field name="quantity" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity</description>
+        </field>
+
+        <!-- just for zuczug hengpai -->
+        <field name="quantitySize0" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 0</description>
+        </field>
+        <field name="quantitySize2" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 2</description>
+        </field>
+        <field name="quantitySize4" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 4</description>
+        </field>
+        <field name="quantitySize6" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 6</description>
+        </field>
+        <field name="quantitySize8" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 8</description>
+        </field>
+        <field name="quantitySizeF" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et F</description>
+        </field>
+        <!-- end of hengpai -->
+
+        <field name="listPrice" type="currency-precise">
+            <description>List Price. From OrderItem.unitListPrice</description>
+        </field>
+
+        <field name="extGrossAmount" type="currency-precise">
+            <description>Extended gross amount: quantity item multiplied by the unit price.</description>
+        </field>
+        <field name="extGrossCost" type="currency-precise">
+            <description>Extended gross cost: quantity item multiplied by the last price.</description>
+        </field>
+        <field name="extDiscountAmount" type="currency-precise">
+            <description>Extended discount amount.</description>
+        </field>
+        <field name="extNetAmount" type="currency-precise">
+            <description>Extended net amount: gross amount less discounts.</description>
+        </field>
+        <field name="extShippingAmount" type="currency-precise">
+            <description>Extended shipping amount.</description>
+        </field>
+        <field name="extTaxAmount" type="currency-precise">
+            <description>Extended tax amount.</description>
+        </field>
+        
+        <field name="GS" type="currency-precise">
+            <description>Gross Sales: Gross Amount plus Shipping Amount.</description>
+        </field>
+        <field name="GMS" type="currency-precise">
+            <description>Gross Merchandize Sales: Gross Amount.</description>
+        </field>
+        <field name="GMP" type="currency-precise">
+            <description>Gross Merchandize Profit: Gross Merchandize Sales less Gross Cost.</description>
+        </field>
+        <field name="GSS" type="currency-precise">
+            <description>Gross Shipping Sales: Shipping Amount</description>
+        </field>
+        <field name="GSC" type="currency-precise">
+            <description>Gross Shipping Cost</description>
+        </field>
+        <field name="GSP" type="currency-precise">
+            <description>Gross Shipping Profit: Gross Shipping Sales less Gross Shipping Cost.</description>
+        </field>
+        <field name="GP" type="currency-precise">
+            <description>Gross Profit: Gross Merchandize Profit less Gross Shipping Profit.</description>
+        </field>
+        
+        <field name="integralAmount" type="fixed-point"></field>
+        <field name="couponAmount" type="currency-precise"></field>
+        <field name="integralAmountDiscount" type="currency-precise"></field>
+        <field name="isGift" type="id-ne"></field>
+		<field name="integralProd" type="id-ne"></field>
+
+        <field name="countOrder" type="fixed-point">
+            <description>Count of order.</description>
+        </field>
+
+        <prim-key field="orderId"/>
+        <prim-key field="orderItemSeqId"/>
+
+        <relation type="one" fk-name="ZSOIF_ORDERDATE" rel-entity-name="DateDimension">
+            <key-map field-name="orderDateDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_CURRENCY" rel-entity-name="CurrencyDimension">
+            <key-map field-name="origCurrencyDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_PRODUCT" rel-entity-name="Ds161ProductDimension">
+            <key-map field-name="productDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_CUSTOMER" rel-entity-name="CustomerDimension">
+            <key-map field-name="billToCustomerDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_PAYMENT" rel-entity-name="PaymentMethodDimension">
+            <key-map field-name="paymentMethodDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_STORE" rel-entity-name="Zz161StoreDimension">
+            <key-map field-name="productStoreDimId" rel-field-name="dimensionId"/>
+        </relation>
+
+    </entity>
+    <entity entity-name="Zz163SalesOrderItemFact" package-name="com.zuczug.olap" title="Sales Order Item Fact">
+        <description>A transaction fact entity with order item grain.</description>
+        <field name="orderId" type="id-ne"></field> <!-- degenerate dimension -->
+        <field name="orderItemSeqId" type="id-ne"></field> <!-- degenerate dimension -->
+        <field name="orderDateDimId" type="id-ne"></field>
+        <field name="productDimId" type="id-ne"></field>
+        <field name="billToCustomerDimId" type="id-ne"></field> <!-- TODO: implement the dimension -->
+        <field name="paymentMethodDimId" type="id-ne"></field>
+        <field name="cancelPaymentStatus" type="very-short"></field>
+        <!-- <field name="productStoreId" type="id-ne"></field> -->
+        <field name="productStoreDimId" type="id-ne"></field>
+        <field name="salesChannelEnumId" type="id-ne"></field>
+        <field name="statusId" type="id-ne"></field>
+        
+        <field name="brand" type="name"></field>
+        <field name="account" type="name"></field>
+        
+        <field name="productPromoCode" type="id-ne"></field>
+        
+        <field name="quantity" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity</description>
+        </field>
+
+        <!-- just for zuczug hengpai -->
+        <field name="quantitySize0" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 0</description>
+        </field>
+        <field name="quantitySize2" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 2</description>
+        </field>
+        <field name="quantitySize4" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 4</description>
+        </field>
+        <field name="quantitySize6" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 6</description>
+        </field>
+        <field name="quantitySize8" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et 8</description>
+        </field>
+        <field name="quantitySizeF" type="fixed-point">
+            <description>Quantity order. From OrderItem.quantity of ProductDimension.size et F</description>
+        </field>
+        <!-- end of hengpai -->
+
+        <field name="listPrice" type="currency-precise">
+            <description>List Price. From OrderItem.unitListPrice</description>
+        </field>
+
+        <field name="extGrossAmount" type="currency-precise">
+            <description>Extended gross amount: quantity item multiplied by the unit price.</description>
+        </field>
+        <field name="extGrossCost" type="currency-precise">
+            <description>Extended gross cost: quantity item multiplied by the last price.</description>
+        </field>
+        <field name="extDiscountAmount" type="currency-precise">
+            <description>Extended discount amount.</description>
+        </field>
+        <field name="extNetAmount" type="currency-precise">
+            <description>Extended net amount: gross amount less discounts.</description>
+        </field>
+        <field name="extShippingAmount" type="currency-precise">
+            <description>Extended shipping amount.</description>
+        </field>
+        <field name="extTaxAmount" type="currency-precise">
+            <description>Extended tax amount.</description>
+        </field>
+        
+        <field name="GS" type="currency-precise">
+            <description>Gross Sales: Gross Amount plus Shipping Amount.</description>
+        </field>
+        <field name="GMS" type="currency-precise">
+            <description>Gross Merchandize Sales: Gross Amount.</description>
+        </field>
+        <field name="GMP" type="currency-precise">
+            <description>Gross Merchandize Profit: Gross Merchandize Sales less Gross Cost.</description>
+        </field>
+        <field name="GSS" type="currency-precise">
+            <description>Gross Shipping Sales: Shipping Amount</description>
+        </field>
+        <field name="GSC" type="currency-precise">
+            <description>Gross Shipping Cost</description>
+        </field>
+        <field name="GSP" type="currency-precise">
+            <description>Gross Shipping Profit: Gross Shipping Sales less Gross Shipping Cost.</description>
+        </field>
+        <field name="GP" type="currency-precise">
+            <description>Gross Profit: Gross Merchandize Profit less Gross Shipping Profit.</description>
+        </field>
+        
+        <field name="integralAmount" type="fixed-point"></field>
+        <field name="couponAmount" type="currency-precise"></field>
+        <field name="integralAmountDiscount" type="currency-precise"></field>
+        <field name="isGift" type="id-ne"></field>
+		<field name="integralProd" type="id-ne"></field>
+
+        <field name="countOrder" type="fixed-point">
+            <description>Count of order.</description>
+        </field>
+
+        <prim-key field="orderId"/>
+        <prim-key field="orderItemSeqId"/>
+
+        <relation type="one" fk-name="ZSOIF_ORDERDATE" rel-entity-name="DateDimension">
+            <key-map field-name="orderDateDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_CURRENCY" rel-entity-name="CurrencyDimension">
+            <key-map field-name="origCurrencyDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_PRODUCT" rel-entity-name="Ds163ProductDimension">
+            <key-map field-name="productDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_CUSTOMER" rel-entity-name="CustomerDimension">
+            <key-map field-name="billToCustomerDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_PAYMENT" rel-entity-name="PaymentMethodDimension">
+            <key-map field-name="paymentMethodDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ZSOIF_STORE" rel-entity-name="Zz163StoreDimension">
             <key-map field-name="productStoreDimId" rel-field-name="dimensionId"/>
         </relation>
 

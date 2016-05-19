@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
-    <description>ZuczugEtl Services</description>
+    <description>huangpu Services</description>
     <vendor></vendor>
     <version>1.0</version>
 
     <service name="checkOrderData" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/check/CheckOrderDataServices.xml" invoke="checkOrderData" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/check/CheckOrderDataServices.xml" invoke="checkOrderData" transaction-timeout="10000000">
         <description>检查订单数据是否有问题</description>
         <attribute name="orderId" type="String" mode="IN" optional="false"/>
         <attribute name="checkResult" type="String" mode="OUT" optional="true"/><!-- 如果没问题，返回COOL，如果有问题，返回问题描述 -->
     </service>
     
     <service name="loadProductTimeCard" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/check/CheckOrderDataServices.xml" invoke="loadProductTimeCard" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/check/CheckOrderDataServices.xml" invoke="loadProductTimeCard" transaction-timeout="10000000">
         <description>生成商品积分.zhoulei</description>
         <attribute name="productKeyWord" mode="IN" type="String"></attribute>
         <attribute name="productIdList" type="List" mode="OUT" optional="true"/>
     </service>
     
     <service name="checkEstimateCalcMethod" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/check/CheckOrderDataServices.xml" invoke="checkEstimateCalcMethod" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/check/CheckOrderDataServices.xml" invoke="checkEstimateCalcMethod" transaction-timeout="10000000">
         <description>修改 ProductAssoc表的EstimateCalcMethod .zhoulei</description>
         <attribute name="productId" mode="IN" type="String"></attribute>
     </service>
     
     <service name="checkNoVirtualNoVariant" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/check/CheckProductDataServices.xml" invoke="checkNoVirtualNoVariant" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/check/CheckProductDataServices.xml" invoke="checkNoVirtualNoVariant" transaction-timeout="10000000">
         <description>检查那些非虚拟非变型商品，是否有变型。除了胚布，其它非虚拟非变型不应该有变型商品，把它们找出来！ zhoulei</description>
         <attribute name="productIdList" type="List" mode="OUT" optional="true"/><!-- 返回有问题的productId -->
         <attribute name="noFactProductIds" type="List" mode="OUT" optional="true"/><!-- 没有业务数据的productId，也就是可以删除的productId -->
         <attribute name="hasFactProductIds" type="List" mode="OUT" optional="true"/><!-- 有业务数据的productId，也就是需要人工检查 -->
     </service>
     <service name="checkNoVirtualNoVariantBM" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/check/CheckProductDataServices.xml" invoke="checkNoVirtualNoVariantBM" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/check/CheckProductDataServices.xml" invoke="checkNoVirtualNoVariantBM" transaction-timeout="10000000">
         <description>检查那些非虚拟商品，是否有变型。除了胚布和纱线，其它非虚拟不应该有变型商品，把它们找出来！ zhoulei</description>
         <!-- <attribute name="productIdList" type="List" mode="OUT" optional="true"/> --><!-- 返回有问题的productId -->
         <attribute name="noBusinessData" type="List" mode="OUT" optional="true"/><!-- 返回无业务数据的productId -->
@@ -43,7 +43,7 @@
     </service>
     
     <service name="productRelevanceProduct" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/check/CheckProductDataServices.xml" invoke="productRelevanceProduct" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/check/CheckProductDataServices.xml" invoke="productRelevanceProduct" transaction-timeout="10000000">
         <description>检查是否有商品自己关联自己 zhoulei</description>
         <attribute name="productIdList" mode="OUT" type="List" optional="false"></attribute>
     </service>
@@ -56,13 +56,13 @@
     </service>
     
     <service name="checkAcceOther" auth="true" engine="simple"
-   		location="component://zuczugetl/script/com/zuczug/check/CheckProductDataServices.xml" invoke="checkAcceOther">
+   		location="component://huangpu/script/com/zuczug/check/CheckProductDataServices.xml" invoke="checkAcceOther">
     	<description>统计分类为"其他类"的辅料:返回结果内部编号，名称，规格 zhoulei</description>
     	<attribute name="productAcceOther" mode="OUT" type="List" optional="false"></attribute>
     </service>
     
     <service name="checkVariantNoCorrectVirtual" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/check/CheckProductDataServices.xml" invoke="checkVariantNoCorrectVirtual" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/check/CheckProductDataServices.xml" invoke="checkVariantNoCorrectVirtual" transaction-timeout="10000000">
         <description>检查那些变型商品，没有关联到正确的虚拟商品  </description>
         <attribute name="productIdList" type="List" mode="OUT" optional="true"/><!-- 返回有问题的productId -->
         <attribute name="noVirtualProductIds" type="List" mode="OUT" optional="true"/><!-- 没有关联的商品 -->

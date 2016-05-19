@@ -1,0 +1,106 @@
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	
+	
+	<simple-method method-name="loadAllSeasonStoreDimension" short-description="">
+        <entity-condition list="storeDimensionList" entity-name="ZzStoreDimension">
+        	<condition-list combine="and">
+        		<condition-expr field-name="dimensionId" operator="not-equals" value="_NF_"/>
+        		<condition-expr field-name="dimensionId" operator="not-equals" value="_NA_"/>
+        	</condition-list>
+        </entity-condition>
+        <log message="+++++++++++++++++++1${storeDimensionList}" level="info"/>
+        <iterate entry="storeDimension" list="storeDimensionList">
+        	<entity-and list="salesOrderItemList" entity-name="ZzSalesOrderItemFactStarSchema">
+        		<field-map field-name="storeProductStoreId" from-field="storeDimension.productStoreId"/>
+        		<field-map field-name="productZuczugSeason" value="153"/>
+        	</entity-and>
+        	<if-not-empty field="salesOrderItemList">
+        		<set-service-fields service-name="loadSeasonStoreDimension" map="parameters" to-map="inMap"/>
+				<set field="inMap.productStoreId" from-field="storeDimension.productStoreId"/>
+				<set field="inMap.season" value="153"/>
+				<call-service service-name="loadSeasonStoreDimension" in-map-name="inMap"/>
+				<clear-field field="inMap"/>
+        	</if-not-empty>
+        	
+        	
+        	<entity-and list="salesOrderItemList" entity-name="ZzSalesOrderItemFactStarSchema">
+        		<field-map field-name="storeProductStoreId" from-field="storeDimension.productStoreId"/>
+        		<field-map field-name="productZuczugSeason" value="161"/>
+        	</entity-and>
+        	<if-not-empty field="salesOrderItemList">
+        		<set-service-fields service-name="loadSeasonStoreDimension" map="parameters" to-map="inMap"/>
+				<set field="inMap.productStoreId" from-field="storeDimension.productStoreId"/>
+				<set field="inMap.season" value="161"/>
+				<call-service service-name="loadSeasonStoreDimension" in-map-name="inMap"/>
+				<clear-field field="inMap"/>
+        	</if-not-empty>
+        	
+        	
+        	<entity-and list="salesOrderItemList" entity-name="ZzSalesOrderItemFactStarSchema">
+        		<field-map field-name="storeProductStoreId" from-field="storeDimension.productStoreId"/>
+        		<field-map field-name="productZuczugSeason" value="163"/>
+        	</entity-and>
+        	<if-not-empty field="salesOrderItemList">
+        		<set-service-fields service-name="loadSeasonStoreDimension" map="parameters" to-map="inMap"/>
+				<set field="inMap.productStoreId" from-field="storeDimension.productStoreId"/>
+				<set field="inMap.season" value="163"/>
+				<call-service service-name="loadSeasonStoreDimension" in-map-name="inMap"/>
+				<clear-field field="inMap"/>
+        	</if-not-empty>
+        </iterate>
+        
+		
+    </simple-method>
+	
+	
+	<simple-method method-name="loadSeasonStoreDimension" short-description="">
+
+        <set-service-fields service-name="prepareSeasonStoreDimensionData" map="parameters" to-map="inMap"/>
+        <call-service service-name="prepareSeasonStoreDimensionData" in-map-name="inMap">
+            <result-to-field result-name="storeDimension"/>
+        </call-service>
+        <clear-field field="inMap"/>
+        <set-service-fields service-name="storeGenericDimension" map="parameters" to-map="inMap"/>
+        <set field="inMap.naturalKeyFields[]" value="productStoreId"/>
+        <set field="inMap.dimensionValue" from-field="storeDimension"/>
+        <call-service service-name="storeGenericDimension" in-map-name="inMap"/>
+    </simple-method>
+	
+	
+	<simple-method method-name="prepareSeasonStoreDimensionData">
+		<entity-and list="storeDimensionList" entity-name="ZzStoreDimension">
+			<field-map field-name="productStoreId" from-field="parameters.productStoreId"/>
+		</entity-and>
+		<first-from-list entry="storeDimensions" list="storeDimensionList"/>
+		<if-empty field="storeDimension">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductProductNotFoundWithProduct"/>
+            </add-error>
+        </if-empty>
+        <!-- 判断Store属于哪个季 -->
+        <if-compare operator="equals" value="153" field="parameters.season">
+        	<make-value value-field="storeDimension" entity-name="Zz153StoreDimension"/>
+        </if-compare>
+        <if-compare operator="equals" value="161" field="parameters.season">
+        	<make-value value-field="storeDimension" entity-name="Zz161StoreDimension"/>
+        </if-compare>
+        <if-compare operator="equals" value="163" field="parameters.season">
+        	<make-value value-field="storeDimension" entity-name="Zz163StoreDimension"/>
+        </if-compare>
+        
+        
+        <set field="storeDimension.productStoreId" from-field="storeDimensions.productStoreId"/>
+        <set field="storeDimension.storeName" from-field="storeDimensions.storeName"/>
+        <set field="storeDimension.cityGeoId" from-field="storeDimensions.cityGeoId"/>
+        <set field="storeDimension.cityName" from-field="storeDimensions.cityName"/>
+        <set field="storeDimension.payToPartyId" from-field="storeDimensions.payToPartyId"/>
+        <set field="storeDimension.payToPartyName" from-field="storeDimensions.payToPartyName"/>
+        <set field="storeDimension.isRetailStoreGroupId" from-field="storeDimensions.isRetailStoreGroupId"/>
+        <set field="storeDimension.isRetailStoreGroupName" from-field="storeDimensions.isRetailStoreGroupName"/>
+        
+        <field-to-result field="storeDimension"/>
+	</simple-method>
+		
+		        
+</simple-methods>

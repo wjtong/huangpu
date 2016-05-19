@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
-    <description>ZuczugEtl Services</description>
+    <description>huangpu Services</description>
     <vendor></vendor>
     <version>1.0</version>
 
@@ -13,45 +13,45 @@
 
     <!-- ProductDimension -->
     <service name="zuczug.prepareProductDimensionData" auth="true" engine="simple" transaction-timeout="720000"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="prepareProductDimensionData">
+        location="component://huangpu/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="prepareProductDimensionData">
         <description>Pulls information from the Product* entities (oltp entities) and 
         prepares data for the ProductDimension entity (olap entity). zhoulei</description>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="productDimension" type="GenericEntity" mode="OUT" optional="false"/>
     </service>
     <service name="zuczug.loadProductInProductDimension" auth="true" engine="simple" transaction-timeout="720000"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="loadProductInProductDimension">
+        location="component://huangpu/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="loadProductInProductDimension">
         <description>Pulls information from the Product* entities and 
         stores them in the ProductDimension entity (olap entity) zhoulei</description>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="false"/> <!-- TYPE1, TYPE2, TYPE3 -->
     </service>
     <service name="zuczug.loadType1ProductInProductDimension" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="loadProductInProductDimension">
+        location="component://huangpu/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="loadProductInProductDimension">
         <description>Same as loadProductInProductDimension; the update strategy is 'type 1': overwrite the values of the attributes</description>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
     </service>
     <service name="zuczug.loadType2ProductInProductDimension" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="loadProductInProductDimension">
+        location="component://huangpu/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="loadProductInProductDimension">
         <description>Same as loadProductInProductDimension; the update strategy is 'type 2': add a dimension row</description>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE2"/>
     </service>
     <service name="zuczug.loadAllProductsInProductDimension" auth="true" engine="simple" transaction-timeout="7200000"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="loadAllProductsInProductDimension">
+        location="component://huangpu/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="loadAllProductsInProductDimension">
         <description>Calls the loadProductInProductDimension service for all the products.  zhoulei</description>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
     </service>
     <service name="zuczug.accordingWavebandLoadProductsInProductDimension" auth="true" engine="simple" transaction-timeout="7200000"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="accordingWavebandLoadProductsInProductDimension">
+        location="component://huangpu/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="accordingWavebandLoadProductsInProductDimension">
         <description>Calls the accordingWavebandLoadProductsInProductDimension service for all the products. zhoulei</description>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
         <attribute name="productCategoryId" type="String" mode="IN" optional="true"/>
     </service>
     
     <service name="findProductMainFabric" engine="simple" transaction-timeout="720000"
-    	location="component://zuczugetl/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="findProductMainFabric">
+    	location="component://huangpu/script/com/zuczug/olap/ProductDimensionServices.xml" invoke="findProductMainFabric">
     	<description>找到么个产品的主要面料  . zhoulei</description>
     	<attribute name="productId" mode="IN" type="String" optional="false"></attribute>
     	<attribute name="greaterProduct" mode="OUT" type="String" optional="false"></attribute>
@@ -67,35 +67,35 @@
 
     <!-- ProductColorDimension -->
     <service name="zuczug.prepareProductColorDimensionData" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductColorDimensionServices.xml" invoke="prepareProductColorDimensionData">
+        location="component://huangpu/script/com/zuczug/olap/ProductColorDimensionServices.xml" invoke="prepareProductColorDimensionData">
         <description>Pulls information from the Product* entities (olap entities) and prepares data for the ZzProductColorDimension entity (olap entity)</description>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="colorId" type="String" mode="IN" optional="false"/>
         <attribute name="productColorDimension" type="GenericEntity" mode="OUT" optional="false"/>
     </service>
     <service name="zuczug.loadProductInProductColorDimension" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductColorDimensionServices.xml" invoke="loadProductInProductColorDimension">
+        location="component://huangpu/script/com/zuczug/olap/ProductColorDimensionServices.xml" invoke="loadProductInProductColorDimension">
         <description>Pulls information from the Product* entities and stores them in the ZzProductColorDimension entity (olap entity)</description>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="colorId" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="false"/> <!-- TYPE1, TYPE2, TYPE3 -->
     </service>
     <service name="zuczug.loadType1ProductInProductColorDimension" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductColorDimensionServices.xml" invoke="loadProductInProductColorDimension">
+        location="component://huangpu/script/com/zuczug/olap/ProductColorDimensionServices.xml" invoke="loadProductInProductColorDimension">
         <description>Same as loadProductInProductColorDimension; the update strategy is 'type 1': overwrite the values of the attributes</description>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="colorId" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
     </service>
     <service name="zuczug.loadType2ProductInProductColorDimension" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductColorDimensionServices.xml" invoke="loadProductInProductColorDimension">
+        location="component://huangpu/script/com/zuczug/olap/ProductColorDimensionServices.xml" invoke="loadProductInProductColorDimension">
         <description>Same as loadProductInProductColorDimension; the update strategy is 'type 2': add a dimension row</description>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="colorId" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE2"/>
     </service>
     <service name="zuczug.loadAllProductsInProductColorDimension" auth="true" engine="simple" transaction-timeout="72000"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductColorDimensionServices.xml" invoke="loadAllProductsInProductColorDimension">
+        location="component://huangpu/script/com/zuczug/olap/ProductColorDimensionServices.xml" invoke="loadAllProductsInProductColorDimension">
         <description>Calls the loadProductInProductColorDimension service for all the products.</description>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
     </service>
@@ -103,31 +103,31 @@
 
     <!-- BulkCustomerDimension -->
     <service name="zuczug.prepareBulkCustomerDimensionData" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/BulkCustomerDimensionServices.xml" invoke="prepareBulkCustomerDimensionData">
+        location="component://huangpu/script/com/zuczug/olap/BulkCustomerDimensionServices.xml" invoke="prepareBulkCustomerDimensionData">
         <description>代理商客户及店铺维度表</description>
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="bulkCustomerDimension" type="GenericEntity" mode="OUT" optional="false"/>
     </service>
     <service name="zuczug.loadCustomerInBulkCustomerDimension" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/BulkCustomerDimensionServices.xml" invoke="loadCustomerInBulkCustomerDimension">
+        location="component://huangpu/script/com/zuczug/olap/BulkCustomerDimensionServices.xml" invoke="loadCustomerInBulkCustomerDimension">
         <description>读取客户信息，存入BulkCustomerDimension</description>
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="false"/> <!-- TYPE1, TYPE2, TYPE3 -->
     </service>
     <service name="zuczug.loadType1CustomerInBulkCustomerDimension" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/BulkCustomerDimensionServices.xml" invoke="loadCustomerInBulkCustomerDimension">
+        location="component://huangpu/script/com/zuczug/olap/BulkCustomerDimensionServices.xml" invoke="loadCustomerInBulkCustomerDimension">
         <description>读取客户信息，存入BulkCustomerDimension</description>
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
     </service>
     <service name="zuczug.loadType2CustomerInBulkCustomerDimension" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/BulkCustomerDimensionServices.xml" invoke="loadCustomerInBulkCustomerDimension">
+        location="component://huangpu/script/com/zuczug/olap/BulkCustomerDimensionServices.xml" invoke="loadCustomerInBulkCustomerDimension">
         <description>读取客户信息，存入BulkCustomerDimension</description>
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE2"/>
     </service>
     <service name="zuczug.loadAllCustomerInBulkCustomerDimension" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/BulkCustomerDimensionServices.xml" invoke="loadAllCustomerInBulkCustomerDimension">
+        location="component://huangpu/script/com/zuczug/olap/BulkCustomerDimensionServices.xml" invoke="loadAllCustomerInBulkCustomerDimension">
         <description>将所有客户信息，存入BulkCustomerDimension</description>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
     </service>
@@ -135,7 +135,7 @@
 
     <!-- Request Facts -->
     <service name="loadRequestItemFact" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/RequestFactServices.xml" invoke="loadRequestItemFact">
+        location="component://huangpu/script/com/zuczug/olap/RequestFactServices.xml" invoke="loadRequestItemFact">
         <description>
             B2B客户request事实表.zhoulei
         </description>
@@ -144,67 +144,67 @@
     </service>
     
     <service name="loadRequestFact" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/RequestFactServices.xml" invoke="loadRequestFact">
+        location="component://huangpu/script/com/zuczug/olap/RequestFactServices.xml" invoke="loadRequestFact">
         <description>B2B客户request事实表.zhoulei</description>
         <attribute name="custRequestId" type="String" mode="IN" optional="false"/>
     </service>
-    <service name="loadProductContentFact" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/ContentFactServices.xml" invoke="loadProductContentFact">
+    <service name="loadProductContentFact" engine="simple" location="component://huangpu/script/com/zuczug/olap/ContentFactServices.xml" invoke="loadProductContentFact">
     	<description>将商品的单品图片数据，导入到olap数据库里 zhoulei</description>
     	<attribute name="productId" type="String" mode="IN" optional="true"/>
     	<attribute name="contentId" type="String" mode="IN" optional="true"/>
     	<attribute name="productContentTypeId" type="String" mode="IN" optional="true"/>
     </service>
     <service name="importProductContentData" engine="simple" transaction-timeout="7200000"
-    	location="component://zuczugetl/script/com/zuczug/olap/ContentFactServices.xml" invoke="importProductContentData">
+    	location="component://huangpu/script/com/zuczug/olap/ContentFactServices.xml" invoke="importProductContentData">
     	<description>调用loadProductContentFact导入图片数据 zhoulei</description>
     	<attribute name="productCategoryId" mode="IN" type="String" optional="false"></attribute>
     </service>
     
-    <service name="loadCategoryContentFact" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/ContentFactServices.xml" invoke="loadCategoryContentFact">
+    <service name="loadCategoryContentFact" engine="simple" location="component://huangpu/script/com/zuczug/olap/ContentFactServices.xml" invoke="loadCategoryContentFact">
     	<description>将商品的搭配图数据，导入到olap数据库里 zhoulei</description>
     	<attribute name="productCategoryId" mode="IN" type="String" optional="true"></attribute>
     	<attribute name="contentId" mode="IN" type="String" optional="true"></attribute>
     	<attribute name="prodCatContentTypeId" mode="IN" type="String" optional="true"></attribute>
     </service>
-    <service name="importCategoryContentData" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/ContentFactServices.xml" invoke="importCategoryContentData">
+    <service name="importCategoryContentData" engine="simple" location="component://huangpu/script/com/zuczug/olap/ContentFactServices.xml" invoke="importCategoryContentData">
     	<description>调用loadCategoryContentFact导入图片数据 zhoulei</description>
     	<attribute name="productCategoryId" mode="IN" type="String" optional="false"></attribute>
     </service>
     
-    <service name="loadCategoryMemberFact" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/ContentFactServices.xml" invoke="loadCategoryMemberFact">
+    <service name="loadCategoryMemberFact" engine="simple" location="component://huangpu/script/com/zuczug/olap/ContentFactServices.xml" invoke="loadCategoryMemberFact">
     	<description>将商品的搭配关联数据，导入到olap数据库里 zhoulei</description>
     	<attribute name="productId" mode="IN" type="String" optional="true"></attribute>
     	<attribute name="productCategoryId" mode="IN" type="String" optional="true"></attribute>
     </service>
-    <service name="importCategoryMemberData" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/ContentFactServices.xml" invoke="importCategoryMemberData">
+    <service name="importCategoryMemberData" engine="simple" location="component://huangpu/script/com/zuczug/olap/ContentFactServices.xml" invoke="importCategoryMemberData">
     	<description>调用loadCategoryMemberFact导入图片数据 zhoulei</description>
     	<attribute name="productCategoryId" mode="IN" type="String" optional="false"></attribute>
     </service>
     
     <service name="loadAllImageData" engine="simple" transaction-timeout="7200000"
-    	location="component://zuczugetl/script/com/zuczug/olap/ContentFactServices.xml" invoke="loadAllImageData">
+    	location="component://huangpu/script/com/zuczug/olap/ContentFactServices.xml" invoke="loadAllImageData">
     	<description>加载某个波段所有商品的图片(搭配，单品)信息 zhoulei</description>
     	<attribute name="productCategoryId" mode="IN" type="String" optional="false"></attribute>
     </service>
     
     <service name="loadOneProductImageData" engine="simple"
-    	location="component://zuczugetl/script/com/zuczug/olap/ContentFactServices.xml" invoke="loadOneProductImageData">
+    	location="component://huangpu/script/com/zuczug/olap/ContentFactServices.xml" invoke="loadOneProductImageData">
     	<description>加载某个商品的图片(搭配，单品)信息 zhoulei</description>
     	<attribute name="productId" mode="IN" type="String" optional="false"></attribute>
     </service>
     
-    <service name="prepareMaterialDimensionData" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/MaterialDimensionServices.xml" invoke="prepareMaterialDimensionData">
+    <service name="prepareMaterialDimensionData" engine="simple" location="component://huangpu/script/com/zuczug/olap/MaterialDimensionServices.xml" invoke="prepareMaterialDimensionData">
     	<description>Pulls information from the Product* entities (oltp entities) and
     	 prepares data for the MaterialDimension entity (olap entity) zhoulei</description>
     	<attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="materialDimension" type="GenericEntity" mode="OUT" optional="false"/>
     </service>
     <service name="loadAllMaterialsInMaterialDimension" engine="simple" transaction-timeout="72000"
-    	location="component://zuczugetl/script/com/zuczug/olap/MaterialDimensionServices.xml" invoke="loadAllMaterialsInMaterialDimension">
+    	location="component://huangpu/script/com/zuczug/olap/MaterialDimensionServices.xml" invoke="loadAllMaterialsInMaterialDimension">
     	<description>Calls the loadMaterialInMaterialDimension service for all the products. zhoulei</description>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
     </service>
-    <service name="loadMaterialInMaterialDimension" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/MaterialDimensionServices.xml" invoke="loadMaterialInMaterialDimension">
+    <service name="loadMaterialInMaterialDimension" engine="simple" location="component://huangpu/script/com/zuczug/olap/MaterialDimensionServices.xml" invoke="loadMaterialInMaterialDimension">
     	<description>Pulls information from the Product* entities and
     	 stores them in the MaterialDimension entity (olap entity)  zhoulei</description>
     	<attribute name="productId" type="String" mode="IN" optional="false"/>
@@ -212,7 +212,7 @@
     </service>
     
     <service name="importCustRequestData" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/RequestFactServices.xml" invoke="importCustRequestData" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/olap/RequestFactServices.xml" invoke="importCustRequestData" transaction-timeout="10000000">
         <description>Import Request Data. zhoulei</description>
         <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
         <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
@@ -229,7 +229,7 @@
     
 
     <service name="findAllOrderId" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/check/CheckOrderDataServices.xml" invoke="findAllOrderId" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/check/CheckOrderDataServices.xml" invoke="findAllOrderId" transaction-timeout="10000000">
         <description>检查所有订单Id .zhoulei</description>
         <attribute name="wrongOrderIdStr" type="String" mode="OUT" optional="true"/>
         <attribute name="wrongOrderIdList" type="List" mode="OUT" optional="true"/>
@@ -237,7 +237,7 @@
 
     <!-- 订货会 Facts -->
     <service name="loadDinghuohuiItemFact" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/DinghuohuiFactServices.xml" invoke="loadDinghuohuiItemFact">
+        location="component://huangpu/script/com/zuczug/olap/DinghuohuiFactServices.xml" invoke="loadDinghuohuiItemFact">
         <description>
             B2B客户订货会事实表 zhoulei
         </description>
@@ -246,65 +246,65 @@
         <attribute name="requirementId" type="String" mode="IN" optional="true"/>
     </service>
     <service name="loadDinghuohuiRequestFact" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/DinghuohuiFactServices.xml" invoke="loadDinghuohuiRequestFact">
+        location="component://huangpu/script/com/zuczug/olap/DinghuohuiFactServices.xml" invoke="loadDinghuohuiRequestFact">
         <description>B2B客户订货会request事实表 zhoulei</description>
         <attribute name="custRequestId" type="String" mode="IN" optional="false"/>
     </service>
     <service name="loadDinghuohuiRequirementFact" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/DinghuohuiFactServices.xml" invoke="loadDinghuohuiRequirementFact">
+        location="component://huangpu/script/com/zuczug/olap/DinghuohuiFactServices.xml" invoke="loadDinghuohuiRequirementFact">
         <description>B2B客户订货会requirement事实表 zhoulei</description>
         <attribute name="requirementId" type="String" mode="IN" optional="false"/>
     </service>
     <service name="importDinghuohuiData" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/DinghuohuiFactServices.xml" invoke="importDinghuohuiData" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/olap/DinghuohuiFactServices.xml" invoke="importDinghuohuiData" transaction-timeout="10000000">
         <description>Import 订货会 Data. zhoulei</description>
         <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
         <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
     </service>
     
     <service name="loadAllZzStoreDimension" auth="true" engine="simple" transaction-timeout="30000"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductStoreDimensionServices.xml" invoke="loadAllZzStoreDimension">
+        location="component://huangpu/script/com/zuczug/olap/ProductStoreDimensionServices.xml" invoke="loadAllZzStoreDimension">
         <description>Calls the loadZzStoreDimension service for all the people. zhoulei</description>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
     </service>
     <service name="loadZzStoreDimension" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductStoreDimensionServices.xml" invoke="loadZzStoreDimension">
+        location="component://huangpu/script/com/zuczug/olap/ProductStoreDimensionServices.xml" invoke="loadZzStoreDimension">
         <description>Load Product Store Dimension.zhoulei</description>
         <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="false"/> <!-- TYPE1, TYPE2, TYPE3 -->
     </service>
     
     <service name="prepareZzStoreDimensionData" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/ProductStoreDimensionServices.xml" invoke="prepareZzStoreDimensionData">
+        location="component://huangpu/script/com/zuczug/olap/ProductStoreDimensionServices.xml" invoke="prepareZzStoreDimensionData">
         <description>Prepare Product Store dimension data. zhoulei</description>
         <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
         <attribute name="zzStoreDimension" type="GenericEntity" mode="OUT" optional="false"/>
     </service>
     
     <service name="importQuoteItemData" engine="simple" auth="true" transaction-timeout="720000"
-    	location="component://zuczugetl/script/com/zuczug/olap/QuoteItemFactServices.xml" invoke="importQuoteItemData">
+    	location="component://huangpu/script/com/zuczug/olap/QuoteItemFactServices.xml" invoke="importQuoteItemData">
     	<description>Import Quote Item Data. zhoulei</description>
     </service>
     <service name="loadQuoteData" engine="simple" auth="true"
-    	location="component://zuczugetl/script/com/zuczug/olap/QuoteItemFactServices.xml" invoke="loadQuoteData">
+    	location="component://huangpu/script/com/zuczug/olap/QuoteItemFactServices.xml" invoke="loadQuoteData">
     	<description>load Quote Data. zhoulei</description>
     	<attribute name="quoteId" mode="IN" type="String"></attribute>
     </service>
     <service name="loadQuoteItemFact" auth="true" engine="simple" 
-    	location="component://zuczugetl/script/com/zuczug/olap/QuoteItemFactServices.xml" invoke="loadQuoteItemFact">
+    	location="component://huangpu/script/com/zuczug/olap/QuoteItemFactServices.xml" invoke="loadQuoteItemFact">
     	<description>load QuoteItemFact.zhoulei</description>
     	<attribute name="quoteId" mode="IN" type="String" optional="false"></attribute>
     	<attribute name="quoteItemSeqId" mode="IN" type="String" optional="false"></attribute>
     </service>
     
     <service name="loadRequirementFact" engine="simple" auth="true"
-    	location="component://zuczugetl/script/com/zuczug/olap/RequirementFactServices.xml" invoke="loadRequirementFact">
+    	location="component://huangpu/script/com/zuczug/olap/RequirementFactServices.xml" invoke="loadRequirementFact">
     	<description>load Requirement Fact.zhoulei</description>
     	<attribute name="requirementId" mode="IN" type="String" optional="false"></attribute>
     </service>
     
     <service name="importRequirementData" engine="simple" auth="true"
-    	location="component://zuczugetl/script/com/zuczug/olap/RequirementFactServices.xml" invoke="importRequirementData">
+    	location="component://huangpu/script/com/zuczug/olap/RequirementFactServices.xml" invoke="importRequirementData">
     	<description>import Requirement Data.zhoulei</description>
     </service>
     
@@ -322,7 +322,7 @@
     </service>
     
     <service name="loadPeopleByDateRangeInCustomerDimension" auth="true" engine="simple" transaction-timeout="30000"
-        location="component://zuczugetl/script/com/zuczug/olap/CustomerDimensionServices.xml" invoke="loadPeopleByDateRangeInCustomerDimension">
+        location="component://huangpu/script/com/zuczug/olap/CustomerDimensionServices.xml" invoke="loadPeopleByDateRangeInCustomerDimension">
         <description>Calls the loadPersonInCustomerDimension service for all the people. zhoulei</description>
         <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
         <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
@@ -330,20 +330,20 @@
     </service>
     
     <service name="loadAllPeopleInCustomerDimension" auth="true" engine="simple" transaction-timeout="30000"
-        location="component://zuczugetl/script/com/zuczug/olap/CustomerDimensionServices.xml" invoke="loadAllPeopleInCustomerDimension">
+        location="component://huangpu/script/com/zuczug/olap/CustomerDimensionServices.xml" invoke="loadAllPeopleInCustomerDimension">
         <description>Calls the loadPersonInCustomerDimension service for all the people. zhoulei</description>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
     </service>
     
     <service name="loadPersonInCustomerDimension" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/CustomerDimensionServices.xml" invoke="loadPersonInCustomerDimension">
+        location="component://huangpu/script/com/zuczug/olap/CustomerDimensionServices.xml" invoke="loadPersonInCustomerDimension">
         <description>Load person in customer dimension. zhoulei</description>
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="false"/> <!-- TYPE1, TYPE2, TYPE3 -->
     </service>
 
     <service name="prepareCustomerDimensionData" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/CustomerDimensionServices.xml" invoke="prepareCustomerDimensionData">
+        location="component://huangpu/script/com/zuczug/olap/CustomerDimensionServices.xml" invoke="prepareCustomerDimensionData">
         <description>Prepare customer dimension data. zhoulei </description>
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="customerDimension" type="GenericEntity" mode="OUT" optional="false"/>
@@ -351,7 +351,7 @@
     
     <!-- the sales orders only for zuczug -->
     <service name="loadZuczugSalesOrderItemFact" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/OrderFactServices.xml" invoke="loadZuczugSalesOrderItemFact">
+        location="component://huangpu/script/com/zuczug/olap/OrderFactServices.xml" invoke="loadZuczugSalesOrderItemFact">
         <description>
             Pulls information from the OrderItem* entities and stores them in the ZzSalesOrderItemFact entity (olap entity).
             One of orderId/orderItemSeqId or order/orderItem must be passed or an error is returned. zhoulei
@@ -364,89 +364,96 @@
     </service>
     
     <service name="loadZuczugSalesOrderFact" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/OrderFactServices.xml" invoke="loadZuczugSalesOrderFact">
+        location="component://huangpu/script/com/zuczug/olap/OrderFactServices.xml" invoke="loadZuczugSalesOrderFact">
         <description>zhoulei</description>
         <attribute name="orderId" type="String" mode="IN" optional="false"/>
         <attribute name="payShipFlag" type="String" mode="IN" optional="true"/>
     </service>
     
     <service name="loadZuczugSalesOrderDataDaily" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/OrderFactServices.xml" invoke="loadZuczugSalesOrderDataDaily" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/olap/OrderFactServices.xml" invoke="loadZuczugSalesOrderDataDaily" transaction-timeout="10000000">
         <description>Load Sales Order Data Daily. zhoulei</description>
     </service>
     
     <service name="loadTheSalesOrderFact" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/OrderFactServices.xml" invoke="loadTheSalesOrderFact">
+        location="component://huangpu/script/com/zuczug/olap/OrderFactServices.xml" invoke="loadTheSalesOrderFact">
         <description>Pulls information from the OrderHeader* entities and
          stores them in the ZzSalesOrderFact entity (olap entity). zhoulei</description>
         <attribute name="orderId" type="String" mode="IN" optional="false"/>
     </service>
     
     <service name="importTheSalesOrderData" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/OrderFactServices.xml" invoke="importTheSalesOrderData" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/olap/OrderFactServices.xml" invoke="importTheSalesOrderData" transaction-timeout="10000000">
         <description>With fromDate and thruDate to get completed orders in this period of time. zhoulei</description>
         <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
         <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
     </service>
     
     <service name="snapshotInventoryItem" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/InventoryFactServices.xml" invoke="snapshotInventoryItem" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/olap/InventoryFactServices.xml" invoke="snapshotInventoryItem" transaction-timeout="10000000">
         <description>Take a snapshot of an inventory items.</description>
         <attribute name="inventoryItemId" type="String" mode="IN" optional="false"/>
     </service>
     
     <service name="snapshotAllInventoryItem" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/InventoryFactServices.xml" invoke="snapshotAllInventoryItem" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/olap/InventoryFactServices.xml" invoke="snapshotAllInventoryItem" transaction-timeout="10000000">
         <description>Take a snapshot of all inventory items, exclude quantity 0.</description>
     </service>
     
     <service name="prepareWashInfoDimensionData" auth="true" engine="simple"
-        location="component://zuczugetl/script/com/zuczug/olap/WashInfoDimensionServices.xml" invoke="prepareWashInfoDimensionData" transaction-timeout="10000000">
+        location="component://huangpu/script/com/zuczug/olap/WashInfoDimensionServices.xml" invoke="prepareWashInfoDimensionData" transaction-timeout="10000000">
         <description>TmpWashInfo table  The import  goods  Washing label information zhoulei</description>
         <attribute name="productId" mode="IN" type="String"></attribute>
     </service>
     
     <service name="loadAllSeasonProductDimension" auth="true" engine="simple" transaction-timeout="7200000"
-        location="component://zuczugetl/script/com/zuczug/olap/SeasonProductDimensionServices.xml" invoke="loadAllSeasonProductDimension">
-        <description>Calls the load161ProductDimension service query season for all the products.zhoulei</description>
-        <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
-        <attribute name="zuczugSeason" type="String" mode="IN" optional="true"/>
+        location="component://huangpu/script/com/zuczug/olap/SeasonProductDimensionServices.xml" invoke="loadAllSeasonProductDimension">
+        <description>查询么个季的商品信息导入对应的Dimension表.zhoulei</description>
+        <attribute name="updateMode" type="String" mode="IN" optional="false" default-value="TYPE1"/>
+        <attribute name="keyword" type="String" mode="IN" optional="false"/>
+    </service>
+    
+    <service name="loadSeasonClassificationProductDimension" auth="true" engine="simple" transaction-timeout="7200000"
+        location="component://huangpu/script/com/zuczug/olap/SeasonProductDimensionServices.xml" invoke="loadSeasonClassificationProductDimension">
+        <description>查询所有商品信息根据季分别导入对应的Dimension表.zhoulei</description>
+        <attribute name="updateMode" type="String" mode="IN" optional="false" default-value="TYPE1"/>
     </service>
     
     
     <service name="loadSeasonProductDimension" auth="true" engine="simple" transaction-timeout="720000"
-        location="component://zuczugetl/script/com/zuczug/olap/SeasonProductDimensionServices.xml" invoke="loadSeasonProductDimension">
+        location="component://huangpu/script/com/zuczug/olap/SeasonProductDimensionServices.xml" invoke="loadSeasonProductDimension">
         <description>Pulls information from the Product* entities and stores them in the ProductDimension entity (olap entity)</description>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="false"/> <!-- TYPE1, TYPE2, TYPE3 -->
+        <attribute name="keyword" type="String" mode="IN" optional="false"/>
     </service>
     
     
     <service name="prepareSeasonProductDimensionData" auth="true" engine="simple" transaction-timeout="720000"
-        location="component://zuczugetl/script/com/zuczug/olap/SeasonProductDimensionServices.xml" invoke="prepareSeasonProductDimensionData">
+        location="component://huangpu/script/com/zuczug/olap/SeasonProductDimensionServices.xml" invoke="prepareSeasonProductDimensionData">
         <description>Pulls information from the Product* entities (oltp entities) and prepares data for the ProductDimension entity (olap entity)</description>
         <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="keyword" type="String" mode="IN" optional="false"/>
         <attribute name="dsProductDimension" type="GenericEntity" mode="OUT" optional="false"/>
     </service>
     
-    <service name="importAllRegentOrderInfo" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/RegentOrderServices.xml"
+    <service name="importAllRegentOrderInfo" engine="simple" location="component://huangpu/script/com/zuczug/olap/RegentOrderServices.xml"
     	invoke="importAllRegentOrderInfo" transaction-timeout="720000">
     	<description>导出所有丽晶订单信息 zhoulei</description>
     	<attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
         <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
     </service>
-    <service name="loadDSRegentOrderPayment" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/RegentOrderServices.xml"
+    <service name="loadDSRegentOrderPayment" engine="simple" location="component://huangpu/script/com/zuczug/olap/RegentOrderServices.xml"
     	invoke="loadDSRegentOrderPayment">
     	<description>导出ZzSalesOrderFact信息 zhoulei</description>
     	<attribute name="checkId" mode="IN" type="String"></attribute>
     </service>
-    <service name="loadDSRegentOrder" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/RegentOrderServices.xml"
-    	invoke="loadDSRegentOrder">
+    <service name="loadRegentOrderInfo" engine="simple" location="component://huangpu/script/com/zuczug/olap/RegentOrderServices.xml"
+    	invoke="loadRegentOrderInfo">
     	<description>导出ZzSalesOrderItemFact信息 zhoulei</description>
-    	<attribute name="checkId" mode="IN" type="String"></attribute>
     </service>
     
-    <service name="importAllErpVip" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/ErpVipServices.xml"
+    <service name="importAllErpVip" engine="simple" location="component://huangpu/script/com/zuczug/olap/ErpVipServices.xml"
     	invoke="importAllErpVip" transaction-timeout="720000">
     	<description>导出所有VIP信息 zhoulei</description>
     	<attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
@@ -454,23 +461,46 @@
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
     </service>
     
-    <service name="loadCustomerDimension" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/ErpVipServices.xml"
+    <service name="loadCustomerDimension" engine="simple" location="component://huangpu/script/com/zuczug/olap/ErpVipServices.xml"
     	invoke="loadCustomerDimension" transaction-timeout="720000">
     	<description>导出所有VIP信息 zhoulei</description>
     	<attribute name="vipcode" type="String" mode="IN" optional="false"/>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
     </service>
     
-    <service name="prepareErpCustomerDimension" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/ErpVipServices.xml"
+    <service name="prepareErpCustomerDimension" engine="simple" location="component://huangpu/script/com/zuczug/olap/ErpVipServices.xml"
     	invoke="prepareErpCustomerDimension" transaction-timeout="720000">
     	<description>导出所有VIP信息 zhoulei</description>
     	<attribute name="vipcode" type="String" mode="IN" optional="false"/>
         <attribute name="customerDimension" type="GenericEntity" mode="OUT" optional="false"/>
     </service>
     
-    <service name="checkErpVipImport" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/ErpVipServices.xml"
+    <service name="checkErpVipImport" engine="simple" location="component://huangpu/script/com/zuczug/olap/ErpVipServices.xml"
     	invoke="checkErpVipImport" transaction-timeout="720000">
     	<description>检查所有Vip数据在olap里面是否存在</description>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
+    </service>
+    
+    <service name="loadAllSeasonStoreDimension" auth="true" engine="simple" transaction-timeout="720000"
+        location="component://huangpu/script/com/zuczug/olap/SeasonProductStoreServices.xml" invoke="loadAllSeasonStoreDimension">
+        <description>Calls the loadZzStoreDimension service for all the people. zhoulei</description>
+        <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
+    </service>
+    
+    <service name="loadSeasonStoreDimension" auth="true" engine="simple" transaction-timeout="30000"
+        location="component://huangpu/script/com/zuczug/olap/SeasonProductStoreServices.xml" invoke="loadSeasonStoreDimension">
+        <description>Calls the loadZzStoreDimension service for all the people. zhoulei</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="season" type="String" mode="IN" optional="false"/>
+        <attribute name="updateMode" type="String" mode="IN" optional="false"/>
+    </service>
+    
+    
+    <service name="prepareSeasonStoreDimensionData" auth="true" engine="simple"
+        location="component://huangpu/script/com/zuczug/olap/SeasonProductStoreServices.xml" invoke="prepareSeasonStoreDimensionData">
+        <description>Prepare Product Store dimension data. zhoulei</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"/>
+        <attribute name="season" type="String" mode="IN" optional="false"/>
+        <attribute name="storeDimension" type="GenericEntity" mode="OUT" optional="false"/>
     </service>
 </services>

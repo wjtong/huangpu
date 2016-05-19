@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+        
+        <simple-method method-name="prepareSeasonOrderItemFact">
+        	<entity-one value-field="salesOrderItem" entity-name="ZzSalesOrderItemFactStarSchema">
+        		<field-map field-name="orderId" from-field="parameters.orderId"/>
+        		<field-map field-name="orderItemSeqId" from-field="parameters.orderItemSeqId"/>
+        	</entity-one>
+        	<if-empty field="salesOrderItemList">
+	            <add-error>
+	                <fail-property resource="salesOrderItemList" property="ProductProductNotFoundWithProduct"/>
+	            </add-error>
+	        </if-empty>
+        	<check-errors/>
+        	<!-- 判断Order是153还是161/163 -->
+        	<if-compare operator="equals" value="153" field="salesOrderItem.productZuczugSeason">
+       			<entity-one value-field="fact" entity-name="Zz153SalesOrderItemFact">
+       				<field-map field-name="orderId" from-field="salesOrderItem.orderId"/>
+       				<field-map field-name="orderItemSeqId" from-field="salesOrderItem.orderItemSeqId"/>
+       			</entity-one>
+       		</if-compare>
+       		<if-compare operator="equals" value="161" field="salesOrderItem.productZuczugSeason">
+       			<entity-one value-field="fact" entity-name="Zz161SalesOrderItemFact">
+       				<field-map field-name="orderId" from-field="salesOrderItem.orderId"/>
+       				<field-map field-name="orderItemSeqId" from-field="salesOrderItem.orderItemSeqId"/>
+       			</entity-one>
+       		</if-compare>
+       		<if-compare operator="equals" value="163" field="salesOrderItem.productZuczugSeason">
+       			<entity-one value-field="fact" entity-name="Zz163SalesOrderItemFact">
+       				<field-map field-name="orderId" from-field="salesOrderItem.orderId"/>
+       				<field-map field-name="orderItemSeqId" from-field="salesOrderItem.orderItemSeqId"/>
+       			</entity-one>
+       		</if-compare>
+       		<if-empty field="fact">
+       			<if-compare operator="equals" value="153" field="salesOrderItem.productZuczugSeason">
+	        		<make-value entity-name="Zz153SalesOrderItemFact" value-field="fact"/>
+       			</if-compare>
+       			<if-compare operator="equals" value="161" field="salesOrderItem.productZuczugSeason">
+	        		<make-value entity-name="Zz161SalesOrderItemFact" value-field="fact"/>
+       			</if-compare>
+       			<if-compare operator="equals" value="163" field="salesOrderItem.productZuczugSeason">
+	        		<make-value entity-name="Zz163SalesOrderItemFact" value-field="fact"/>
+       			</if-compare>
+       			
+       			<set field="fact.orderId" from-field="salesOrderItem.orderId"/>
+				<set field="fact.orderItemSeqId" from-field="salesOrderItem.orderItemSeqId"/>
+				<!-- 获取productStoreDimId -->
+				<if-not-empty field="salesOrderItem.storeProductStoreId">
+					<clear-field field="inMap"/>
+					<if-compare operator="equals" value="153" field="salesOrderItem.productZuczugSeason">
+			     		<set field="inMap.dimensionEntityName" value="Zz153StoreDimension"/>
+	       			</if-compare>
+					<if-compare operator="equals" value="161" field="salesOrderItem.productZuczugSeason">
+			     		<set field="inMap.dimensionEntityName" value="Zz161StoreDimension"/>
+	       			</if-compare>
+					<if-compare operator="equals" value="163" field="salesOrderItem.productZuczugSeason">
+			     		<set field="inMap.dimensionEntityName" value="Zz163StoreDimension"/>
+	       			</if-compare>
+			     	<set field="inMap.naturalKeyFields.productStoreId" from-field="salesOrderItem.storeProductStoreId"/>
+			     	<call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+			         	<result-to-field result-name="dimensionId" field="fact.productStoreDimId"/>
+			     	</call-service>
+			     	<if-empty field="fact.productStoreDimId">
+			         	<set field="fact.productStoreDimId" value="_NF_"/>
+			     	</if-empty>
+				<else>
+					<set field="fact.productStoreDimId" value="_NA_"/>
+				</else>
+				</if-not-empty>
+				
+       			<create-value value-field="fact"/>
+       		</if-empty>
+       		
+        	<set field="fact.statusId" from-field="orderItem.statusId"/>
+        	
+        	
+          	<store-value value-field="fact"/>
+        </simple-method>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <simple-method method-name="loadSeasonOrderItemData">
+			<set field="fromDate" from-field="parameters.fromDate"/>
+	        <set field="thruDate" from-field="parameters.thruDate"/>
+	        
+        	<entity-condition list="salesOrderItemList" entity-name="ZzSalesOrderItemFactStarSchema">
+        		<condition-list combine="and">
+        			<condition-expr field-name="dateDateValue" operator="greater-equals" from-field="fromDate"/>
+        			<condition-expr field-name="dateDateValue" operator="less" from-field="thruDate"/>
+        		</condition-list>
+        	</entity-condition>
+        	<!-- if-empty field="fact">
+				<make-value value-field="fact" entity-name="Zz153SalesOrderItemFact"/>
+      		</if-empty-->
+        	<iterate entry="salesOrderItem" list="salesOrderItemList">
+        		<!-- 判断Order是153还是161/163 -->
+        		<if-compare operator="equals" value="153" field="salesOrderItem.productZuczugSeason">
+        			<entity-one value-field="fact" entity-name="Zz153SalesOrderItemFact">
+        				<field-map field-name="orderId" from-field="salesOrderItem.orderId"/>
+        				<field-map field-name="orderItemSeqId" from-field="salesOrderItem.orderItemSeqId"/>
+        			</entity-one>
+        		</if-compare>
+        		<if-compare operator="equals" value="161" field="salesOrderItem.productZuczugSeason">
+        			<entity-one value-field="fact" entity-name="Zz161SalesOrderItemFact">
+        				<field-map field-name="orderId" from-field="salesOrderItem.orderId"/>
+        				<field-map field-name="orderItemSeqId" from-field="salesOrderItem.orderItemSeqId"/>
+        			</entity-one>
+        		</if-compare>
+        		<if-compare operator="equals" value="163" field="salesOrderItem.productZuczugSeason">
+        			<entity-one value-field="fact" entity-name="Zz163SalesOrderItemFact">
+        				<field-map field-name="orderId" from-field="salesOrderItem.orderId"/>
+        				<field-map field-name="orderItemSeqId" from-field="salesOrderItem.orderItemSeqId"/>
+        			</entity-one>
+        		</if-compare>
+        		
+        		
+        		
+        	</iterate>
+        	
+        </simple-method>
+
+</simple-methods>        
