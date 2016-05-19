@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
-    <description>ZuczugEtl Services</description>
+    <description>HuangPu Services</description>
     <vendor></vendor>
     <version>1.0</version>
 
@@ -32,7 +32,7 @@
     </service>    
 
     <service name="analysis.forecastStoreProductQuantity" engine="simple"
-            location="component://zuczugetl/script/com/zuczug/analysis/AnalysisForecastServices.xml" invoke="forecastStoreProductQuantity" auth="true">
+            location="component://huangpu/script/com/zuczug/analysis/AnalysisForecastServices.xml" invoke="forecastStoreProductQuantity" auth="true">
 		<description>Forecast sku amount for each store</description>
 		<attribute name="productId" mode="IN" type="String" optional="true"></attribute>
 		<attribute name="quantity" mode="IN" type="BigDecimal" optional="true"></attribute>
@@ -40,7 +40,7 @@
 	</service>
 
     <service name="analysis.forecastStoreProductQuantityTest" engine="simple"
-            location="component://zuczugetl/script/com/zuczug/analysis/AnalysisForecastServices.xml" invoke="forecastStoreProductQuantityTest" auth="true">
+            location="component://huangpu/script/com/zuczug/analysis/AnalysisForecastServices.xml" invoke="forecastStoreProductQuantityTest" auth="true">
 		<description>Test forecast sku amount for each store</description>
 		<attribute name="productId" mode="IN" type="String" optional="true"></attribute>
 		<attribute name="storeProductQuantityList" mode="OUT" type="List" optional="true"></attribute>

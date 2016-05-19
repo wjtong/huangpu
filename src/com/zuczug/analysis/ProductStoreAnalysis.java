@@ -545,4 +545,22 @@ public class ProductStoreAnalysis {
 
 		return result;
 	}
+
+	public static Map<String, Object> forecastProductQuantity(DispatchContext dctx,
+  			Map<String, ? extends Object> context) {
+  		Map<String, Object> result = ServiceUtil.returnSuccess();
+  		Delegator delegator = dctx.getDelegator();
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+  		String productId=(String) context.get("productId");
+  		
+  		// 找到相同颜色、尺码、款型、面料供应商、系列及价格带的历史商品
+  		try {
+			List<GenericValue> salesOrderItems = delegator.findByAnd("ZzSalesOrderItemFactStarSchema", UtilMisc.toMap("productProductId", productId));
+		} catch (GenericEntityException e) {
+			e.printStackTrace();
+			return ServiceUtil.returnError(e.getMessage());
+		}
+  		
+  		return result;
+	}
 }
