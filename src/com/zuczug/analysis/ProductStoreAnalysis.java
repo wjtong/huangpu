@@ -2,6 +2,7 @@ package com.zuczug.analysis;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -283,47 +284,11 @@ public class ProductStoreAnalysis {
   		// String productStoreId=(String) context.get("productStoreId");
   		BigDecimal totalScore = BigDecimal.ZERO;
 		try {
-			List<GenericValue> productDimensions = delegator.findByAnd("ZzProductDimension",
-					UtilMisc.toMap("productId", productId));
-			if (UtilValidate.isEmpty(productDimensions)) {
-				return result;
-			}
-			GenericValue productDimension = EntityUtil.getFirst(productDimensions);
-	        List<EntityExpr> exprs = FastList.newInstance();
-	        exprs.add(EntityCondition.makeCondition("primaryStoreGroupId", EntityOperator.NOT_EQUAL, "_NA_"));
-			List<GenericValue> productStores = delegator.findList("ProductStore", EntityCondition.makeCondition(exprs, EntityOperator.AND), null, null, null, false);
-			for (GenericValue productStore : productStores) {
-				StringBuffer comment = new StringBuffer();
-		  		totalScore = BigDecimal.ZERO;
-				String productStoreId = productStore.getString("productStoreId");
-				totalScore = totalScore.add(forecastColorScore(delegator, productId, productStoreId, comment));
-				totalScore = totalScore.add(forecastSizeScore(delegator, productId, productStoreId, comment));
-				totalScore = totalScore.add(forecastPriceScore(delegator, productId, productStoreId, comment));
-				totalScore = totalScore.add(getStoreProductFeatureScore(delegator, productStoreId, productDimension.getString("style"), comment));
-				totalScore = totalScore.add(getStoreProductFeatureScore(delegator, productStoreId, productDimension.getString("seriesId"), comment));
-				totalScore = totalScore.add(getStoreProductFeatureScore(delegator, productStoreId, productDimension.getString("subseriesId"), comment));
-				totalScore = totalScore.add(getStoreProductFeatureScore(delegator, productStoreId, productDimension.getString("mainSupplierPartyId"), comment));
-				// result.put("score", totalScore);
-				if (totalScore.equals(BigDecimal.ZERO)) {
-					continue;
-				}
-				GenericValue dsForecastStoreProductScore = delegator.findByPrimaryKey("DsForecastStoreProductScore",
-						UtilMisc.toMap("productStoreId", productStoreId, "productId", productId));
-				if (UtilValidate.isEmpty(dsForecastStoreProductScore)) {
-					dsForecastStoreProductScore = delegator.makeValue("DsForecastStoreProductScore",
-							UtilMisc.toMap("productStoreId", productStoreId, "productId", productId, "score", totalScore, "comment", comment.toString()));
-					delegator.create(dsForecastStoreProductScore);
-				} else {
-					dsForecastStoreProductScore.set("score", totalScore);
-					dsForecastStoreProductScore.set("comment", comment.toString());
-					dsForecastStoreProductScore.store();
-				}
-			}
+			scoreEachProduct(delegator, productId);
 		} catch (GenericEntityException e) {
 			e.printStackTrace();
 			return ServiceUtil.returnError(e.getMessage());
 		}
-
 		return result;
 	}
 
@@ -442,7 +407,7 @@ public class ProductStoreAnalysis {
   		Delegator delegator = dctx.getDelegator();
         LocalDispatcher dispatcher = dctx.getDispatcher();
   		String productId=(String) context.get("productId");
-  		Boolean isManufactCount = (Boolean) context.get("isManufactCount");
+  		String isManufactCount = (String) context.get("isManufactCount");
         GenericValue userLogin = (GenericValue) context.get("userLogin");
   		if (UtilValidate.isEmpty(productId)) {
   			return result;
@@ -458,7 +423,7 @@ public class ProductStoreAnalysis {
   		for (GenericValue inventoryItem : inventoryItems) {
   			totalQuantity = totalQuantity.add(inventoryItem.getBigDecimal("availableToPromiseTotal"));
   		}
-  		if (isManufactCount) {
+  		if (isManufactCount.equals("Y")) {
   			totalQuantity = totalQuantity.add(getManufactTotal(delegator, productId));
   		}
   		if (totalQuantity.equals(BigDecimal.ZERO)) {
@@ -490,62 +455,21 @@ public class ProductStoreAnalysis {
   		Map<String, Object> result = ServiceUtil.returnSuccess();
   		Delegator delegator = dctx.getDelegator();
   		String productCategoryId=(String) context.get("productCategoryId");
-  		BigDecimal totalScore = BigDecimal.ZERO;
-  		String productId = "";
 		try {
-			List<GenericValue> productSkuList = delegator.findByAnd("productCategoryMemberAssoc",UtilMisc.toMap("productCategoryId", productCategoryId));
-			for(GenericValue productSku : productSkuList){
-				if(productSku.get("isVirtual").equals("Y")){
-					productId = (String)productSku.get("productIdTo");
-				}else{
-					productId = (String)productSku.get("productId");
-				}
-				List<GenericValue> productDimensions = delegator.findByAnd("ZzProductDimension",
-						UtilMisc.toMap("productId", productId));
-				if (UtilValidate.isEmpty(productDimensions)) {
-					return result;
-				}
-				GenericValue productDimension = EntityUtil.getFirst(productDimensions);
-		        List<EntityExpr> exprs = FastList.newInstance();
-		        exprs.add(EntityCondition.makeCondition("primaryStoreGroupId", EntityOperator.NOT_EQUAL, "_NA_"));
-				List<GenericValue> productStores = delegator.findList("ProductStore", EntityCondition.makeCondition(exprs, EntityOperator.AND), null, null, null, false);
-				for (GenericValue productStore : productStores) {
-					StringBuffer comment = new StringBuffer();
-			  		totalScore = BigDecimal.ZERO;
-					String productStoreId = productStore.getString("productStoreId");
-					totalScore = totalScore.add(forecastColorScore(delegator, productId, productStoreId, comment));
-					totalScore = totalScore.add(forecastSizeScore(delegator, productId, productStoreId, comment));
-					totalScore = totalScore.add(forecastPriceScore(delegator, productId, productStoreId, comment));
-					totalScore = totalScore.add(getStoreProductFeatureScore(delegator, productStoreId, productDimension.getString("style"), comment));
-					totalScore = totalScore.add(getStoreProductFeatureScore(delegator, productStoreId, productDimension.getString("seriesId"), comment));
-					totalScore = totalScore.add(getStoreProductFeatureScore(delegator, productStoreId, productDimension.getString("subseriesId"), comment));
-					totalScore = totalScore.add(getStoreProductFeatureScore(delegator, productStoreId, productDimension.getString("mainSupplierPartyId"), comment));
-					// result.put("score", totalScore);
-					if (totalScore.equals(BigDecimal.ZERO)) {
-						continue;
-					}
-					GenericValue dsForecastStoreProductScore = delegator.findByPrimaryKey("DsForecastStoreProductScore",
-							UtilMisc.toMap("productStoreId", productStoreId, "productId", productId));
-					if (UtilValidate.isEmpty(dsForecastStoreProductScore)) {
-						dsForecastStoreProductScore = delegator.makeValue("DsForecastStoreProductScore",
-								UtilMisc.toMap("productStoreId", productStoreId, "productId", productId, "score", totalScore, "comment", comment.toString()));
-						delegator.create(dsForecastStoreProductScore);
-					} else {
-						dsForecastStoreProductScore.set("score", totalScore);
-						dsForecastStoreProductScore.set("comment", comment.toString());
-						dsForecastStoreProductScore.store();
-					}
-				}
+			//获取分类下所有sku
+			List<String> productSkuList = getSkuByCatId(delegator, productCategoryId);
+			for(String productSku : productSkuList){
+				//为某个商品进行打分
+				scoreEachProduct(delegator, productSku);
 			}
-			
 		} catch (GenericEntityException e) {
 			e.printStackTrace();
 			return ServiceUtil.returnError(e.getMessage());
 		}
-
 		return result;
 	}
 
+<<<<<<< HEAD
 	public static Map<String, Object> forecastProductQuantity(DispatchContext dctx,
   			Map<String, ? extends Object> context) {
   		Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -563,4 +487,61 @@ public class ProductStoreAnalysis {
   		
   		return result;
 	}
+=======
+	private static void scoreEachProduct(Delegator delegator, String productId) throws GenericEntityException {
+		BigDecimal totalScore = BigDecimal.ZERO;
+		List<GenericValue> productDimensions = delegator.findByAnd("ZzProductDimension",
+				UtilMisc.toMap("productId", productId));
+		if (UtilValidate.isEmpty(productDimensions)) {
+			return;
+		}
+		GenericValue productDimension = EntityUtil.getFirst(productDimensions);
+        List<EntityExpr> exprs = FastList.newInstance();
+        exprs.add(EntityCondition.makeCondition("primaryStoreGroupId", EntityOperator.NOT_EQUAL, "_NA_"));
+		List<GenericValue> productStores = delegator.findList("ProductStore", EntityCondition.makeCondition(exprs, EntityOperator.AND), null, null, null, false);
+		for (GenericValue productStore : productStores) {
+			StringBuffer comment = new StringBuffer();
+	  		totalScore = BigDecimal.ZERO;
+			String productStoreId = productStore.getString("productStoreId");
+			totalScore = totalScore.add(forecastColorScore(delegator, productId, productStoreId, comment));
+			totalScore = totalScore.add(forecastSizeScore(delegator, productId, productStoreId, comment));
+			totalScore = totalScore.add(forecastPriceScore(delegator, productId, productStoreId, comment));
+			totalScore = totalScore.add(getStoreProductFeatureScore(delegator, productStoreId, productDimension.getString("style"), comment));
+			totalScore = totalScore.add(getStoreProductFeatureScore(delegator, productStoreId, productDimension.getString("seriesId"), comment));
+			totalScore = totalScore.add(getStoreProductFeatureScore(delegator, productStoreId, productDimension.getString("subseriesId"), comment));
+			totalScore = totalScore.add(getStoreProductFeatureScore(delegator, productStoreId, productDimension.getString("mainSupplierPartyId"), comment));
+			// result.put("score", totalScore);
+			if (totalScore.equals(BigDecimal.ZERO)) {
+				continue;
+			}
+			GenericValue dsForecastStoreProductScore = delegator.findByPrimaryKey("DsForecastStoreProductScore",
+					UtilMisc.toMap("productStoreId", productStoreId, "productId", productId));
+			if (UtilValidate.isEmpty(dsForecastStoreProductScore)) {
+				dsForecastStoreProductScore = delegator.makeValue("DsForecastStoreProductScore",
+						UtilMisc.toMap("productStoreId", productStoreId, "productId", productId, "score", totalScore, "comment", comment.toString()));
+				delegator.create(dsForecastStoreProductScore);
+			} else {
+				dsForecastStoreProductScore.set("score", totalScore);
+				dsForecastStoreProductScore.set("comment", comment.toString());
+				dsForecastStoreProductScore.store();
+			}
+		}
+	}
+
+	private static List<String> getSkuByCatId(Delegator delegator,
+			String productCategoryId) throws GenericEntityException {
+		List productSkuList = new ArrayList();
+		List<GenericValue> productList = delegator.findByAnd("productCategoryMemberAssoc",UtilMisc.toMap("productCategoryId", productCategoryId));
+		for(GenericValue productSku:productList){
+			if(productSku.get("isVirtual").equals("Y")){
+				productSkuList.add((String)productSku.get("productIdTo"));
+			}else{
+				productSkuList.add((String)productSku.get("productId"));
+			}
+		}
+		return productSkuList;
+	}
+	
+	
+>>>>>>> origin/master
 }

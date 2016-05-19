@@ -1,15 +1,11 @@
 package com.zuczug.zuczugetl;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
@@ -17,15 +13,6 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.service.ServiceUtil;
-
-import javolution.util.FastMap;
-import jxl.Cell;
-import jxl.Sheet;
-import jxl.Workbook;
-import jxl.read.biff.BiffException;
 
 /**
  * Created by zuczug on 14-11-25.
@@ -455,72 +442,4 @@ public class ZuczugEtlUtil {
 
     }
     
-    public static Map<String, Object> ImportInventoryData(DispatchContext dctx,Map<String, ? extends Object> context) {
-    	LocalDispatcher dispatcher = dctx.getDispatcher();
-    	Delegator delegator = dctx.getDelegator();
-        GenericValue userLogin = (GenericValue) context.get("userLogin");
-    	Timestamp fromDate = UtilDateTime.nowTimestamp();//时间
-    	File outFilePath=new File("hot-deploy/zuczugetl/data/ImportInventoryData.xls");
-    	String returnMessage=""; 
-    	int sssh = 0;
-			try {
-				Workbook book = Workbook.getWorkbook(new File("hot-deploy/zuczugetl/data/ImportInventoryData.xls"));
-				Sheet sheet = (Sheet) book.getSheet(0);
-				for(int i=0;i<sheet.getRows();i++){
-					Cell cell1 = sheet.getCell( 0 , i );//前一个参数代表列，后一个参数代表行
-					String virtualProduct = cell1.getContents();//商品Id
-
-					Cell cell2 = sheet.getCell( 1 , i );
-					String yanse = cell2.getContents();//颜色
-					
-					Cell cell3 = sheet.getCell( 2 , i );
-					String chima = cell3.getContents();//尺码
-					
-					Cell cell4 = sheet.getCell( 3 , i );
-					String shuliang = cell4.getContents();//数量
-					
-					String productId=virtualProduct+"-"+yanse+"-"+chima;
-					
-					Map<String,Object> inventoryProduct=FastMap.newInstance();
-					Debug.log("++++++++++++1"+productId);
-					inventoryProduct.put("productId", productId);
-					inventoryProduct.put("inventoryItemTypeId", "NON_SERIAL_INV_ITEM");
-					inventoryProduct.put("datetimeReceived", fromDate);
-					inventoryProduct.put("quantityAccepted", shuliang);
-					inventoryProduct.put("quantityRejected", "0");
-					inventoryProduct.put("facilityId", "ZUCZUG_CLOTHESFACILITY");
-					inventoryProduct.put("userLogin", userLogin);
-	                //判断仓库里面是否有这条库存明细
-	                List<GenericValue> inventory = delegator.findByAnd("InventoryItem", 
-	                		UtilMisc.toMap("productId",productId,"facilityId","ZUCZUG_CLOTHESFACILITY"));
-	                
-	                if (UtilValidate.isNotEmpty(inventory)) {
-	                	sssh+=1;
-	                	returnMessage+=productId+":"+sssh+",";
-					}
-
-	                dispatcher.runSync("receiveInventoryProduct", inventoryProduct);
-	                
-				}
-			} catch (IOException e) {
-				Debug.log("++++++++++++11:"+e.getMessage());
-				e.printStackTrace();
-			} catch (BiffException e) {
-				Debug.log("++++++++++++12:"+e.getMessage());
-				e.printStackTrace();
-			} catch (GenericServiceException e) {
-				e.printStackTrace();
-			} catch (GenericEntityException e) {
-				e.printStackTrace();
-			} 
-			
-			
-			
-		if(UtilValidate.isNotEmpty(returnMessage)){
-        	return ServiceUtil.returnSuccess("已有的库存"+returnMessage);
-        }else {
-        	return ServiceUtil.returnSuccess();
-		}
-    	
-    }
 }

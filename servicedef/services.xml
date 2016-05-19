@@ -154,7 +154,8 @@
     	<attribute name="contentId" type="String" mode="IN" optional="true"/>
     	<attribute name="productContentTypeId" type="String" mode="IN" optional="true"/>
     </service>
-    <service name="importProductContentData" engine="simple" location="component://zuczugetl/script/com/zuczug/olap/ContentFactServices.xml" invoke="importProductContentData">
+    <service name="importProductContentData" engine="simple" transaction-timeout="7200000"
+    	location="component://zuczugetl/script/com/zuczug/olap/ContentFactServices.xml" invoke="importProductContentData">
     	<description>调用loadProductContentFact导入图片数据 zhoulei</description>
     	<attribute name="productCategoryId" mode="IN" type="String" optional="false"></attribute>
     </service>
@@ -472,10 +473,4 @@
     	<description>检查所有Vip数据在olap里面是否存在</description>
         <attribute name="updateMode" type="String" mode="IN" optional="true" default-value="TYPE1"/>
     </service>
-    <service name="ImportInventoryData" engine="java" location="com.zuczug.zuczugetl.ZuczugEtlUtil"
-    	invoke="ImportInventoryData" transaction-timeout="720000">
-    </service>
-    
-    
-    
 </services>

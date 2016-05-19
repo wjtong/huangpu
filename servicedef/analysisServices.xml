@@ -50,7 +50,7 @@
             location="com.zuczug.analysis.ProductStoreAnalysis" invoke="forecastQuantityByInventory" auth="true">
 		<description>根据库存，估算某个sku每个店铺应该放多少货</description>
 		<attribute name="productId" mode="IN" type="String" optional="true"></attribute>
-		<attribute name="isManufactCount" mode="IN" type="Boolean" optional="true"></attribute>
+		<attribute name="isManufactCount" mode="IN" type="String" optional="true"></attribute>
 		<attribute name="storeProductQuantityList" mode="OUT" type="List" optional="true"></attribute>
 	</service>
 	
@@ -58,5 +58,19 @@
     	location="com.zuczug.analysis.ProductStoreAnalysis" invoke="forecastAllStoresProductByCat">
     	<description>预测一个商品在所有店铺的得分 by liujia</description>
     	<attribute name="productCategoryId" mode="IN" type="String" optional="false"></attribute>
-    </service>  
+    </service>
+    
+    <service name="analysis.forecastProductQuantity" auth="true" engine="java" transaction-timeout="720000"
+    	location="com.zuczug.analysis.ProductStoreAnalysis" invoke="forecastProductQuantity">
+    	<description>预测一个新商品可能的销售数量  by liujia</description>
+    	<attribute name="productId" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="prudouctForecastSaleQuantity" mode="OUT" type="String" optional="true"></attribute>
+    </service>
+    
+     <service name="analysis.forecastProductQuantityByCat" auth="true" engine="java" use-transaction="false"
+    	location="com.zuczug.analysis.ProductStoreAnalysis" invoke="forecastProductQuantityByCat">
+    	<description>预测系列中商品销售数量  by liujia</description>
+    	<attribute name="productCategoryId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="prudouctForecastSaleQuantityList" mode="OUT" type="List" optional="true"></attribute>
+    </service>
 </services>
