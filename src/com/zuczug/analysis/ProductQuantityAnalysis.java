@@ -130,7 +130,7 @@ public class ProductQuantityAnalysis {
 		}else{
 			assocProductId = (String)productAssoc.get("productIdTo");
 		}
-		GenericValue group = EntityUtil.getFirst( delegator.findByAnd("ProductCategoryMemberView", UtilMisc.toMap("productId",assocProductId,"productCategoryTypeId","GROUPNAME")));
+		GenericValue group = EntityUtil.getFirst( delegator.findByAnd("ProductCategoryAndMember", UtilMisc.toMap("productId",assocProductId,"productCategoryTypeId","GROUPNAME")));
 		if(UtilValidate.isNotEmpty(group)){
 			GenericValue pgv = EntityUtil.getFirst(delegator.findByAndCache("ProductCategoryGroupView", UtilMisc.toMap("groupId",group.getString("productCategoryId"))));
 			if(UtilValidate.isNotEmpty(pgv)){
