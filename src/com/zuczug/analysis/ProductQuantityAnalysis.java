@@ -26,8 +26,13 @@ import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
 public class ProductQuantityAnalysis {
-
+	
+	//商品预测系数
+	private static final BigDecimal quantityRatio = new BigDecimal(0.8);
+	//新商品预测数量
+	private static final BigDecimal newProductQuantity = new BigDecimal(500);
 	/**
+	 * TEST
 	 * 预测一个新商品可能的销售数量
 	 * by liujia
 	 */
@@ -39,30 +44,31 @@ public class ProductQuantityAnalysis {
   		BigDecimal quantity = BigDecimal.ZERO;
   		String method = "";
 		try {
-			//根据sku获取商品信息
 			Map<String,String> productInfo = getProductInfo(delegator, productId);
-			//获取销售数量
 			quantity = getForecastProductSaleQuantity(delegator, productInfo,"max");
 			method="getForecastProductSaleQuantity";
 			if(quantity.compareTo(BigDecimal.ZERO)==0){
-				//从大色商品中取平均销量
 				quantity = getLargeColorAvgQuantity(delegator,productInfo);
 				method="getLargeColorAvgQuantity";
 			}
 			if(quantity.compareTo(BigDecimal.ZERO)==0){
-				//对应尺码列表计算销量0 2 4 6 8--25 26 27 28 29
 				quantity = getCorrespondSizeQuantity(delegator,productInfo);
 				method="getCorrespondSizeQuantity";
 			}
 			if(quantity.compareTo(BigDecimal.ZERO)==0){
-				//取款和色平均销量
 				quantity = getStyleAndColorAvgQuantity(delegator,productInfo);
 				method="getStyleAndColorAvgQuantity";
 			}
 			if(quantity.compareTo(BigDecimal.ZERO)==0){
-				//取款和价格带的平均销量
 				quantity = getStyleAndPriceAvgQuantity(delegator,productInfo);
 				method="getStyleAndPriceAvgQuantity";
+			}
+			
+			quantity = quantity.divide(quantityRatio, 0, RoundingMode.CEILING);
+
+			if(quantity.compareTo(BigDecimal.ZERO)==0){
+				quantity = getNewProductForecastQuantity(delegator,productInfo);
+				method="getNewProductForecastQuantity";
 			}
 		} catch (GenericEntityException e) {
 			e.printStackTrace();
@@ -91,6 +97,13 @@ public class ProductQuantityAnalysis {
 		if(quantity.compareTo(BigDecimal.ZERO)==0){
 			//取款和价格带的平均销量
 			quantity = getStyleAndPriceAvgQuantity(delegator,productInfo);
+		}
+		
+		quantity = quantity.divide(quantityRatio, 0, RoundingMode.CEILING);
+		
+		//新品预测
+		if(quantity.compareTo(BigDecimal.ZERO)==0){
+			quantity = getNewProductForecastQuantity(delegator,productInfo);
 		}
 		return quantity;
 	}
@@ -143,6 +156,7 @@ public class ProductQuantityAnalysis {
 		if(productPrice!=null&&!productPrice.isEmpty()){
 			productListPrice = (BigDecimal) productPrice.get("price");
 		}
+		productInfoMap.put("productId",productId);
 		productInfoMap.put("productColorId",productColorId);
 		productInfoMap.put("productSizeId",productSizeId);
 		productInfoMap.put("productStyleName",productStyleName);
@@ -208,6 +222,7 @@ public class ProductQuantityAnalysis {
 						sumQuantity = sumQuantity.add(productQuantity);
 						count++;
 					}
+					productQuantity = BigDecimal.ZERO;
 				}
 				if(count!=0){
 					returnQuantity = sumQuantity.divide(new BigDecimal(count), 0, RoundingMode.CEILING);
@@ -431,7 +446,7 @@ public class ProductQuantityAnalysis {
 	
 	private static String createRequirement(LocalDispatcher dispatcher,String productId,BigDecimal quantity,String isCancel,GenericValue userLogin) throws GenericServiceException {
 		String error="";
-        Map<String, Object> resultInfo = dispatcher.runSync("createRequirement", UtilMisc.toMap("requirementTypeId", "INTERNAL_REQUIREMENT","facilityId","ZUCZUG_CLOTHESFACILITY",
+        Map<String, Object> resultInfo = dispatcher.runSync("createRequirement", UtilMisc.toMap("requirementTypeId", "FORECAST_REQUIREMENT","facilityId","ZUCZUG_CLOTHESFACILITY",
 				"statusId","REQ_CREATED","productId",productId,"quantity",quantity,"reason","预测","userLogin", userLogin));
         if (resultInfo.containsKey("errorMessage")){
         	error=(String) resultInfo.get("errorMessage");
@@ -485,10 +500,38 @@ public class ProductQuantityAnalysis {
 		if(sizeCode.equals("8")){
 			productSizeCode = "29";
 		}else if(sizeCode.equals("29")){
-			productSizeCode = "6";
+			productSizeCode = "8";
 		}
 		return productSizeCode;
 	}
 
+	private static BigDecimal getNewProductForecastQuantity(Delegator delegator, Map<String, String> productInfo) throws GenericEntityException {
+		BigDecimal returnQuantity = BigDecimal.ZERO;
+		GenericValue productAssoc = EntityUtil.getFirst(delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productIdTo",productInfo.get("productId"),"productAssocTypeId","PRODUCT_VARIANT")));
+		List<GenericValue> productAssocList = delegator.findByAnd("ProductAssoc",UtilMisc.toMap("productId", productAssoc.get("productId"),"productAssocTypeId","PRODUCT_VARIANT"));
+		int totalCount = productAssocList.size();
+		int count = 0;
+		for(GenericValue ps : productAssocList){
+			String productSizeId = "";
+			GenericValue productSize = EntityUtil.getFirst(delegator.findByAnd("ProductFeatureAndAppl", UtilMisc.toMap("productId",(String)ps.get("productIdTo"),"productFeatureTypeId","SIZE")));
+			if(productSize!=null&&!productSize.isEmpty()){
+				productSizeId = (String)productSize.get("idCode");
+			}
+			if(productSizeId.equals("4")||productSizeId.equals("27")){
+				count+=1;
+			}
+		}
+		totalCount = totalCount + count;
+		if(totalCount!=0){
+			BigDecimal present = new BigDecimal(1);
+			present = present.divide(new BigDecimal(totalCount), 2, RoundingMode.DOWN);
+			if(productInfo.get("productSizeId").equals("4")||productInfo.get("productSizeId").equals("27")){
+				present = present.multiply(new BigDecimal(2));
+			}
+			returnQuantity = newProductQuantity.multiply(present);
+		}
+		
+		return returnQuantity;
+	}
 	
 }

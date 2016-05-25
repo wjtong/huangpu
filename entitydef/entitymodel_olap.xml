@@ -596,22 +596,22 @@ under the License.
         <prim-key field="orderId"/>
         <prim-key field="orderItemSeqId"/>
 
-        <relation type="one" fk-name="ZSOIF_ORDERDATE" rel-entity-name="DateDimension">
+        <relation type="one" fk-name="ZSOIF_153ORDERDATE" rel-entity-name="DateDimension">
             <key-map field-name="orderDateDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_CURRENCY" rel-entity-name="CurrencyDimension">
+        <relation type="one" fk-name="ZSOIF_153CURRENCY" rel-entity-name="CurrencyDimension">
             <key-map field-name="origCurrencyDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_PRODUCT" rel-entity-name="Ds153ProductDimension">
+        <relation type="one" fk-name="ZSOIF_153PRODUCT" rel-entity-name="Ds153ProductDimension">
             <key-map field-name="productDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_CUSTOMER" rel-entity-name="CustomerDimension">
+        <relation type="one" fk-name="ZSOIF_153CUSTOMER" rel-entity-name="CustomerDimension">
             <key-map field-name="billToCustomerDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_PAYMENT" rel-entity-name="PaymentMethodDimension">
+        <relation type="one" fk-name="ZSOIF_153PAYMENT" rel-entity-name="PaymentMethodDimension">
             <key-map field-name="paymentMethodDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_STORE" rel-entity-name="Zz153StoreDimension">
+        <relation type="one" fk-name="ZSOIF_153STORE" rel-entity-name="Zz153StoreDimension">
             <key-map field-name="productStoreDimId" rel-field-name="dimensionId"/>
         </relation>
 
@@ -719,26 +719,27 @@ under the License.
         <prim-key field="orderId"/>
         <prim-key field="orderItemSeqId"/>
 
-        <relation type="one" fk-name="ZSOIF_ORDERDATE" rel-entity-name="DateDimension">
+        <relation type="one" fk-name="ZSOIF_161ORDERDATE" rel-entity-name="DateDimension">
             <key-map field-name="orderDateDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_CURRENCY" rel-entity-name="CurrencyDimension">
+        <relation type="one" fk-name="ZSOIF_161CURRENCY" rel-entity-name="CurrencyDimension">
             <key-map field-name="origCurrencyDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_PRODUCT" rel-entity-name="Ds161ProductDimension">
+        <relation type="one" fk-name="ZSOIF_161PRODUCT" rel-entity-name="Ds161ProductDimension">
             <key-map field-name="productDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_CUSTOMER" rel-entity-name="CustomerDimension">
+        <relation type="one" fk-name="ZSOIF_161CUSTOMER" rel-entity-name="CustomerDimension">
             <key-map field-name="billToCustomerDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_PAYMENT" rel-entity-name="PaymentMethodDimension">
+        <relation type="one" fk-name="ZSOIF_161PAYMENT" rel-entity-name="PaymentMethodDimension">
             <key-map field-name="paymentMethodDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_STORE" rel-entity-name="Zz161StoreDimension">
+        <relation type="one" fk-name="ZSOIF_161STORE" rel-entity-name="Zz161StoreDimension">
             <key-map field-name="productStoreDimId" rel-field-name="dimensionId"/>
         </relation>
 
     </entity>
+    
     <entity entity-name="Zz163SalesOrderItemFact" package-name="com.zuczug.olap" title="Sales Order Item Fact">
         <description>A transaction fact entity with order item grain.</description>
         <field name="orderId" type="id-ne"></field> <!-- degenerate dimension -->
@@ -841,22 +842,22 @@ under the License.
         <prim-key field="orderId"/>
         <prim-key field="orderItemSeqId"/>
 
-        <relation type="one" fk-name="ZSOIF_ORDERDATE" rel-entity-name="DateDimension">
+        <relation type="one" fk-name="ZSOIF_163ORDERDATE" rel-entity-name="DateDimension">
             <key-map field-name="orderDateDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_CURRENCY" rel-entity-name="CurrencyDimension">
+        <relation type="one" fk-name="ZSOIF_163CURRENCY" rel-entity-name="CurrencyDimension">
             <key-map field-name="origCurrencyDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_PRODUCT" rel-entity-name="Ds163ProductDimension">
+        <relation type="one" fk-name="ZSOIF_163PRODUCT" rel-entity-name="Ds163ProductDimension">
             <key-map field-name="productDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_CUSTOMER" rel-entity-name="CustomerDimension">
+        <relation type="one" fk-name="ZSOIF_163CUSTOMER" rel-entity-name="CustomerDimension">
             <key-map field-name="billToCustomerDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_PAYMENT" rel-entity-name="PaymentMethodDimension">
+        <relation type="one" fk-name="ZSOIF_163PAYMENT" rel-entity-name="PaymentMethodDimension">
             <key-map field-name="paymentMethodDimId" rel-field-name="dimensionId"/>
         </relation>
-        <relation type="one" fk-name="ZSOIF_STORE" rel-entity-name="Zz163StoreDimension">
+        <relation type="one" fk-name="ZSOIF_163STORE" rel-entity-name="Zz163StoreDimension">
             <key-map field-name="productStoreDimId" rel-field-name="dimensionId"/>
         </relation>
 

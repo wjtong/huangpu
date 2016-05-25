@@ -42,8 +42,10 @@ under the License.
 	        <if-compare operator="equals" value="163" field="parameters.keyword">
 	        	<make-value value-field="dsProductDimension" entity-name="Ds163ProductDimension"/>
 	        </if-compare>
+	        
+			<set-nonpk-fields value-field="dsProductDimension" map="productDimension"/>
 			
-	        <set field="dsProductDimension.productId" value="${productDimension.productId}"/>
+	        <!-- set field="dsProductDimension.productId" value="${productDimension.productId}"/>
 	        <set field="dsProductDimension.productColorId" from-field="productDimension.productColorId"/>
 	        <set field="dsProductDimension.productType" from-field="productDimension.productType"/>
 	        <set field="dsProductDimension.brandName" from-field="productDimension.brandName"/>
@@ -80,7 +82,7 @@ under the License.
 	        <set field="dsProductDimension.designProductId" from-field="productDimension.designProductId"/>
 	        <set field="dsProductDimension.mainFabricId" from-field="productDimension.mainFabricId"/>
 	        <set field="dsProductDimension.mainSupplierPartyId" from-field="productDimension.mainSupplierPartyId"/>
-	        <set field="dsProductDimension.mainSupplierPartyName" from-field="productDimension.mainSupplierPartyName"/>
+	        <set field="dsProductDimension.mainSupplierPartyName" from-field="productDimension.mainSupplierPartyName"/-->
 	        
 	        <log message="++++++++++++++++++5" level="info"/>
 	        <field-to-result field="dsProductDimension"/>

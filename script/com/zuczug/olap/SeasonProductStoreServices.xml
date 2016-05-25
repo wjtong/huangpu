@@ -90,14 +90,15 @@
         </if-compare>
         
         
-        <set field="storeDimension.productStoreId" from-field="storeDimensions.productStoreId"/>
+		<set-nonpk-fields value-field="storeDimension" map="storeDimensions"/>
+        <!-- set field="storeDimension.productStoreId" from-field="storeDimensions.productStoreId"/>
         <set field="storeDimension.storeName" from-field="storeDimensions.storeName"/>
         <set field="storeDimension.cityGeoId" from-field="storeDimensions.cityGeoId"/>
         <set field="storeDimension.cityName" from-field="storeDimensions.cityName"/>
         <set field="storeDimension.payToPartyId" from-field="storeDimensions.payToPartyId"/>
         <set field="storeDimension.payToPartyName" from-field="storeDimensions.payToPartyName"/>
         <set field="storeDimension.isRetailStoreGroupId" from-field="storeDimensions.isRetailStoreGroupId"/>
-        <set field="storeDimension.isRetailStoreGroupName" from-field="storeDimensions.isRetailStoreGroupName"/>
+        <set field="storeDimension.isRetailStoreGroupName" from-field="storeDimensions.isRetailStoreGroupName"/-->
         
         <field-to-result field="storeDimension"/>
 	</simple-method>

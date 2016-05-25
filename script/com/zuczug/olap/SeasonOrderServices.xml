@@ -21,14 +21,24 @@ under the License.
 <simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
         
+        
         <simple-method method-name="prepareSeasonOrderItemFact">
         	<entity-one value-field="salesOrderItem" entity-name="ZzSalesOrderItemFactStarSchema">
         		<field-map field-name="orderId" from-field="parameters.orderId"/>
         		<field-map field-name="orderItemSeqId" from-field="parameters.orderItemSeqId"/>
         	</entity-one>
-        	<if-empty field="salesOrderItemList">
+        	<entity-one value-field="salesOrderItemFact" entity-name="ZzSalesOrderItemFact">
+        		<field-map field-name="orderId" from-field="parameters.orderId"/>
+        		<field-map field-name="orderItemSeqId" from-field="parameters.orderItemSeqId"/>
+        	</entity-one>
+        	<if-empty field="salesOrderItem">
 	            <add-error>
-	                <fail-property resource="salesOrderItemList" property="ProductProductNotFoundWithProduct"/>
+	                <fail-property resource="salesOrderItem" property="ProductProductNotFoundWithProduct"/>
+	            </add-error>
+	        </if-empty>
+        	<if-empty field="salesOrderItemFact">
+	            <add-error>
+	                <fail-property resource="salesOrderItemFact" property="ProductProductNotFoundWithProduct"/>
 	            </add-error>
 	        </if-empty>
         	<check-errors/>
@@ -61,21 +71,47 @@ under the License.
        			<if-compare operator="equals" value="163" field="salesOrderItem.productZuczugSeason">
 	        		<make-value entity-name="Zz163SalesOrderItemFact" value-field="fact"/>
        			</if-compare>
-       			
-       			<set field="fact.orderId" from-field="salesOrderItem.orderId"/>
-				<set field="fact.orderItemSeqId" from-field="salesOrderItem.orderItemSeqId"/>
-				<!-- 获取productStoreDimId -->
-				<if-not-empty field="salesOrderItem.storeProductStoreId">
+       			<log message="++++++++++++++++++++++salesOrderItemFact:${salesOrderItemFact}" level="info"/>
+       			<log message="++++++++++++++++++++++fact:${fact}" level="info"/>
+       			<set-nonpk-fields map="salesOrderItemFact" value-field="fact"/>
+       			<log message="++++++++++++++++++++++fact2:${fact}" level="info"/>
+       			<set field="fact.orderId" from-field="salesOrderItemFact.orderId"/>
+       			<set field="fact.orderItemSeqId" from-field="salesOrderItemFact.orderItemSeqId"/>
+       			<!-- productDimId -->
+	        	<if-not-empty field="salesOrderItem.productProductId">
+	        		<clear-field field="inMap"/>
+	        		<if-compare operator="equals" value="153" field="salesOrderItem.productZuczugSeason">
+	        			<set field="inMap.dimensionEntityName" value="Ds153ProductDimension"/>
+	        		</if-compare>
+	        		<if-compare operator="equals" value="161" field="salesOrderItem.productZuczugSeason">
+	        			<set field="inMap.dimensionEntityName" value="Ds161ProductDimension"/>
+	        		</if-compare>
+	        		<if-compare operator="equals" value="163" field="salesOrderItem.productZuczugSeason">
+	        			<set field="inMap.dimensionEntityName" value="Ds163ProductDimension"/>
+	        		</if-compare>
+				    <set field="inMap.naturalKeyFields.productId" from-field="salesOrderItem.productProductId"/>
+				    <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+				        <result-to-field result-name="dimensionId" field="fact.productDimId"/>
+				    </call-service>
+				    <if-empty field="fact.productDimId">
+				        <set field="fact.productDimId" value="_NF_"/>
+				    </if-empty>
+				<else>
+				    <set field="fact.productDimId" value="_NA_"/>
+				</else>
+	        	</if-not-empty>
+	        	<!-- productStore -->
+       			<if-not-empty field="salesOrderItem.storeProductStoreId">
 					<clear-field field="inMap"/>
 					<if-compare operator="equals" value="153" field="salesOrderItem.productZuczugSeason">
-			     		<set field="inMap.dimensionEntityName" value="Zz153StoreDimension"/>
-	       			</if-compare>
+						<set field="inMap.dimensionEntityName" value="Zz153StoreDimension"/>	
+					</if-compare>
 					<if-compare operator="equals" value="161" field="salesOrderItem.productZuczugSeason">
-			     		<set field="inMap.dimensionEntityName" value="Zz161StoreDimension"/>
-	       			</if-compare>
+						<set field="inMap.dimensionEntityName" value="Zz161StoreDimension"/>
+					</if-compare>
 					<if-compare operator="equals" value="163" field="salesOrderItem.productZuczugSeason">
 			     		<set field="inMap.dimensionEntityName" value="Zz163StoreDimension"/>
-	       			</if-compare>
+					</if-compare>
 			     	<set field="inMap.naturalKeyFields.productStoreId" from-field="salesOrderItem.storeProductStoreId"/>
 			     	<call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
 			         	<result-to-field result-name="dimensionId" field="fact.productStoreDimId"/>
@@ -87,30 +123,67 @@ under the License.
 					<set field="fact.productStoreDimId" value="_NA_"/>
 				</else>
 				</if-not-empty>
-				
+       			
        			<create-value value-field="fact"/>
+       		<else>
+       			<set-nonpk-fields map="salesOrderItemFact" value-field="fact"/>
+       			<set field="fact.orderId" from-field="salesOrderItemFact.orderId"/>
+       			<set field="fact.orderItemSeqId" from-field="salesOrderItemFact.orderItemSeqId"/>
+       			<!-- productDimId -->
+	        	<if-not-empty field="salesOrderItem.productProductId">
+	        		<clear-field field="inMap"/>
+	        		<if-compare operator="equals" value="153" field="salesOrderItem.productZuczugSeason">
+	        			<set field="inMap.dimensionEntityName" value="Ds153ProductDimension"/>
+	        		</if-compare>
+	        		<if-compare operator="equals" value="161" field="salesOrderItem.productZuczugSeason">
+	        			<set field="inMap.dimensionEntityName" value="Ds161ProductDimension"/>
+	        		</if-compare>
+	        		<if-compare operator="equals" value="163" field="salesOrderItem.productZuczugSeason">
+	        			<set field="inMap.dimensionEntityName" value="Ds163ProductDimension"/>
+	        		</if-compare>
+				    <set field="inMap.naturalKeyFields.productId" from-field="salesOrderItem.productProductId"/>
+				    <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+				        <result-to-field result-name="dimensionId" field="fact.productDimId"/>
+				    </call-service>
+				    <if-empty field="fact.productDimId">
+				        <set field="fact.productDimId" value="_NF_"/>
+				    </if-empty>
+				<else>
+				    <set field="fact.productDimId" value="_NA_"/>
+				</else>
+	        	</if-not-empty>
+	        	<!-- productStore -->
+       			<if-not-empty field="salesOrderItem.storeProductStoreId">
+					<clear-field field="inMap"/>
+					<if-compare operator="equals" value="153" field="salesOrderItem.productZuczugSeason">
+						<set field="inMap.dimensionEntityName" value="Zz153StoreDimension"/>	
+					</if-compare>
+					<if-compare operator="equals" value="161" field="salesOrderItem.productZuczugSeason">
+						<set field="inMap.dimensionEntityName" value="Zz161StoreDimension"/>
+					</if-compare>
+					<if-compare operator="equals" value="163" field="salesOrderItem.productZuczugSeason">
+			     		<set field="inMap.dimensionEntityName" value="Zz163StoreDimension"/>
+					</if-compare>
+			     	<set field="inMap.naturalKeyFields.productStoreId" from-field="salesOrderItem.storeProductStoreId"/>
+			     	<call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
+			         	<result-to-field result-name="dimensionId" field="fact.productStoreDimId"/>
+			     	</call-service>
+			     	<if-empty field="fact.productStoreDimId">
+			         	<set field="fact.productStoreDimId" value="_NF_"/>
+			     	</if-empty>
+				<else>
+					<set field="fact.productStoreDimId" value="_NA_"/>
+				</else>
+				</if-not-empty>
+       			<store-value value-field="fact"/>
+       		</else>
        		</if-empty>
-       		
-        	<set field="fact.statusId" from-field="orderItem.statusId"/>
-        	
-        	
-          	<store-value value-field="fact"/>
         </simple-method>
         
         
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        <simple-method method-name="loadSeasonOrderItemData">
+        <simple-method method-name="importSeasonOrderItemData">
 			<set field="fromDate" from-field="parameters.fromDate"/>
 	        <set field="thruDate" from-field="parameters.thruDate"/>
 	        
@@ -124,30 +197,42 @@ under the License.
 				<make-value value-field="fact" entity-name="Zz153SalesOrderItemFact"/>
       		</if-empty-->
         	<iterate entry="salesOrderItem" list="salesOrderItemList">
-        		<!-- 判断Order是153还是161/163 -->
-        		<if-compare operator="equals" value="153" field="salesOrderItem.productZuczugSeason">
-        			<entity-one value-field="fact" entity-name="Zz153SalesOrderItemFact">
-        				<field-map field-name="orderId" from-field="salesOrderItem.orderId"/>
-        				<field-map field-name="orderItemSeqId" from-field="salesOrderItem.orderItemSeqId"/>
-        			</entity-one>
-        		</if-compare>
-        		<if-compare operator="equals" value="161" field="salesOrderItem.productZuczugSeason">
-        			<entity-one value-field="fact" entity-name="Zz161SalesOrderItemFact">
-        				<field-map field-name="orderId" from-field="salesOrderItem.orderId"/>
-        				<field-map field-name="orderItemSeqId" from-field="salesOrderItem.orderItemSeqId"/>
-        			</entity-one>
-        		</if-compare>
-        		<if-compare operator="equals" value="163" field="salesOrderItem.productZuczugSeason">
-        			<entity-one value-field="fact" entity-name="Zz163SalesOrderItemFact">
-        				<field-map field-name="orderId" from-field="salesOrderItem.orderId"/>
-        				<field-map field-name="orderItemSeqId" from-field="salesOrderItem.orderItemSeqId"/>
-        			</entity-one>
-        		</if-compare>
-        		
-        		
+        		<if>
+        			<condition>
+        			<and>
+        				<if-compare operator="not-equals" value="_NA_" field="salesOrderItem.productZuczugSeason"/>
+        				<if-compare operator="not-equals" value="_NF_" field="salesOrderItem.productZuczugSeason"/>
+        			</and>
+        			</condition>
+        			<then>
+        				<clear-field field="inMap"/>
+		                <set field="inMap.orderId" from-field="salesOrderItem.orderId"/>
+		                <set field="inMap.orderItemSeqId" from-field="salesOrderItem.orderItemSeqId"/>
+		                <call-service service-name="prepareSeasonOrderItemFact" in-map-name="inMap"/>
+        			</then>
+        		</if>
         		
         	</iterate>
-        	
         </simple-method>
+        
+        
+        <simple-method method-name="loadSeasonOrderItemInfo" short-description="loadPutawaySnapshotJob">
+	        <now-date-to-env field="nowDate"/>
+	        <set field="yesterday" value="${groovy:
+	            import java.text.SimpleDateFormat;
+	            def sdf = new SimpleDateFormat(&quot;yyyy-MM-dd 00:00:00.000&quot;);
+	            def yesterday = sdf.format(nowDate-1);
+	            return yesterday;
+	        }" type="Timestamp"/>
+	        <set field="today" value="${groovy:
+	            import java.text.SimpleDateFormat;
+	            def sdf = new SimpleDateFormat(&quot;yyyy-MM-dd 00:00:00.000&quot;);
+	            def today = sdf.format(nowDate);
+	            return today;
+	        }" type="Timestamp"/>
+	        <set field="inMap.fromDate" from-field="yesterday"/>
+	        <set field="inMap.thruDate" from-field="today"/>
+	        <call-service service-name="importSeasonOrderItemData" in-map-name="inMap"/>
+	    </simple-method>
 
 </simple-methods>        

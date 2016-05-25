@@ -31,6 +31,7 @@ under the License.
 			        <condition-expr field-name="statuesItems" value="销售"/>
 			        <condition-expr field-name="checkDate" operator="greater-equals" from-field="fromDate"/>
 			        <condition-expr field-name="checkDate" operator="less" from-field="thruDate"/>
+			        <condition-expr field-name="customerId" operator="not-equals" value="T"/>
 			        <condition-list combine="or">
                     	<condition-expr field-name="quantity" operator="greater-equals" value="0" />
 			        </condition-list>

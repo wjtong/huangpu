@@ -54,15 +54,15 @@ under the License.
         <set field="fproductId" from-field="product.productId"/>
 
         <!-- 系列、组别、款型、颜色、尺码 -->
-        <entity-and list="productCategoryAndMembers" entity-name="ProductCategoryAndMember" filter-by-date="true"><!-- 组别 -->
+        <entity-and list="productCategoryMemberViews" entity-name="ProductCategoryAndMember" filter-by-date="true"><!-- 组别 -->
         	<field-map field-name="productId" from-field="fproductId"/>
         	<field-map field-name="productCategoryTypeId" value="GROUPNAME"/>
         </entity-and>
-        <if-not-empty field="productCategoryAndMembers">
-        	<first-from-list entry="productCategoryAndMember" list="productCategoryAndMembers"/>
-        	<set field="productColorDimension.groupname" from-field="productCategoryAndMember.categoryName"/>
+        <if-not-empty field="productCategoryMemberViews">
+        	<first-from-list entry="productCategoryMemberView" list="productCategoryMemberViews"/>
+        	<set field="productColorDimension.groupname" from-field="productCategoryMemberView.categoryName"/>
         	<!-- 系列和季节都是从组别来的，所以想把组别的productCategoryId获得，然后后面根据此来查找系列和季节 -->
-        	<set field="groupnameCategoryId" from-field="productCategoryAndMember.productCategoryId"/>
+        	<set field="groupnameCategoryId" from-field="productCategoryMemberView.productCategoryId"/>
         <else>
         	<set field="productColorDimension.groupname" value="_NA_"/>
         </else>
@@ -158,14 +158,14 @@ under the License.
         	<set field="productColorDimension.modelYear" value="_NA_"/>
         	<set field="productColorDimension.yearCode" value="_NA_"/>
         </if-empty>
-        <entity-and list="productCategoryAndMembers" entity-name="ProductCategoryAndMember" filter-by-date="true"><!-- 波段 -->
+        <entity-and list="productCategoryMemberViews" entity-name="ProductCategoryAndMember" filter-by-date="true"><!-- 波段 -->
         	<field-map field-name="productId" from-field="fproductId"/>
         	<field-map field-name="productCategoryTypeId" value="WAVE"/>
         </entity-and>
-        <if-not-empty field="productCategoryAndMembers">
-        	<first-from-list entry="productCategoryAndMember" list="productCategoryAndMembers"/>
-        	<set field="productColorDimension.wave" from-field="productCategoryAndMember.categoryName"/>
-        	<set field="productColorDimension.waveId" from-field="productCategoryAndMember.productCategoryId"/>
+        <if-not-empty field="productCategoryMemberViews">
+        	<first-from-list entry="productCategoryMemberView" list="productCategoryMemberViews"/>
+        	<set field="productColorDimension.wave" from-field="productCategoryMemberView.categoryName"/>
+        	<set field="productColorDimension.waveId" from-field="productCategoryMemberView.productCategoryId"/>
         <else>
         	<set field="productColorDimension.wave" value="_NA_"/>
         	<set field="productColorDimension.waveId" value="_NA_"/>

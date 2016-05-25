@@ -348,6 +348,7 @@ public class ProductStoreAnalysis {
   		Map<String, Object> result = ServiceUtil.returnSuccess();
   		Delegator delegator = dctx.getDelegator();
         // LocalDispatcher dispatcher = dctx.getDispatcher();
+  		GenericValue userLogin = (GenericValue) context.get("userLogin");
   		String productId=(String) context.get("productId");
   		List<Map<String, Object>> storePercentList = FastList.newInstance();
   		BigDecimal totalScore = BigDecimal.ZERO;
@@ -361,27 +362,74 @@ public class ProductStoreAnalysis {
   		if (UtilValidate.isEmpty(forecastScores)) {
   			return result;
   		}
-		for (GenericValue forecastScore : forecastScores) {
-			totalScore = totalScore.add(forecastScore.getBigDecimal("score"));
+  		try {
+			for (GenericValue forecastScore : forecastScores) {
+				boolean flag = isStoreCatalogProduct(delegator,dctx.getDispatcher(),(String)forecastScore.get("productStoreId"),productId,userLogin);
+				if(flag){
+					totalScore = totalScore.add(forecastScore.getBigDecimal("score"));
+				}
+			}
+  		} catch (GenericEntityException e) {
+			e.printStackTrace();
+			return ServiceUtil.returnError(e.getMessage());
+		} catch (GenericServiceException e) {
+			e.printStackTrace();
+			return ServiceUtil.returnError(e.getMessage());
 		}
 		if (totalScore.equals(BigDecimal.ZERO)) {
 			return result;
 		}
+		
 		Double totalDoubleScore = totalScore.doubleValue();
-		for (GenericValue forecastScore : forecastScores) {
-			Double doubleScore = forecastScore.getBigDecimal("score").doubleValue();
-			Double doublePercent = doubleScore / totalDoubleScore;
-	  		Map<String, Object> storePercentMap = FastMap.newInstance();
-			// storePercentMap.put(forecastScore.getString("productStoreId"), doublePercent);
-			storePercentMap.put("productStoreId", forecastScore.getString("productStoreId"));
-			storePercentMap.put("score", doubleScore);
-			storePercentMap.put("percent", doublePercent);
-			storePercentMap.put("comment", forecastScore.getString("comment"));
-			storePercentList.add(storePercentMap);
+		try {
+			for (GenericValue forecastScore : forecastScores) {
+				Double doubleScore = forecastScore.getBigDecimal("score").doubleValue();
+				Double doublePercent = doubleScore / totalDoubleScore;
+		  		Map<String, Object> storePercentMap = FastMap.newInstance();
+				// storePercentMap.put(forecastScore.getString("productStoreId"), doublePercent);
+				storePercentMap.put("productStoreId", forecastScore.getString("productStoreId"));
+				storePercentMap.put("score", doubleScore);
+				boolean flag = isStoreCatalogProduct(delegator,dctx.getDispatcher(),(String)forecastScore.get("productStoreId"),productId,userLogin);
+				if(flag){
+					storePercentMap.put("percent", doublePercent);
+				}else{
+					storePercentMap.put("percent", new Double(0));
+				}
+				storePercentMap.put("comment", forecastScore.getString("comment"));
+				storePercentList.add(storePercentMap);
+			}
+		} catch (GenericEntityException e) {
+			e.printStackTrace();
+			return ServiceUtil.returnError(e.getMessage());
+		} catch (GenericServiceException e) {
+			e.printStackTrace();
+			return ServiceUtil.returnError(e.getMessage());
 		}
 		result.put("storePercentList", storePercentList);
   		
   		return result;
+	}
+
+	
+	private static boolean isStoreCatalogProduct(Delegator delegator,LocalDispatcher dispatcher,String productStoreId,String productId,GenericValue userLogin) throws GenericEntityException, GenericServiceException {
+		boolean flag = false;
+		GenericValue productStoreCatalogAllStyle = EntityUtil.getFirst(delegator.findByAnd("ProductStoreCatalog", UtilMisc.toMap("productStoreId",productStoreId,"prodCatalogId","RETAIL-DEFAULT")));
+		//如果是全款的店铺 直接return true;
+		if(!productStoreCatalogAllStyle.isEmpty()){
+			return true;
+		}
+		GenericValue productStoreCatalog = EntityUtil.getFirst(delegator.findByAnd("ProductStoreCatalog", UtilMisc.toMap("productStoreId",productStoreId)));
+		Map serviceResult = dispatcher.runSync("getProdCatalogCategoryProductIds", UtilMisc.toMap("prodCatalogCategoryTypeId", "PCCT_BROWSE_ROOT", "prodCatalogId", productStoreCatalog.get("prodCatalogId"), "userLogin", userLogin));
+		List productIdList = (List) serviceResult.get("productIdList");
+		String productVariantId = "";
+		GenericValue productAssoc = EntityUtil.getFirst(delegator.findByAnd("ProductAssoc", UtilMisc.toMap("productIdTo",productId,"productAssocTypeId","PRODUCT_VARIANT")));
+		if(!productAssoc.isEmpty()){
+			productVariantId = productAssoc.getString("productId");
+		}
+		if(productIdList.contains(productVariantId)||productIdList.contains(productId)){
+			flag=true;
+		}
+		return flag;
 	}
 
 	// TODO

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
-    <description>huangpu Services</description>
+    <description>ZuczugEtl Services</description>
     <vendor></vendor>
     <version>1.0</version>
 
@@ -60,7 +60,7 @@
     	<attribute name="productCategoryId" mode="IN" type="String" optional="false"></attribute>
     </service>
     
-    <service name="analysis.forecastProductQuantity" auth="true" engine="java" transaction-timeout="720000"
+    <service name="analysis.forecastProductQuantity" auth="true" engine="java" use-transaction="false"
     	location="com.zuczug.analysis.ProductQuantityAnalysis" invoke="forecastProductQuantity">
     	<description>预测一个新商品可能的销售数量  by liujia</description>
     	<attribute name="productId" mode="IN" type="String" optional="false"></attribute>

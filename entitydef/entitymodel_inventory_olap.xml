@@ -27,7 +27,6 @@
         </relation>
     </entity>
 	
-
     <entity entity-name="InventorySnapshotFact" package-name="org.ofbiz.bi.fact.product" title="Inventory Item Fact">
         <description>Inventory facility snapshot.</description>
         <field name="facilityDimId" type="id-ne"></field>
@@ -39,6 +38,45 @@
         <field name="accountingQuantityTotal" type="fixed-point"></field>
         <field name="listPrice" type="fixed-point"></field>
         <!-- <field name="soldoutAmount" type="fixed-point"></field> -->
+
+        <prim-key field="facilityId"/>
+        <prim-key field="productDimId"/>
+        <prim-key field="snapshotDateDimId"/>
+        <relation type="one" fk-name="ISF_INVFACILITY" rel-entity-name="ZzFacilityDimension">
+            <key-map field-name="facilityDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ISF_INVPRODUCT" rel-entity-name="ZzProductDimension">
+            <key-map field-name="productDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="ISF_INVDATE" rel-entity-name="DateDimension">
+            <key-map field-name="snapshotDateDimId" rel-field-name="dimensionId"/>
+        </relation>
+    </entity>
+	
+    <entity entity-name="InventoryDetailFact" package-name="org.ofbiz.bi.fact.product" title="Inventory Detail Fact">
+        <description>Jin Xiao Cun Fact.</description>
+        <field name="facilityDimId" type="id-ne"></field>
+        <field name="productDimId" type="id-ne"></field>
+		<field name="inventoryItemId" type="id-ne"></field>
+		<field name="inventoryItemDetailSeqId" type="id-ne"></field>
+        <field name="snapshotDateDimId" type="id-ne"></field>
+        
+		<field name="quantityOnHandDiff" type="fixed-point"></field>
+		<field name="availableToPromiseDiff" type="fixed-point"></field>
+		<field name="accountingQuantityDiff" type="fixed-point"></field>
+        <field name="listPrice" type="fixed-point"></field>
+		<field name="orderId" type="id"></field>
+		<field name="orderItemSeqId" type="id"></field>
+		<field name="shipGroupSeqId" type="id"></field>
+		<field name="shipmentId" type="id"></field>
+		<field name="shipmentItemSeqId" type="id"></field>
+		<field name="returnId" type="id"></field>
+		<field name="returnItemSeqId" type="id"></field>
+		<field name="itemIssuanceId" type="id"></field>
+		<field name="receiptId" type="id"></field>
+		<field name="physicalInventoryId" type="id"></field>
+		<field name="reasonEnumId" type="id"></field>
+		<field name="description" type="description"></field>
 
         <prim-key field="facilityId"/>
         <prim-key field="productDimId"/>
