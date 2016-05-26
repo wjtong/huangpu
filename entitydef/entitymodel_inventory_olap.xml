@@ -4,8 +4,8 @@
     xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
     <description>OLAP</description>
 
-    <entity entity-name="InventoryItemSnapshotFact" package-name="org.ofbiz.bi.fact.product" title="Inventory Item Fact">
-        <description>A transaction fact entity with inventory item.</description>
+    <entity entity-name="FinInventoryItemSnapshotFact" package-name="org.ofbiz.bi.fact.product" title="Finished Good Inventory Item Snapshot Fact">
+        <description>Finished good inventory item snapshot fact</description>
         <field name="inventoryItemId" type="id-ne"></field>
         <field name="facilityId" type="id-ne"></field>
         <field name="productDimId" type="id-ne"></field>
@@ -27,34 +27,8 @@
         </relation>
     </entity>
 	
-    <entity entity-name="InventorySnapshotFact" package-name="org.ofbiz.bi.fact.product" title="Inventory Item Fact">
-        <description>Inventory facility snapshot.</description>
-        <field name="facilityDimId" type="id-ne"></field>
-        <field name="productDimId" type="id-ne"></field>
-        <field name="snapshotDateDimId" type="id-ne"></field>
-        
-        <field name="quantityOnHandTotal" type="fixed-point"></field>
-        <field name="availableToPromiseTotal" type="fixed-point"></field>
-        <field name="accountingQuantityTotal" type="fixed-point"></field>
-        <field name="listPrice" type="fixed-point"></field>
-        <!-- <field name="soldoutAmount" type="fixed-point"></field> -->
-
-        <prim-key field="facilityId"/>
-        <prim-key field="productDimId"/>
-        <prim-key field="snapshotDateDimId"/>
-        <relation type="one" fk-name="ISF_INVFACILITY" rel-entity-name="ZzFacilityDimension">
-            <key-map field-name="facilityDimId" rel-field-name="dimensionId"/>
-        </relation>
-        <relation type="one" fk-name="ISF_INVPRODUCT" rel-entity-name="ZzProductDimension">
-            <key-map field-name="productDimId" rel-field-name="dimensionId"/>
-        </relation>
-        <relation type="one" fk-name="ISF_INVDATE" rel-entity-name="DateDimension">
-            <key-map field-name="snapshotDateDimId" rel-field-name="dimensionId"/>
-        </relation>
-    </entity>
-	
-    <entity entity-name="InventoryDetailFact" package-name="org.ofbiz.bi.fact.product" title="Inventory Detail Fact">
-        <description>Jin Xiao Cun Fact.</description>
+    <entity entity-name="FinInventoryDetailFact" package-name="org.ofbiz.bi.fact.product" title="Inventory Detail Fact">
+        <description>Inventory Item Detail Fact.</description>
         <field name="facilityDimId" type="id-ne"></field>
         <field name="productDimId" type="id-ne"></field>
 		<field name="inventoryItemId" type="id-ne"></field>
@@ -78,9 +52,8 @@
 		<field name="reasonEnumId" type="id"></field>
 		<field name="description" type="description"></field>
 
-        <prim-key field="facilityId"/>
-        <prim-key field="productDimId"/>
-        <prim-key field="snapshotDateDimId"/>
+        <prim-key field="inventoryItemId"/>
+        <prim-key field="inventoryItemDetailSeqId"/>
         <relation type="one" fk-name="ISF_INVFACILITY" rel-entity-name="ZzFacilityDimension">
             <key-map field-name="facilityDimId" rel-field-name="dimensionId"/>
         </relation>
@@ -89,6 +62,40 @@
         </relation>
         <relation type="one" fk-name="ISF_INVDATE" rel-entity-name="DateDimension">
             <key-map field-name="snapshotDateDimId" rel-field-name="dimensionId"/>
+        </relation>
+    </entity>
+
+	
+    <entity entity-name="DmFacilityInvSnapshotFact" package-name="org.ofbiz.bi.fact.product" title="Inventory Detail Fact">
+        <description>Facility Jin Xiao Cun Fact.</description>
+        <field name="facilityDimId" type="id-ne"></field>
+        <field name="productDimId" type="id-ne"></field>
+        <field name="dateDimId" type="id-ne"></field>
+        
+		<field name="quantityOnHand" type="fixed-point"></field>
+		<field name="availableToPromise" type="fixed-point"></field>
+		<field name="accountingQuantity" type="fixed-point"></field>
+        <field name="listPriceOnHand" type="fixed-point"></field>
+		<field name="quantitySold" type="fixed-point"></field>
+		<field name="quantityReturned" type="fixed-point"></field>
+		<field name="quantityShippedIn" type="fixed-point"><description>包括采购进货，盘盈</description></field>
+		<field name="quantityShippedOut" type="fixed-point"><description>包括采购退货，盘亏</description></field>
+		<field name="listPriceSold" type="fixed-point"></field>
+		<field name="listPriceRerturned" type="fixed-point"></field>
+		<field name="listPriceShippedIn" type="fixed-point"></field>
+		<field name="listPriceShippedOut" type="fixed-point"></field>
+
+        <prim-key field="facilityId"/>
+        <prim-key field="productDimId"/>
+        <prim-key field="dateDimId"/>
+        <relation type="one" fk-name="FISF_FACILITY" rel-entity-name="ZzFacilityDimension">
+            <key-map field-name="facilityDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="FISF_PRODUCT" rel-entity-name="ZzProductDimension">
+            <key-map field-name="productDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="FISF_DATE" rel-entity-name="DateDimension">
+            <key-map field-name="dateDimId" rel-field-name="dimensionId"/>
         </relation>
     </entity>
 </entitymodel>

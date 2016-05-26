@@ -9,10 +9,17 @@
 	        </condition-list>
         </entity-condition>
         <iterate list="inventoryItems" entry="inventoryItem">
-            <clear-field field="inventMap"/>
-            <set field="inventMap.inventoryItemId" from-field="inventoryItem.inventoryItemId"/>
-            <call-service service-name="snapshotInventoryItem" in-map-name="inventMap"></call-service>
-            <check-errors/>
+        	<entity-one entity-name="Product" value-field="product">
+        		<field-map field-name="productId" from-field="inventoryItem.productId"/>
+        	</entity-one>
+        	<if-compare field="product.productTypeId" operator="equals" value="FINISHED_GOOD"> <!-- must be FINISHED_GOOD -->
+	            <if-compare field="inventoryItem.quantityOnHandTotal" operator="not-equals" value="0"> <!-- 只快照库存不为0的库存明细 -->
+		            <clear-field field="inventMap"/>
+		            <set field="inventMap.inventoryItemId" from-field="inventoryItem.inventoryItemId"/>
+		            <call-service service-name="zuczug.snapshotInventoryItem" in-map-name="inventMap"></call-service>
+		            <check-errors/>
+	            </if-compare>
+        	</if-compare>
         </iterate>
 
     </simple-method>
@@ -28,12 +35,12 @@
         <call-service service-name="getDimensionIdFromNaturalKey" in-map-name="inMap">
             <result-to-field result-name="dimensionId" field="dateDimensionId"/>
         </call-service>
-        <entity-one entity-name="InventoryItemSnapshotFact" value-field="fact">
+        <entity-one entity-name="FinInventoryItemSnapshotFact" value-field="fact">
             <field-map field-name="inventoryItemId" from-field="parameters.inventoryItemId"/>
             <field-map field-name="snapshotDateDimId" from-field="dateDimensionId"/>
         </entity-one>
         <if-empty field="fact">
-            <make-value value-field="fact" entity-name="InventoryItemSnapshotFact"/>
+            <make-value value-field="fact" entity-name="FinInventoryItemSnapshotFact"/>
             <set field="fact.inventoryItemId" from-field="inventory.inventoryItemId"/>
             <set field="fact.snapshotDateDimId" from-field="dateDimensionId"/>
             <!-- conversion of the product id -->

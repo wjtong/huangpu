@@ -65,10 +65,10 @@ under the License.
     <entity-group group="org.ofbiz.olap" entity="CategoryMemberFact"/>
     <entity-group group="org.ofbiz.olap" entity="DSRegentOrder"/>
     <entity-group group="org.ofbiz.olap" entity="DSRegentOrderPayment"/>
-    <entity-group group="org.ofbiz.olap" entity="InventoryItemSnapshotFact"/>
-    <entity-group group="org.ofbiz.olap" entity="InventoryDetailFact"/>
-    <entity-group group="org.ofbiz.olap" entity="InventorySnapshotFact"/>
+    <entity-group group="org.ofbiz.olap" entity="FinInventoryItemSnapshotFact"/>
+    <entity-group group="org.ofbiz.olap" entity="FinInventoryDetailFact"/>
     <!--
+    <entity-group group="org.ofbiz.olap" entity="InventorySnapshotFact"/>
     <entity-group group="org.ofbiz.olap" entity="ForecastDetailFact"/>
     <entity-group group="org.ofbiz.olap" entity="TempRequirementFact"/>
 	 -->
@@ -76,6 +76,7 @@ under the License.
     <!-- DM Facts                                                  -->
     <!-- ========================================================= -->
     <entity-group group="org.ofbiz.olap" entity="DinghuohuiItemFact"/>
+    <entity-group group="org.ofbiz.olap" entity="DmFacilityInvStatusFact"/>
     <!-- ========================================================= -->
     <!-- Star Schema                                               -->
     <!-- ========================================================= -->
