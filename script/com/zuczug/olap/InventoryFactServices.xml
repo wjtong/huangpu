@@ -13,15 +13,12 @@
         		<field-map field-name="productId" from-field="inventoryItem.productId"/>
         	</entity-one>
         	<if-compare field="product.productTypeId" operator="equals" value="FINISHED_GOOD"> <!-- must be FINISHED_GOOD -->
-	            <if-compare field="inventoryItem.quantityOnHandTotal" operator="not-equals" value="0"> <!-- 只快照库存不为0的库存明细 -->
-		            <clear-field field="inventMap"/>
-		            <set field="inventMap.inventoryItemId" from-field="inventoryItem.inventoryItemId"/>
-		            <call-service service-name="zuczug.snapshotInventoryItem" in-map-name="inventMap"></call-service>
-		            <check-errors/>
-	            </if-compare>
+	            <clear-field field="inventMap"/>
+	            <set field="inventMap.inventoryItemId" from-field="inventoryItem.inventoryItemId"/>
+	            <call-service service-name="zuczug.snapshotInventoryItem" in-map-name="inventMap"></call-service>
+	            <check-errors/>
         	</if-compare>
         </iterate>
-
     </simple-method>
 
     <simple-method method-name="snapshotInventoryItem" short-description="">
