@@ -389,13 +389,13 @@
         <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
     </service>
     
-    <service name="snapshotInventoryItem" auth="true" engine="simple"
+    <service name="zuczug.snapshotInventoryItem" auth="true" engine="simple"
         location="component://huangpu/script/com/zuczug/olap/InventoryFactServices.xml" invoke="snapshotInventoryItem" transaction-timeout="10000000">
         <description>Take a snapshot of an inventory items.</description>
         <attribute name="inventoryItemId" type="String" mode="IN" optional="false"/>
     </service>
     
-    <service name="snapshotAllInventoryItem" auth="true" engine="simple"
+    <service name="zuczug.snapshotAllInventoryItem" auth="true" engine="simple"
         location="component://huangpu/script/com/zuczug/olap/InventoryFactServices.xml" invoke="snapshotAllInventoryItem" transaction-timeout="10000000">
         <description>Take a snapshot of all inventory items, exclude quantity 0.</description>
     </service>

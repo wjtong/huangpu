@@ -66,6 +66,7 @@ under the License.
     <entity-group group="org.ofbiz.olap" entity="DSRegentOrder"/>
     <entity-group group="org.ofbiz.olap" entity="DSRegentOrderPayment"/>
     <entity-group group="org.ofbiz.olap" entity="InventoryItemSnapshotFact"/>
+    <entity-group group="org.ofbiz.olap" entity="InventoryDetailFact"/>
     <entity-group group="org.ofbiz.olap" entity="InventorySnapshotFact"/>
     <!--
     <entity-group group="org.ofbiz.olap" entity="ForecastDetailFact"/>
