@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <description>Entities from bluemountain</description>
+    <entity entity-name="IngredientType"
+            package-name="org.ofbiz.product.product"
+            table-name="ingredient_Type"
+            title="IngredientType Entity">
+      <field name="ingredientTypeId" type="id-ne"></field>      
+      <field name="description" type="id-long"></field>
+      <field name="parentTypeId" type="id-long"></field>
+      <field name="hasTable" type="id-long"></field>
+      <prim-key field="ingredientTypeId"/>
+      <index name="INGREDIENT_TYPE_ID_VALIDX" unique="false">
+          <index-field name="ingredientTypeId"/>
+      </index>
+    </entity>
+    
+    <entity entity-name="Ingredient"
+            package-name="org.ofbiz.product.product"
+            table-name="ingredient"
+            title="Ingredient Entity">
+      <field name="ingredientId" type="id-ne"></field>  
+      <field name="ingredientTypeId" type="id-ne"></field>            
+      <field name="description" type="id-long"></field>
+      <prim-key field="ingredientId"/>
+      <relation type="one" fk-name="INGREDIENT_TYPE_ID" rel-entity-name="IngredientType">
+        <key-map field-name="ingredientTypeId"/>
+      </relation>
+      <index name="INGREDIENT_ID_VALIDX" unique="false">
+          <index-field name="ingredientId"/>
+      </index>
+    </entity>
+    
+    <entity entity-name="ProductIngredient"
+            package-name="org.ofbiz.product.product"
+            table-name="product_ingredient"
+            title="ProductIngredient Entity">  
+      <field name="productIngredientId" type="id-ne"></field>
+      <field name="ingredientId" type="id-ne"></field>  
+      <field name="productId" type="id-ne"></field>          
+      <field name="percent" type="id-ne"></field>
+      <field name="fromDate" type="date-time"></field>
+      <prim-key field="productIngredientId"/>
+      <prim-key field="ingredientId"/>
+      <prim-key field="productId"/>
+ 
+      <relation type="one" fk-name="INGREDIENT_ID" rel-entity-name="Ingredient">
+        	<key-map field-name="ingredientId"/>
+      </relation>     
+      <relation type="one" fk-name="PRODUCT_ID" rel-entity-name="Product">
+        	<key-map field-name="productId"/>
+      </relation>
+      <index name="PRODUCT_INGREDIENT_ID_VALIDX" unique="false">
+          <index-field name="productIngredientId"/>
+      </index>
+    </entity>
+    
+    <entity entity-name="ProductIngredientGroup"
+            package-name="org.ofbiz.product.product"
+            table-name="product_ingredient_group"
+            title="ProductIngredientGroup Entity">
+      <field name="productIngredientGroupId" type="id-ne"></field>  
+      <field name="productIngredientGroupName" type="id-long"></field>
+      <field name="description" type="id-long"></field>
+      <prim-key field="productIngredientGroupId"/>
+      <index name="PRODUCT_INGREDIENT_GROUP_ID_VALIDX" unique="false">
+          <index-field name="productIngredientGroupId"/>
+      </index>
+    </entity>
+    
+    <entity entity-name="ProductIngredientGroupAppl"
+            package-name="org.ofbiz.product.product"
+            table-name="product_ingredient_group_appl"
+            title="ProductIngredientGroupAppl Entity">
+      <field name="productIngredientId" type="id-ne"></field>  
+      <field name="productIngredientGroupId" type="id-ne"></field>       
+      <prim-key field="productIngredientId"/>
+      <prim-key field="productIngredientGroupId"/>
+      <relation type="one" fk-name="PRODUCT_INGREDIENT_ID" rel-entity-name="ProductIngredient">
+        	<key-map field-name="productIngredientId"/>
+      </relation>     
+      <relation type="one" fk-name="PRODUCT_INGrEDIENT_GROUP_ID" rel-entity-name="ProductIngredientGroup">
+        	<key-map field-name="productIngredientGroupId"/>
+      </relation>
+      <index name="PRODUCT_INGREDIENT_GROUP_APPL_ID_VALIDX" unique="false">
+          <index-field name="productIngredientId"/>
+      </index>
+    </entity>
+    
+    <view-entity entity-name="ProductIngredientGroupAndAppl"
+            package-name="org.ofbiz.product.feature"
+            title="Product Ingredient Group And Applicability View Entity">
+      <member-entity entity-alias="PIGA" entity-name="ProductIngredientGroupAppl"/>
+      <member-entity entity-alias="PIG" entity-name="ProductIngredientGroup"/>
+      <member-entity entity-alias="PI" entity-name="ProductIngredient"/>
+      <member-entity entity-alias="I" entity-name="Ingredient"/>
+      <alias-all entity-alias="PIGA"/>
+      <alias-all entity-alias="PI"/>
+      <alias-all entity-alias="I"/>
+      <alias entity-alias="PIG" field="description" name="ProductIngredientGroupDescription"></alias>
+      <view-link entity-alias="PIGA" rel-entity-alias="PI">
+        <key-map field-name="productIngredientId"/>
+      </view-link>
+      <view-link entity-alias="PI" rel-entity-alias="I">
+        <key-map field-name="ingredientId"/>
+      </view-link>
+      <view-link entity-alias="PIGA" rel-entity-alias="PIG">
+        <key-map field-name="productIngredientGroupId"/>
+      </view-link>
+    </view-entity>
+    
+
+</entitymodel>

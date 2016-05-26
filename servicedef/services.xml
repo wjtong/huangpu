@@ -58,7 +58,7 @@
     </service>
     
     <service name="getIngredientsListWashingWay" engine="java"
-    	location="com.zuczug.huangpu.ZuczugEtlService" invoke="getIngredientsListWashingWay">
+    	location="com.zuczug.zuczugetl.ZuczugEtlService" invoke="getIngredientsListWashingWay">
     	<description>获取商品的成份列表，特殊说明.zhoulei</description>
     	<attribute name="productId" mode="IN" type="String"></attribute>
     	<attribute name="ingredientsTextBm" mode="OUT" type="String"></attribute>
@@ -218,10 +218,10 @@
         <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
     </service>
     
-    <service name="dataFromSwToOlap" engine="java" location="com.zuczug.huangpu.ZuczugEtlService" invoke="dataFromSwToOlap" transaction-timeout="100000000">
+    <service name="dataFromSwToOlap" engine="java" location="com.zuczug.zuczugetl.ZuczugEtlService" invoke="dataFromSwToOlap" transaction-timeout="100000000">
     </service>
     <!-- 获取月份 -->
-    <service name="findReleaseDate" engine="java" location="com.zuczug.huangpu.ZuczugEtlService" invoke="findReleaseDate" transaction-timeout="100000000">
+    <service name="findReleaseDate" engine="java" location="com.zuczug.zuczugetl.ZuczugEtlService" invoke="findReleaseDate" transaction-timeout="100000000">
     	<description>To obtain release month.zhoulei</description>
     	<attribute name="releaseDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
     	<attribute name="releaseMonth" mode="OUT" type="String"></attribute>
@@ -309,14 +309,14 @@
     </service>
     
     <service name="findMinimumOrderItemSeq" auth="true" engine="java"
-        location="com.zuczug.huangpu.ZuczugEtlService" invoke="findMinimumOrderItemSeq">
+        location="com.zuczug.zuczugetl.ZuczugEtlService" invoke="findMinimumOrderItemSeq">
         <description>To get the smallest orderItemSeqId.zhoulei</description>
         <attribute name="orderId" type="String" mode="IN" optional="true"/>
         <attribute name="minimumOrderItemSeq" mode="OUT" type="String"></attribute>
     </service>
     
     <service name="shareEquallySalesOrderItemFact" auth="true" engine="java"
-        location="com.zuczug.huangpu.ZuczugEtlService" use-transaction="false" invoke="shareEquallySalesOrderItemFact">
+        location="com.zuczug.zuczugetl.ZuczugEtlService" use-transaction="false" invoke="shareEquallySalesOrderItemFact">
         <description></description>
         <attribute name="orderId" type="String" mode="IN" optional="false"/>
     </service>

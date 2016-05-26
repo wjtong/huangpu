@@ -168,40 +168,34 @@ under the License.
         	<first-from-list entry="productCategoryMemberView" list="productCategoryMemberViews"/>
         	<set field="productDimension.groupname" from-field="productCategoryMemberView.categoryName"/>
         	<set field="productDimension.groupId" from-field="productCategoryMemberView.productCategoryId"/>
-        	<!-- 系列和季节都是从组别来的，所以想把组别的productCategoryId获得，然后后面根据此来查找系列和季节 -->
+        	<!-- 以前系列和季节都是从组别来的，所以想把组别的productCategoryId获得，然后后面根据此来查找系列和季节，现在商品应该直接有季节和系列分类  -->
         	<set field="groupnameCategoryId" from-field="productCategoryMemberView.productCategoryId"/>
         <else>
         	<set field="productDimension.groupname" value="_NA_"/>
         	<set field="productDimension.groupId" value="_NA_"/>
         </else>
         </if-not-empty>
-        <entity-and list="categoryRollupAndParentByTypes" entity-name="CategoryRollupAndParentByType"><!-- 系列 -->
-        	<field-map field-name="productCategoryId" from-field="groupnameCategoryId"/>
+        <entity-and list="productCategoryMemberViews" entity-name="ProductCategoryAndMember" filter-by-date="true"><!-- 系列，商品是直接关联到系列的，不是通过组别或子系列关联的 -->
+        	<field-map field-name="productId" from-field="fproductId"/>
         	<field-map field-name="productCategoryTypeId" value="SERIES"/>
         </entity-and>
-        <if-not-empty field="categoryRollupAndParentByTypes">
-        	<first-from-list entry="categoryRollupAndParentByType" list="categoryRollupAndParentByTypes"/>
-        	<entity-one value-field="productCategory" entity-name="ProductCategory">
-        		<field-map field-name="productCategoryId" from-field="categoryRollupAndParentByType.parentProductCategoryId"/>
-        	</entity-one>
-        	<set field="productDimension.series" from-field="productCategory.categoryName"/>
-        	<set field="productDimension.seriesId" from-field="categoryRollupAndParentByType.parentProductCategoryId"/>
+        <if-not-empty field="productCategoryMemberViews">
+        	<first-from-list entry="productCategoryMemberView" list="productCategoryMemberViews"/>
+        	<set field="productDimension.series" from-field="productCategoryMemberView.categoryName"/>
+        	<set field="productDimension.seriesId" from-field="productCategoryMemberView.productCategoryId"/>
         <else>
         	<set field="productDimension.series" value="_NA_"/>
         	<set field="productDimension.seriesId" value="_NA_"/>
         </else>
         </if-not-empty>
-        <entity-and list="categoryRollupAndParentByTypes" entity-name="CategoryRollupAndParentByType"><!-- 季节 -->
-        	<field-map field-name="productCategoryId" from-field="groupnameCategoryId"/>
+        <entity-and list="productCategoryMemberViews" entity-name="ProductCategoryAndMember" filter-by-date="true"><!-- 季节，商品是直接关联到系列的，不是通过组别关联的 -->
+        	<field-map field-name="productId" from-field="fproductId"/>
         	<field-map field-name="productCategoryTypeId" value="ZUCZUG_SEASON"/>
         </entity-and>
-        <if-not-empty field="categoryRollupAndParentByTypes">
-        	<first-from-list entry="categoryRollupAndParentByType" list="categoryRollupAndParentByTypes"/>
-        	<entity-one value-field="productCategory" entity-name="ProductCategory">
-        		<field-map field-name="productCategoryId" from-field="categoryRollupAndParentByType.parentProductCategoryId"/>
-        	</entity-one>
-        	<set field="productDimension.zuczugSeason" from-field="productCategory.categoryName"/>
-        	<set field="productDimension.zuczugSeasonId" from-field="categoryRollupAndParentByType.parentProductCategoryId"/>
+        <if-not-empty field="productCategoryMemberViews">
+        	<first-from-list entry="productCategoryMemberView" list="productCategoryMemberViews"/>
+        	<set field="productDimension.zuczugSeason" from-field="productCategoryMemberView.categoryName"/>
+        	<set field="productDimension.zuczugSeasonId" from-field="productCategoryMemberView.productCategoryId"/>
         <else>
         	<set field="productDimension.zuczugSeason" value="_NA_"/>
         	<set field="productDimension.zuczugSeasonId" value="_NA_"/>
@@ -334,11 +328,10 @@ under the License.
         </if-not-empty>
         
         <!-- 对应设计商品计算的ENGINEER BOM的成本 -->
-        <clear-field field="inMap"/>
-        <set field="inMap.productId" from-field="product.productId"/>
-        <call-service service-name="getDesignProductIdByProductId" in-map-name="inMap">
-        	<result-to-field result-name="designProductId"/>
-        </call-service>
+		<call-class-method method-name="getDesignProductIdByProductId" ret-field="designProductId" class-name="com.zuczug.product.ZuczugProductUtils">
+		    <field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		    <field field="product.productId" type="String"/>
+		</call-class-method>
         <if-not-empty field="designProductId">
         	<set field="productDimension.designProductId" from-field="designProductId"/>
 	        <clear-field field="inMap"/>

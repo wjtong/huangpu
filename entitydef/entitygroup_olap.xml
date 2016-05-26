@@ -120,5 +120,8 @@ under the License.
     <entity-group group="org.ofbiz.olap" entity="LijingCustAdjOrders"/>
      -->
     
+    <!-- ========================================================= -->
+    <!-- Entities from bluemountain                                -->
+    <!-- ========================================================= -->
     
 </entitygroup>

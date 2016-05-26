@@ -49,7 +49,7 @@
     </service>
     
     <service name="judgeDataNumber" auth="true" engine="java"
-    	location="com.zuczug.huangpu.ZuczugEtlService" invoke="judgeDataNumber">
+    	location="com.zuczug.zuczugetl.ZuczugEtlService" invoke="judgeDataNumber">
     	<description>检查商品有多少条变形商品:一条还回1，多条还回2 zhoulei</description>
     	<attribute name="productId" mode="IN" type="String" optional="false"></attribute>
     	<attribute name="number" mode="OUT" type="String" optional="false"></attribute>
