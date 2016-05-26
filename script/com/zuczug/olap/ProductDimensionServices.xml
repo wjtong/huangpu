@@ -334,6 +334,7 @@ under the License.
 		</call-class-method>
         <if-not-empty field="designProductId">
         	<set field="productDimension.designProductId" from-field="designProductId"/>
+        	<!-- 因为用到了zuczugcommon的一个service，所以暂时先去掉
 	        <clear-field field="inMap"/>
 	        <set field="inMap.costComponentTypePrefix" value="EST_STD"/>
 	        <set field="inMap.currencyUomId" value="CNY"/>
@@ -341,6 +342,7 @@ under the License.
 	        <call-service service-name="calculateProductEngineerCosts" in-map-name="inMap">
 	        	<result-to-field result-name="totalCost" field="productDimension.estDesignEngineerCost"/>
 	        </call-service>
+	         -->
 	    <else>
 	    	<set field="productDimension.designProductId" value="_NA_"/>
 	    </else>

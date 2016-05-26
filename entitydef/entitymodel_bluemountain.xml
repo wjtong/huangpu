@@ -111,5 +111,18 @@
       </view-link>
     </view-entity>
     
+	<view-entity entity-name="OnlyProductSupplierView"
+			package-name="org.ofbiz.product.catalog"
+			title="Only Product Supplier View">
+		<member-entity entity-alias="SP" entity-name="SupplierProduct"></member-entity>
+		<member-entity entity-alias="PG" entity-name="PartyGroup"></member-entity>
+		<alias-all entity-alias="SP"></alias-all>
+		<alias entity-alias="PG" name="groupName"/>
+		<alias entity-alias="SP" name="fromDate" field="availableFromDate"/>
+		<alias entity-alias="SP" name="thruDate" field="availableThruDate"/>
+		<view-link entity-alias="PG" rel-entity-alias="SP">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
 
 </entitymodel>
